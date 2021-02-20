@@ -1,6 +1,7 @@
 package org.epics.pvaccess.server.rpc.test;
 
 import org.epics.pvaccess.PVAException;
+import org.epics.pvaccess.client.rpc.test.RPCServiceClientExample;
 import org.epics.pvaccess.server.rpc.RPCRequestException;
 import org.epics.pvaccess.server.rpc.RPCServer;
 import org.epics.pvaccess.server.rpc.RPCService;
@@ -13,6 +14,9 @@ import org.epics.pvdata.pv.ScalarType;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.Structure;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class RPCServiceExample {
 
 	private final static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
@@ -24,7 +28,11 @@ public class RPCServiceExample {
 
 	static class SumServiceImpl implements RPCService
 	{
+		private static final Logger logger = Logger.getLogger(RPCServiceExample.SumServiceImpl.class.getName());
+
 		public PVStructure request(PVStructure args) throws RPCRequestException {
+
+			logger.log(Level.INFO, "Received request: " + args);
 
 	        // NTURI support
 			if (args.getStructure().getID().startsWith("epics:nt/NTURI:1."))

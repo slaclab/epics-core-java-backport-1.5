@@ -250,16 +250,16 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
             try {
                 close();
             } catch (IOException e) {
-                this.context.getLogger().log(Level.WARNING, "IO Exception: " + e.getMessage());
+//                this.context.getLogger().log(Level.WARNING, "IO Exception: " + e.getMessage());
             }
         } catch (ClosedChannelException cce) {
             try {
                 close();
             } catch (IOException e) {
-                this.context.getLogger().log(Level.WARNING, "IO Exception: " + e.getMessage());
+//                this.context.getLogger().log(Level.WARNING, "IO Exception: " + e.getMessage());
             }
         } catch (IOException ioex) {
-            this.context.getLogger().log(Level.WARNING, "IO Exception: " + ioex.getMessage());
+//            this.context.getLogger().log(Level.WARNING, "IO Exception: " + ioex.getMessage());
         }
     }
 
