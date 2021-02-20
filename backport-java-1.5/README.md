@@ -14,6 +14,45 @@ George McIntyre, SLAC, 15-Feb-2021
   + set `source` and `target` to `1.5` so that we will be creating byte code `1.5` and checking source compatibility with `1.5`
 + Change version of `jca` from `2.4.7-SNAPSHOT` to `2.3.6` as this is the last byte-code compatible version
 
+Run with the following command line:
+```shell
+mvn install
+```
+
+After running all tests the logs should end like this ...
+
+```shell
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO]
+[INFO] EPICS Core Build ................................... SUCCESS [  1.251 s]
+[INFO] org.epics.util ..................................... SUCCESS [ 13.707 s]
+[INFO] pvDataJava ......................................... SUCCESS [ 15.928 s]
+[INFO] normativeTypesJava ................................. SUCCESS [  4.863 s]
+[INFO] pvAccessJava ....................................... SUCCESS [01:38 min]
+[INFO] EPICS Core Libraries POM ........................... SUCCESS [  0.105 s]
+[INFO] EPICS Core Distribution Bundle ..................... SUCCESS [  8.409 s]
+[INFO] EPICS Core Nexus Deploy ............................ SUCCESS [  0.084 s]
+[INFO] epics-vtype ........................................ SUCCESS [  0.037 s]
+[INFO] org.epics.vtype .................................... SUCCESS [  9.007 s]
+[INFO] org.epics.vtype.json ............................... SUCCESS [  3.525 s]
+[INFO] org.epics.vtype.gson ............................... SUCCESS [  4.157 s]
+[INFO] gpclient ........................................... SUCCESS [  0.047 s]
+[INFO] org.epics.gpclient ................................. SUCCESS [ 40.924 s]
+[INFO] org.epics.gpclient.sim ............................. SUCCESS [  8.023 s]
+[INFO] org.epics.gpclient.ca .............................. SUCCESS [ 16.634 s]
+[INFO] org.epics.gpclient.pva ............................. SUCCESS [  3.627 s]
+[INFO] org.epics.gpclient.loc ............................. SUCCESS [  2.087 s]
+[INFO] org.epics.gpclient.sample .......................... SUCCESS [ 12.246 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 04:04 min
+[INFO] Finished at: 2021-02-16T08:47:59-08:00
+[INFO] Final Memory: 59M/402M
+[INFO] ------------------------------------------------------------------------
+```
+
 ## New Compatibility library in `epics-util`
 Convert source to use utility classes instead of standard java classes where the `1.5` versions are incompatible with the source code.
 Employed here are one of three patterns:
