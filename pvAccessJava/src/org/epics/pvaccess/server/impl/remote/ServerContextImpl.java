@@ -519,7 +519,6 @@ public class ServerContextImpl implements ServerContext, Context {
             if (localNIF != null) {
                 try {
                     InetAddress group = InetAddress.getByName("224.0.0.128");
-                    /*MembershipKey key =*/
                     broadcastTransport.join(group, localNIF);
 
                     InetSocketAddress anyAddress = new InetSocketAddress(0);

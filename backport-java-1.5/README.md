@@ -74,7 +74,6 @@ The following compatibility implementations are provided:
     + `Random`
   + `net` - various classes used by the networking services that are missing some methods in `1.5`
     + `InterfaceAddress`
-    + `MembershipKey`
     + `MulticastSocket` - exists in 1.5 but does not track groups or close when socket closes
     + `NetworkInterface` _delegate_
   + `service`
