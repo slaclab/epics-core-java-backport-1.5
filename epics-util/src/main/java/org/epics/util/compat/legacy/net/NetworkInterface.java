@@ -68,16 +68,10 @@ public class NetworkInterface {
     }
 
     public boolean supportsMulticast() {
-        // TODO Find a good way to determine whether multicast.
-        //  The implementation below DOES NOT WORK returns false all the time
-        //  because none of the addresses bound to the NICs are multicast addresses
+        // TODO Find a good way to determine whether multicast supported.
+        //  For the moment we return true for everything
 
-        Enumeration<InetAddress> enumeratedInetAddresses = this.networkInterface.getInetAddresses();
-        while (enumeratedInetAddresses.hasMoreElements()) {
-            if (enumeratedInetAddresses.nextElement().isMulticastAddress())
-                return true;
-        }
-        return false;
+        return true;
     }
 
     public boolean isVirtual() {
@@ -94,7 +88,14 @@ public class NetworkInterface {
 
     public int getMTU() {
         // TODO Find a good way to determine the MTU
-        return 1500;
+        //  For the moment we will return 1500 for all addresses
+        //  except localhost where we will return 16384
+
+        if ( isLoopback() ) {
+            return 16384;
+        } else {
+            return 1500;
+        }
     }
 
     public Enumeration<NetworkInterface> getSubInterfaces() {

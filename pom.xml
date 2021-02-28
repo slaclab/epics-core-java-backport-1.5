@@ -271,6 +271,15 @@
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.2</version>
+                <configuration>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
             <!-- Includes the OSGi manifest -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -286,23 +295,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
             </plugin>
 
             <!-- Set compiler for Java 7 -->

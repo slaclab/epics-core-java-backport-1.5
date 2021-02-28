@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -15,6 +14,7 @@ import org.epics.pvdata.pv.DeserializableControl;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.PVDataCreate;
 import org.epics.pvdata.pv.PVField;
+import org.epics.util.compat.legacy.net.MulticastSocket;
 
 class PVMSSubscriber extends PVMSCodec implements DeserializableControl
 {
@@ -105,7 +105,7 @@ class PVMSSubscriber extends PVMSCodec implements DeserializableControl
 			if (joinedGroups.contains(address))
 			{
 				socket.leaveGroup(address);
-				joinedGroups.add(address);
+				joinedGroups.remove(address);
 			}
 		}
 	}

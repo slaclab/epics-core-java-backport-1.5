@@ -25,6 +25,7 @@ import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.Status;
+import org.epics.util.compat.legacy.net.MulticastSocket;
 import org.epics.util.compat.legacy.net.NetworkInterface;
 
 import java.io.IOException;
