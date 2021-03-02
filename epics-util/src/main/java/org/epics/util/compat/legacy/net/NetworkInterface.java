@@ -83,7 +83,11 @@ public class NetworkInterface {
     public byte[] getHardwareAddress() {
         // TODO Find a good way to determine the mac code
         byte[] ipv6Address = this.networkInterface.getInetAddresses().nextElement().getAddress();
-        return new byte[]{(byte) (ipv6Address[8] - 2), ipv6Address[9], ipv6Address[10], ipv6Address[13], ipv6Address[14], ipv6Address[15]};
+        if (ipv6Address.length >= 16) {
+            return new byte[]{(byte) (ipv6Address[8] - 2), ipv6Address[9], ipv6Address[10], ipv6Address[13], ipv6Address[14], ipv6Address[15]};
+        } else {
+            return new byte[]{0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F};
+        }
     }
 
     public int getMTU() {

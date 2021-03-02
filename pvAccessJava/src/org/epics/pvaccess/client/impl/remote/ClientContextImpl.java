@@ -14,47 +14,15 @@
 
 package org.epics.pvaccess.client.impl.remote;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.epics.pvaccess.PVAConstants;
-import org.epics.pvaccess.PVAException;
-import org.epics.pvaccess.PVAVersion;
-import org.epics.pvaccess.PVFactory;
-import org.epics.pvaccess.Version;
-import org.epics.pvaccess.client.Channel;
-import org.epics.pvaccess.client.ChannelFind;
-import org.epics.pvaccess.client.ChannelFindRequester;
-import org.epics.pvaccess.client.ChannelListRequester;
-import org.epics.pvaccess.client.ChannelProvider;
-import org.epics.pvaccess.client.ChannelRequester;
+import org.epics.pvaccess.*;
+import org.epics.pvaccess.client.*;
 import org.epics.pvaccess.client.impl.remote.search.ChannelSearchManager;
 import org.epics.pvaccess.client.impl.remote.search.SearchInstance;
 import org.epics.pvaccess.client.impl.remote.search.SimpleChannelSearchManagerImpl;
 import org.epics.pvaccess.client.impl.remote.tcp.BlockingClientTCPTransport;
 import org.epics.pvaccess.client.impl.remote.tcp.BlockingTCPConnector;
 import org.epics.pvaccess.client.impl.remote.tcp.BlockingTCPConnector.TransportFactory;
-import org.epics.pvaccess.impl.remote.ConnectionException;
-import org.epics.pvaccess.impl.remote.Context;
-import org.epics.pvaccess.impl.remote.ProtocolType;
-import org.epics.pvaccess.impl.remote.Transport;
-import org.epics.pvaccess.impl.remote.TransportClient;
-import org.epics.pvaccess.impl.remote.TransportRegistry;
+import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.io.impl.PollerImpl;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
 import org.epics.pvaccess.impl.remote.request.ResponseRequest;
@@ -77,6 +45,19 @@ import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
 import org.epics.util.compat.legacy.net.NetworkInterface;
+
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
+import java.nio.channels.SocketChannel;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation of PVAJ JCA <code>Context</code>.
@@ -464,7 +445,7 @@ public class ClientContextImpl implements Context {
 				try {
 					InetAddress group = InetAddress.getByName("224.0.0.128");
 					localBroadcastAddress = new InetSocketAddress(group, broadcastPort);
-					searchTransport.join(group, localNIF);
+					searchTransport.join(localBroadcastAddress, localNIF);
 
 					// NOTE: this disables usage of multicast addresses in EPICS_PVA_ADDR_LIST
 					searchTransport.setMulticastNIF(localNIF, true);

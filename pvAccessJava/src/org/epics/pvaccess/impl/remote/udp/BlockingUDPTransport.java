@@ -358,8 +358,6 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 this.legacySendBuffer.setData(byteBuffer.array());
                 this.legacySendBuffer.setAddress(this.sendAddresses[i].getAddress());
                 this.legacySendBuffer.setPort(this.sendAddresses[i].getPort());
-
-                //context.getLogger().finest("Sending " + buffer.limit() + " bytes to " + sendAddresses[i] + ".");
                 this.channel.send(this.legacySendBuffer);
             } catch (NoRouteToHostException noRouteToHostException) {
                 this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + this.sendAddresses[i] + ".", noRouteToHostException);
@@ -406,8 +404,8 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         }
     }
 
-    public void join(InetAddress group, NetworkInterface nif) throws IOException {
-        this.channel.joinGroup(group);
+    public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
+        this.channel.joinGroup(group, nif.getNetworkInterface());
     }
 
     // set NIF used to send packets
