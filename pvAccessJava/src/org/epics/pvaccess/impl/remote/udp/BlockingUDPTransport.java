@@ -29,7 +29,10 @@ import org.epics.util.compat.legacy.net.MulticastSocket;
 import org.epics.util.compat.legacy.net.NetworkInterface;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NoRouteToHostException;
+import java.net.SocketException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -87,15 +90,11 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
      * Receive buffer.
      */
     private final ByteBuffer receiveBuffer;
-    private final DatagramPacket legacyReceiveBuffer;
-    private final byte[] legacyReceiveByteArray = new byte[PVAConstants.MAX_UDP_PACKET];
 
     /**
      * Send buffer.
      */
     private final ByteBuffer sendBuffer;
-    private final DatagramPacket legacySendBuffer;
-    private final byte[] legacySendByteArray = new byte[PVAConstants.MAX_UDP_UNFRAGMENTED_SEND];
 
     /**
      * Response handler.
@@ -135,11 +134,9 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
 
         // allocate receive buffer
         this.receiveBuffer = ByteBuffer.allocate(PVAConstants.MAX_UDP_PACKET);
-        this.legacyReceiveBuffer = new DatagramPacket(this.legacyReceiveByteArray, PVAConstants.MAX_UDP_PACKET);
 
         // allocate send buffer and non-reentrant lock
         this.sendBuffer = ByteBuffer.allocate(PVAConstants.MAX_UDP_UNFRAGMENTED_SEND);
-        this.legacySendBuffer = new DatagramPacket(this.legacySendByteArray, PVAConstants.MAX_UDP_UNFRAGMENTED_SEND);
     }
 
     /**
@@ -211,23 +208,19 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 // NOTE: If there are fewer bytes remaining in the buffer
                 // than are required to hold the datagram then the remainder
                 // of the datagram is silently discarded.
-                this.legacyReceiveBuffer.setData(this.legacyReceiveByteArray);
-                this.channel.receive(this.legacyReceiveBuffer);
-                this.receiveBuffer.put(this.legacyReceiveBuffer.getData());
-
-                final InetAddress fromAddressOnly = this.legacyReceiveBuffer.getAddress();
-                final InetSocketAddress fromAddress = new InetSocketAddress(fromAddressOnly, this.legacyReceiveBuffer.getPort());
+                InetSocketAddress fromAddress = this.channel.receive(this.receiveBuffer);
 
                 // check if datagram not available
                 // NOTE: If this channel is in non-blocking mode and a datagram is not
                 // immediately available then this method immediately returns <tt>null</tt>.
-//                if (fromAddress == null)
-//                    break;
+                if (fromAddress == null)
+                    break;
 
                 // check if received from ignore address list
                 if (this.ignoredAddresses != null) {
                     boolean ignore = false;
 
+                    final InetAddress fromAddressOnly = fromAddress.getAddress();
                     for (InetSocketAddress ignoredAddress : this.ignoredAddresses)
                         if (ignoredAddress.getAddress().equals(fromAddressOnly)) {
                             ignore = true;
@@ -355,10 +348,10 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
             try {
                 // prepare buffer
                 byteBuffer.flip();
-                this.legacySendBuffer.setData(byteBuffer.array());
-                this.legacySendBuffer.setAddress(this.sendAddresses[i].getAddress());
-                this.legacySendBuffer.setPort(this.sendAddresses[i].getPort());
-                this.channel.send(this.legacySendBuffer);
+
+                //context.getLogger().finest("Sending " + buffer.limit() + " bytes to " + sendAddresses[i] + ".");
+
+                this.channel.send(byteBuffer, sendAddresses[i]);
             } catch (NoRouteToHostException noRouteToHostException) {
                 this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + this.sendAddresses[i] + ".", noRouteToHostException);
             } catch (UnresolvedAddressException uae) {
@@ -391,10 +384,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         try {
             // context.getLogger().finest("Sending " + buffer.limit() + " bytes to " + address + ".");
             byteBuffer.flip();
-            this.legacySendBuffer.setData(byteBuffer.array());
-            this.legacySendBuffer.setAddress(address.getAddress());
-            this.legacySendBuffer.setPort(address.getPort());
-            this.channel.send(this.legacySendBuffer);
+            this.channel.send(byteBuffer, address);
         } catch (NoRouteToHostException noRouteToHostException) {
             this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + address + ".", noRouteToHostException);
         } catch (UnresolvedAddressException uae) {

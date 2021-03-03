@@ -95,7 +95,7 @@ public class NetworkInterface {
         //  For the moment we will return 1500 for all addresses
         //  except localhost where we will return 16384
 
-        if ( isLoopback() ) {
+        if (isLoopback()) {
             return 16384;
         } else {
             return 1500;
