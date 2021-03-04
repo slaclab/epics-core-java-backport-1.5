@@ -19,6 +19,11 @@ public class MulticastSocket extends java.net.MulticastSocket {
     public static final int MAX_UDP_UNFRAGMENTED_SEND = 1440;
 
     private final Set<InetAddress> groups = new HashSet<InetAddress>();
+    private InetSocketAddress inetSocketAddress;
+
+    public InetSocketAddress getInetSocketAddress() {
+        return inetSocketAddress;
+    }
 
     public MulticastSocket(int port) throws IOException {
         super(port);
@@ -26,6 +31,12 @@ public class MulticastSocket extends java.net.MulticastSocket {
 
     public MulticastSocket(SocketAddress bindaddr) throws IOException {
         super(bindaddr);
+    }
+
+    @Override
+    public void connect(InetAddress address, int port) {
+        super.connect(address, port);
+        inetSocketAddress = new InetSocketAddress(address, port);
     }
 
     public void joinGroup(InetAddress mcastaddr) throws IOException {
@@ -58,6 +69,14 @@ public class MulticastSocket extends java.net.MulticastSocket {
         byteBuffer.put(datagramPacket.getData());
 
         return new InetSocketAddress(datagramPacket.getAddress(), datagramPacket.getPort());
+    }
+
+    public void send(ByteBuffer byteBuffer) throws IOException {
+        if (!isConnected()) {
+            throw new IOException("Socket must be connected to send buffer");
+        }
+
+        send(byteBuffer, getInetSocketAddress());
     }
 
     /**
