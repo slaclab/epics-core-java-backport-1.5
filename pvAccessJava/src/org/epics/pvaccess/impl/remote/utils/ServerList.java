@@ -20,30 +20,29 @@ import org.epics.pvaccess.util.configuration.Configuration;
 import org.epics.pvaccess.util.configuration.ConfigurationProvider;
 import org.epics.pvaccess.util.configuration.impl.ConfigurationFactory;
 import org.epics.pvdata.misc.SerializeHelper;
+import org.epics.util.compat.legacy.net.MulticastSocket;
 
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.DatagramChannel;
 import java.util.*;
 
 /**
  * Gets a list of all servers.
+ *
  * @author msekoranja
  */
-public class ServerList  {
+public class ServerList {
 
-	static
-	{
+	static {
 		// force only IPv4 sockets, since EPICS does not work right with IPv6 sockets
 		// see http://java.sun.com/j2se/1.5.0/docs/guide/net/properties.html
 		System.setProperty("java.net.preferIPv4Stack", "true");
 	}
 
-	private static boolean send(DatagramChannel channel,
-								InetSocketAddress[] sendAddresses, ByteBuffer buffer)
-	{
+	private static boolean send(MulticastSocket channel,
+								InetSocketAddress[] sendAddresses, ByteBuffer buffer) {
 		// noop check
 		if (sendAddresses == null)
 			return false;
@@ -181,8 +180,7 @@ public class ServerList  {
 		InetSocketAddress[] broadcastAddresses = InetAddressUtil.getBroadcastAddresses(broadcastPort);
 
 		// set broadcast address list
-		if (addressList != null && addressList.length() > 0)
-		{
+		if (addressList != null && addressList.length() > 0) {
 			// if auto is true, add it to specified list
 			InetSocketAddress[] appendList = null;
 			if (autoAddressList)
@@ -193,60 +191,48 @@ public class ServerList  {
 
 		System.out.println("Searching...");
 
-		DatagramChannel datagramChannel = DatagramChannel.open();
-		datagramChannel.configureBlocking(true);
-		datagramChannel.socket().setBroadcast(true);
-		datagramChannel.socket().setSoTimeout(1000);	// 1 sec
-		datagramChannel.connect(new InetSocketAddress(0));
-
+		MulticastSocket multicastSocket = new MulticastSocket(new InetSocketAddress(0));
+		multicastSocket.setBroadcast(true);
+		multicastSocket.setSoTimeout(1000);    // 1 sec
 
 		ByteBuffer sendBuffer = ByteBuffer.allocate(1024);
 
 		sendBuffer.put(PVAConstants.PVA_MAGIC);
 		sendBuffer.put(PVAConstants.PVA_VERSION);
-		sendBuffer.put((byte)0x80);	// big endian
-		sendBuffer.put((byte)0x03);	// search
-		sendBuffer.putInt(4+1+3+16+2+1+2);		// payload size
+		sendBuffer.put((byte) 0x80);    // big endian
+		sendBuffer.put((byte) 0x03);    // search
+		sendBuffer.putInt(4 + 1 + 3 + 16 + 2 + 1 + 2);        // payload size
 
-		sendBuffer.putInt(0);	    // sequenceId
-		sendBuffer.put((byte)0x81); // reply required // TODO unicast vs multicast; for now we mark ourselves as unicast
-		sendBuffer.put((byte)0);		// reserved
-		sendBuffer.putShort((short)0);  // reserved
+		sendBuffer.putInt(0);        // sequenceId
+		sendBuffer.put((byte) 0x81); // reply required // TODO unicast vs multicast; for now we mark ourselves as unicast
+		sendBuffer.put((byte) 0);        // reserved
+		sendBuffer.putShort((short) 0);  // reserved
 
 		// NOTE: is it possible (very likely) that address is any local address ::ffff:0.0.0.0
-		InetSocketAddress address = new InetSocketAddress(datagramChannel.socket().getInetAddress(), datagramChannel.socket().getPort()) ;
-		//(InetSocketAddress)datagramChannel.socket().getLocalAddress();
-		InetAddressUtil.encodeAsIPv6Address(sendBuffer, address.getAddress());
-		sendBuffer.putShort((short)address.getPort());
+		InetAddressUtil.encodeAsIPv6Address(sendBuffer, multicastSocket.getInetAddress());
+		sendBuffer.putShort((short) multicastSocket.getPort());
 
-		sendBuffer.put((byte)0x00);	// no restriction on protocol
-		sendBuffer.putShort((byte)0x00);	// count
+		sendBuffer.put((byte) 0x00);    // no restriction on protocol
+		sendBuffer.putShort((byte) 0x00);    // count
 
-
-		send(datagramChannel, broadcastAddresses, sendBuffer);
+		send(multicastSocket, broadcastAddresses, sendBuffer);
 
 		ByteBuffer receiveBuffer = ByteBuffer.allocate(1024);
 
-		DatagramPacket dp = new DatagramPacket(receiveBuffer.array(), receiveBuffer.capacity());
-		while (true)
-		{
+		while (true) {
 //			SocketAddress responseFrom = datagramChannel.receive(receiveBuffer);
 //			if (responseFrom == null)
 //				break;
 
-			SocketAddress responseFrom;
-			try
-			{
-				datagramChannel.socket().receive(dp);
-				responseFrom = dp.getSocketAddress();
-				receiveBuffer.position(dp.getLength());
-			}
-			catch (SocketTimeoutException ste) {
+			InetSocketAddress responseFrom;
+			try {
+				responseFrom = multicastSocket.receive(receiveBuffer);
+			} catch (SocketTimeoutException ste) {
 				break;
 			}
 
 			receiveBuffer.flip();
-			processSearchResponse((InetSocketAddress)responseFrom, receiveBuffer);
+			processSearchResponse(responseFrom, receiveBuffer);
 		}
 
 		for (ServerEntry se : serverMap.values())
