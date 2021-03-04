@@ -10,6 +10,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MulticastSocket extends java.net.MulticastSocket {
+    /**
+     * UDP maximum send message size (for sending search requests).
+     * Calculation is specific to EPICS
+     * MAX_UDP: 1500 (max of ethernet and 802.{2,3} MTU) - 20/40(IPv4/IPv6) - 8(UDP) - some reserve (e.g. IPSEC)
+     * (the MTU of Ethernet is currently independent of its speed variant)
+     */
+    public static final int MAX_UDP_UNFRAGMENTED_SEND = 1440;
+
     private final Set<InetAddress> groups = new HashSet<InetAddress>();
 
     public MulticastSocket(int port) throws IOException {
@@ -64,9 +72,22 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @throws IOException if there is a problem sending
      */
     public void send(ByteBuffer byteBuffer, InetSocketAddress socketAddress) throws IOException {
-        DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), byteBuffer.arrayOffset(), byteBuffer.limit(), socketAddress.getAddress(), socketAddress.getPort());
+        DatagramPacket datagramPacket;
+        int offset = byteBuffer.arrayOffset();
+        int length = byteBuffer.limit();
 
-        send(datagramPacket);
+        // Send in chunks if greater than max un-fragmented size
+        while (length > 0) {
+            int chunkLength = Math.min(length, MAX_UDP_UNFRAGMENTED_SEND);
+
+            datagramPacket = new DatagramPacket(byteBuffer.array(), offset, chunkLength, socketAddress.getAddress(), socketAddress.getPort());
+            send(datagramPacket);
+
+            length -= chunkLength;
+            offset += chunkLength;
+        }
+
+        // All done, set new position
         byteBuffer.position(byteBuffer.limit());
     }
 }
