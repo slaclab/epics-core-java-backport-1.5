@@ -14,8 +14,8 @@
 
 package org.epics.pvaccess.impl.remote.utils;
 
-import org.epics.util.compat.legacy.net.InterfaceAddress;
-import org.epics.util.compat.legacy.net.NetworkInterface;
+import org.epics.util.compat.jdk5.net.InterfaceAddress;
+import org.epics.util.compat.jdk5.net.NetworkInterface;
 
 import java.io.PrintStream;
 import java.net.InetAddress;

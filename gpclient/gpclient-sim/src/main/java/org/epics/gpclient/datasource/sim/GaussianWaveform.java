@@ -6,7 +6,7 @@ package org.epics.gpclient.datasource.sim;
 
 import org.epics.util.array.ArrayDouble;
 import org.epics.util.array.ListDouble;
-import org.epics.util.compat.legacy.lang.Random;
+import org.epics.util.compat.jdk5.lang.Random;
 import org.epics.util.stats.Range;
 import org.epics.vtype.Display;
 /**

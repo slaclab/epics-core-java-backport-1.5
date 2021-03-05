@@ -4,8 +4,8 @@
  */
 package org.epics.gpclient;
 
-import org.epics.util.compat.legacy.functional.Consumer;
-import org.epics.util.compat.legacy.functional.Supplier;
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Supplier;
 
 /**
  * A collector can be written from one thread and read from another and provides

@@ -4,12 +4,13 @@
  */
 package org.epics.gpclient;
 
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Function;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.epics.util.compat.legacy.functional.Consumer;
-import org.epics.util.compat.legacy.functional.Function;
 
 /**
  * Utility class to record the flow of events mainly for debugging and testing

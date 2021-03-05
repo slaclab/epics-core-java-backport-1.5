@@ -2,7 +2,7 @@ package org.epics.gpclient.datasource.ca;
 
 import org.epics.gpclient.*;
 import org.epics.gpclient.datasource.DataSourceProvider;
-import org.epics.util.compat.legacy.functional.Function;
+import org.epics.util.compat.jdk5.functional.Function;
 import org.epics.vtype.*;
 import org.joda.time.Duration;
 import org.junit.AfterClass;

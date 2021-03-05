@@ -6,7 +6,7 @@ import org.epics.pvdata.misc.SerializeHelper;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.SerializableControl;
-import org.epics.util.compat.legacy.net.MulticastSocket;
+import org.epics.util.compat.jdk5.net.MulticastSocket;
 
 import java.io.IOException;
 import java.net.InetAddress;

@@ -4,7 +4,7 @@
  */
 package org.epics.util.concurrent;
 
-import org.epics.util.compat.legacy.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Consumer;
 import org.junit.Test;
 
 import java.util.Arrays;

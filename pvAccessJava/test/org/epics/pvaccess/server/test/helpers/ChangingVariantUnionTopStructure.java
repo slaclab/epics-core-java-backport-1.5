@@ -1,7 +1,5 @@
 package org.epics.pvaccess.server.test.helpers;
 
-import org.epics.util.compat.legacy.lang.Random;
-
 import org.epics.pvaccess.PVFactory;
 import org.epics.pvdata.factory.StandardFieldFactory;
 import org.epics.pvdata.factory.StandardPVFieldFactory;
@@ -14,15 +12,8 @@ import org.epics.pvdata.property.PVTimeStamp;
 import org.epics.pvdata.property.PVTimeStampFactory;
 import org.epics.pvdata.property.TimeStamp;
 import org.epics.pvdata.property.TimeStampFactory;
-import org.epics.pvdata.pv.Field;
-import org.epics.pvdata.pv.FieldCreate;
-import org.epics.pvdata.pv.PVByteArray;
-import org.epics.pvdata.pv.PVDataCreate;
-import org.epics.pvdata.pv.PVDouble;
-import org.epics.pvdata.pv.PVField;
-import org.epics.pvdata.pv.PVUnion;
-import org.epics.pvdata.pv.ScalarType;
-import org.epics.pvdata.pv.Structure;
+import org.epics.pvdata.pv.*;
+import org.epics.util.compat.jdk5.lang.Random;
 
 public class ChangingVariantUnionTopStructure extends PVTopStructure implements TimerCallback
 {

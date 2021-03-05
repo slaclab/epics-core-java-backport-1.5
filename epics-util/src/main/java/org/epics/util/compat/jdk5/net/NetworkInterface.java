@@ -1,4 +1,4 @@
-package org.epics.util.compat.legacy.net;
+package org.epics.util.compat.jdk5.net;
 
 import java.net.InetAddress;
 import java.net.SocketException;

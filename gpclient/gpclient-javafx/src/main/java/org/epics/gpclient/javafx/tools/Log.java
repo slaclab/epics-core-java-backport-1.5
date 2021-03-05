@@ -4,18 +4,18 @@
  */
 package org.epics.gpclient.javafx.tools;
 
+import org.epics.gpclient.PV;
+import org.epics.gpclient.PVEvent;
+import org.epics.gpclient.PVListener;
+import org.epics.util.compat.jdk5.lang.Objects;
+import org.joda.time.Instant;
+
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.epics.gpclient.PV;
-import org.epics.gpclient.PVEvent;
-import org.epics.gpclient.PVListener;
-import org.epics.util.compat.legacy.lang.Objects;
-import org.joda.time.Instant;
 
 /**
- *
  * @author carcassi
  */
 public class Log {

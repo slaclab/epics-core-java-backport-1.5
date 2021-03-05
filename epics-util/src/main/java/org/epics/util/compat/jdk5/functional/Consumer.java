@@ -1,4 +1,4 @@
-package org.epics.util.compat.legacy.functional;
+package org.epics.util.compat.jdk5.functional;
 
 /**
  * Represents an operation that accepts a single input argument and returns no

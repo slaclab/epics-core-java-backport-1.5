@@ -16,7 +16,7 @@ package org.epics.pvaccess.impl.remote.udp;
 
 import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
-import org.epics.util.compat.legacy.net.MulticastSocket;
+import org.epics.util.compat.jdk5.net.MulticastSocket;
 
 import java.net.InetSocketAddress;
 

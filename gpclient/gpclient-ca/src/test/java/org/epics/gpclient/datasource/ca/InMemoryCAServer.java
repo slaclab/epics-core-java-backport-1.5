@@ -9,7 +9,7 @@ import gov.aps.jca.dbr.DBR_Double;
 import gov.aps.jca.dbr.DBR_Float;
 import gov.aps.jca.dbr.DBR_Int;
 import gov.aps.jca.dbr.DBR_String;
-import org.epics.util.compat.legacy.lang.Random;
+import org.epics.util.compat.jdk5.lang.Random;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

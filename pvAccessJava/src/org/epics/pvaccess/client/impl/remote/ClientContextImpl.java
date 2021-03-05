@@ -44,7 +44,7 @@ import org.epics.pvdata.misc.TimerFactory;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 import org.epics.pvdata.pv.StatusCreate;
-import org.epics.util.compat.legacy.net.NetworkInterface;
+import org.epics.util.compat.jdk5.net.NetworkInterface;
 
 import java.io.IOException;
 import java.io.PrintStream;

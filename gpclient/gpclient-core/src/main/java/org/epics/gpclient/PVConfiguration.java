@@ -4,10 +4,11 @@
  */
 package org.epics.gpclient;
 
-import org.joda.time.Duration;
-import java.util.concurrent.Executor;
-import org.epics.util.compat.legacy.functional.Consumer;
 import org.epics.gpclient.datasource.DataSource;
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.joda.time.Duration;
+
+import java.util.concurrent.Executor;
 
 /**
  * Allows to configure the type of read/write PV to create.

@@ -4,7 +4,7 @@
  */
 package org.epics.vtype;
 
-import org.epics.util.compat.legacy.lang.Objects;
+import org.epics.util.compat.jdk5.lang.Objects;
 
 /**
  * Scalar boolean with alarm and timestamp.

@@ -4,7 +4,7 @@
  */
 package org.epics.gpclient;
 
-import org.epics.util.compat.legacy.lang.Objects;
+import org.epics.util.compat.jdk5.lang.Objects;
 
 import java.util.ArrayList;
 import java.util.Arrays;

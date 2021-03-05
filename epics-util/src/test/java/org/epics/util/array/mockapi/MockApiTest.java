@@ -4,12 +4,18 @@
  */
 package org.epics.util.array.mockapi;
 
-import org.epics.util.compat.legacy.lang.Random;
-import org.epics.util.array.*;
+import org.epics.util.array.ArrayDouble;
+import org.epics.util.array.ArrayInteger;
+import org.epics.util.array.ListDouble;
+import org.epics.util.array.UnsafeUnwrapper;
+import org.epics.util.compat.jdk5.lang.Random;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-import static org.epics.util.array.CollectionNumbers.*;
+
+import static org.epics.util.array.CollectionNumbers.unmodifiableListDouble;
+import static org.epics.util.array.CollectionNumbers.unmodifiableListInt;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertThat;
 
 /**
  *

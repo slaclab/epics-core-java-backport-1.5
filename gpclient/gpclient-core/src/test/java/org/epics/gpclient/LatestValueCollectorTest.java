@@ -4,12 +4,12 @@
  */
 package org.epics.gpclient;
 
-import org.epics.util.compat.legacy.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Consumer;
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.mockito.InOrder;
+
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
 /**

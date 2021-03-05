@@ -7,7 +7,7 @@ package org.epics.gpclient.datasource;
 import org.epics.gpclient.ReadCollector;
 import org.epics.gpclient.TypeMismatchException;
 import org.epics.gpclient.WriteCollector;
-import org.epics.util.compat.legacy.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Consumer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

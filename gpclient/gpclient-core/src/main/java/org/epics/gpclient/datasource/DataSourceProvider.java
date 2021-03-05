@@ -4,8 +4,8 @@
  */
 package org.epics.gpclient.datasource;
 
-import org.epics.util.compat.legacy.functional.Consumer;
-import org.epics.util.compat.legacy.service.ServiceLoader;
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.epics.util.compat.jdk5.service.ServiceLoader;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

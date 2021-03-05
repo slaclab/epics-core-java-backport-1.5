@@ -4,7 +4,7 @@
  */
 package org.epics.gpclient;
 
-import org.epics.util.compat.legacy.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Consumer;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 

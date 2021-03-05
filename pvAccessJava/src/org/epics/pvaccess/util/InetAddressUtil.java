@@ -14,22 +14,12 @@
 
 package org.epics.pvaccess.util;
 
-import org.epics.util.compat.legacy.net.InterfaceAddress;
-import org.epics.util.compat.legacy.net.NetworkInterface;
+import org.epics.util.compat.jdk5.net.InterfaceAddress;
+import org.epics.util.compat.jdk5.net.NetworkInterface;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * <code>InetAddress</code> utility methods.

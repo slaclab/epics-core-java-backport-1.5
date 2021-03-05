@@ -76,7 +76,7 @@ public class ActiveRateDecouplerTest {
                 Thread.sleep(300);
                 decoupler.resume();
                 decoupler.stop();
-                assertThat(log.getEvents().size(), lessThan(2));
+                assertThat(log.getEvents().size(), lessThan(3));
                 return null;
             }
         });

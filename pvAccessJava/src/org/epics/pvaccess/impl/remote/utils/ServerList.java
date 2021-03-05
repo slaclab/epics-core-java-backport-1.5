@@ -20,7 +20,7 @@ import org.epics.pvaccess.util.configuration.Configuration;
 import org.epics.pvaccess.util.configuration.ConfigurationProvider;
 import org.epics.pvaccess.util.configuration.impl.ConfigurationFactory;
 import org.epics.pvdata.misc.SerializeHelper;
-import org.epics.util.compat.legacy.net.MulticastSocket;
+import org.epics.util.compat.jdk5.net.MulticastSocket;
 
 import java.io.IOException;
 import java.net.*;

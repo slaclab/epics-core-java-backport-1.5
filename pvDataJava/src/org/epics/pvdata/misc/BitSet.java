@@ -32,7 +32,7 @@ package org.epics.pvdata.misc;
 
 import org.epics.pvdata.pv.DeserializableControl;
 import org.epics.pvdata.pv.SerializableControl;
-import org.epics.util.compat.legacy.lang.Arrays;
+import org.epics.util.compat.jdk5.lang.Arrays;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

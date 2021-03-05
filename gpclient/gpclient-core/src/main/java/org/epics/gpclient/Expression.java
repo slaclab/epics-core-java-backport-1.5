@@ -4,8 +4,8 @@
  */
 package org.epics.gpclient;
 
-import org.epics.util.compat.legacy.functional.Consumer;
-import org.epics.util.compat.legacy.functional.Supplier;
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Supplier;
 
 /**
  * An expression that can be read or written by the gpclient.

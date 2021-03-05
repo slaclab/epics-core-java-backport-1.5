@@ -4,9 +4,8 @@
  */
 package org.epics.vtype;
 
-import org.epics.util.compat.legacy.lang.Objects;
-
 import org.epics.util.array.ListNumber;
+import org.epics.util.compat.jdk5.lang.Objects;
 
 /**
  * VImage represents an image.

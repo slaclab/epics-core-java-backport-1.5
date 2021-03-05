@@ -4,11 +4,11 @@
  */
 package org.epics.util.array.performance;
 
-import org.epics.util.compat.legacy.lang.Random;
 import org.epics.util.array.ArrayDouble;
 import org.epics.util.array.CircularBufferDouble;
+import org.epics.util.compat.jdk5.lang.Random;
 
-import static org.epics.util.array.CollectionNumbers.*;
+import static org.epics.util.array.CollectionNumbers.unmodifiableListDouble;
 
 /**
  *

@@ -4,9 +4,8 @@
  */
 package org.epics.vtype;
 
+import org.epics.util.compat.jdk5.lang.Objects;
 import org.joda.time.Instant;
-
-import org.epics.util.compat.legacy.lang.Objects;
 
 /**
  * Time information.

@@ -4,18 +4,8 @@
  */
 package org.epics.vtype;
 
-import org.epics.util.compat.legacy.lang.Objects;
-import org.epics.util.array.ListByte;
-import org.epics.util.array.ListDouble;
-import org.epics.util.array.ListFloat;
-import org.epics.util.array.ListInteger;
-import org.epics.util.array.ListLong;
-import org.epics.util.array.ListNumber;
-import org.epics.util.array.ListShort;
-import org.epics.util.array.ListUByte;
-import org.epics.util.array.ListUInteger;
-import org.epics.util.array.ListULong;
-import org.epics.util.array.ListUShort;
+import org.epics.util.array.*;
+import org.epics.util.compat.jdk5.lang.Objects;
 
 /**
  * Numeric array with alarm, timestamp, display and control information.

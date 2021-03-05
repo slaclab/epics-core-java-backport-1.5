@@ -4,10 +4,11 @@
  */
 package org.epics.vtype;
 
+import org.epics.util.compat.jdk5.lang.Objects;
+import org.epics.util.stats.Range;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import org.epics.util.compat.legacy.lang.Objects;
-import org.epics.util.stats.Range;
 
 /**
  * Limit and unit information needed for display and control.

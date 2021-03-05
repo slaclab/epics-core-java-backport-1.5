@@ -4,11 +4,12 @@
  */
 package org.epics.gpclient;
 
-import org.epics.util.compat.legacy.functional.Consumer;
+import org.epics.gpclient.datasource.DataSource;
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.epics.util.compat.jdk5.lang.Optional;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.epics.gpclient.datasource.DataSource;
-import org.epics.util.compat.legacy.lang.Optional;
 
 /**
  *

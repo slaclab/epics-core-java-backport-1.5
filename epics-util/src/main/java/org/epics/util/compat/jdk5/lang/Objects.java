@@ -1,4 +1,4 @@
-package org.epics.util.compat.legacy.lang;
+package org.epics.util.compat.jdk5.lang;
 
 /**
  * Implementation of Java Objects class

@@ -312,8 +312,6 @@ public class SearchHandler extends AbstractServerResponseHandler {
 
     }
 
-    ;
-
     // TODO limit max, cleanup after some time
     private class ChannelFindRequesterImplObjectPool {
         private final ArrayList<ChannelFindRequesterImpl> elements = new ArrayList<ChannelFindRequesterImpl>();

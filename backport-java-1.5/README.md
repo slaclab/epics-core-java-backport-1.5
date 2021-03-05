@@ -1,5 +1,5 @@
 # Porting Notes
-There are a total of 691 file changes/additions in this backport to JDK `1.5`.  Most of these changes are trivial changes.  
+There are a total of 691 file changes/additions in this backport to JDK `1.5`.  Most of these changes are trivial changes.
 All changes are detailed below.
 
 Auth:  
@@ -62,7 +62,7 @@ are provided where missing, All implementations following the delegate patter ar
 + `full` pattern implementing all methods.  All unannotated implementations listed below.
 
 The following compatibility implementations are provided:
-+ `org.epics.util.compat.legacy`
++ `org.epics.util.compat.jdk5`
   + `functional` - for functional programming from Java 8+
     + `Consumer`
     + `Function`

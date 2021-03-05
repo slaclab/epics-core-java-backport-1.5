@@ -4,15 +4,8 @@
  */
 package org.epics.util.array.performance;
 
-import org.epics.util.array.ArrayShort;
-import org.epics.util.array.ArrayDouble;
-import org.epics.util.array.CollectionNumber;
-import org.epics.util.array.ArrayFloat;
-import org.epics.util.array.ArrayByte;
-import org.epics.util.array.ArrayInteger;
-import org.epics.util.compat.legacy.lang.Random;
-import org.epics.util.array.ArrayLong;
-import org.epics.util.array.IteratorNumber;
+import org.epics.util.array.*;
+import org.epics.util.compat.jdk5.lang.Random;
 
 import static org.epics.util.array.CollectionNumbers.*;
 

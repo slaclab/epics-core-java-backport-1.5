@@ -4,21 +4,22 @@
  */
 package org.epics.gpclient.sample;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.epics.util.compat.legacy.lang.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.epics.gpclient.GPClient;
 import org.epics.gpclient.PV;
 import org.epics.gpclient.PVEvent;
 import org.epics.gpclient.PVListener;
+import org.epics.util.compat.jdk5.lang.Random;
 import org.epics.vtype.VType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This example can be used to test how man write operations can be performed,
  * what is the memory usage profile and that all writes are actually
  * performed.
- *
+ * <p>
  * As of 5/1/2018, on Windows 10, Xeon E3-1505M v6, Java 1.8.0_515,
  * 100,000 pvs total. 330,000 writes/sec. Memory usage oscillates between
  * 350MB and 950 MB. This means roughly 3.5KB per pv and 1.2KB per write.

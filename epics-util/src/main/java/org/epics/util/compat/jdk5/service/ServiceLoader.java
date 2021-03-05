@@ -1,4 +1,4 @@
-package org.epics.util.compat.legacy.service;
+package org.epics.util.compat.jdk5.service;
 /*
  * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -26,7 +26,7 @@ package org.epics.util.compat.legacy.service;
  * @author George McIntyre. 15-Feb-2021, SLAC
  */
 
-import org.epics.util.compat.legacy.lang.Objects;
+import org.epics.util.compat.jdk5.lang.Objects;
 import sun.misc.ServiceConfigurationError;
 
 import java.io.BufferedReader;

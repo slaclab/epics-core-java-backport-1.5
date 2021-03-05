@@ -1,10 +1,10 @@
 package org.epics.vtype;
 
-import java.util.List;
-import org.epics.util.compat.legacy.lang.Objects;
-
 import org.epics.util.array.ArrayInteger;
 import org.epics.util.array.ListInteger;
+import org.epics.util.compat.jdk5.lang.Objects;
+
+import java.util.List;
 
 public abstract class VStringArray extends Array implements AlarmProvider, TimeProvider {
 

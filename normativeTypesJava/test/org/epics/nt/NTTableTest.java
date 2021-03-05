@@ -6,9 +6,8 @@ package org.epics.nt;
 
 import org.epics.pvdata.property.*;
 import org.epics.pvdata.pv.*;
+import org.epics.util.compat.jdk5.lang.Arrays;
 import org.junit.Assert;
-
-import org.epics.util.compat.legacy.lang.Arrays;
 
 /**
  * JUnit test for NTTable.

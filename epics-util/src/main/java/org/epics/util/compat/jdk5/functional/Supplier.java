@@ -1,4 +1,4 @@
-package org.epics.util.compat.legacy.functional;
+package org.epics.util.compat.jdk5.functional;
 
 /**
  * Implementation of the Supplier functional interface

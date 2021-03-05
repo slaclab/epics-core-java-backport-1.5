@@ -5,9 +5,9 @@
 package org.epics.gpclient;
 
 import org.epics.gpclient.datasource.DataSource;
-import org.epics.util.compat.legacy.functional.Consumer;
-import org.epics.util.compat.legacy.functional.Supplier;
-import org.epics.util.compat.legacy.lang.Objects;
+import org.epics.util.compat.jdk5.functional.Consumer;
+import org.epics.util.compat.jdk5.functional.Supplier;
+import org.epics.util.compat.jdk5.lang.Objects;
 import org.epics.vtype.VType;
 import org.joda.time.Duration;
 

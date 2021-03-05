@@ -37,7 +37,7 @@ import org.epics.pvaccess.util.logging.ConsoleLogHandler;
 import org.epics.pvdata.misc.ThreadPriority;
 import org.epics.pvdata.misc.Timer;
 import org.epics.pvdata.misc.TimerFactory;
-import org.epics.util.compat.legacy.net.NetworkInterface;
+import org.epics.util.compat.jdk5.net.NetworkInterface;
 
 import java.io.IOException;
 import java.io.PrintStream;
