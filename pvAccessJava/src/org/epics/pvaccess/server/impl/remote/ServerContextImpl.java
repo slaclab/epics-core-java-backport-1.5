@@ -519,7 +519,7 @@ public class ServerContextImpl implements ServerContext, Context {
             if (localNIF != null) {
                 try {
                     InetAddress group = InetAddress.getByName("224.0.0.128");
-                    broadcastTransport.join(new InetSocketAddress(group, broadcastPort), localNIF);
+                    broadcastTransport.join(group, localNIF);
 
                     InetSocketAddress anyAddress = new InetSocketAddress(0);
                     // NOTE: localMulticastTransport is not started (no read is called on a socket)

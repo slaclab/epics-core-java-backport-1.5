@@ -445,7 +445,7 @@ public class ClientContextImpl implements Context {
 				try {
 					InetAddress group = InetAddress.getByName("224.0.0.128");
 					localBroadcastAddress = new InetSocketAddress(group, broadcastPort);
-					searchTransport.join(localBroadcastAddress, localNIF);
+					searchTransport.join(group, localNIF);
 
 					// NOTE: this disables usage of multicast addresses in EPICS_PVA_ADDR_LIST
 					searchTransport.setMulticastNIF(localNIF, true);

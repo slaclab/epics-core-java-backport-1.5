@@ -115,14 +115,6 @@ public class NetworkInterface {
         return networkInterface.getDisplayName();
     }
 
-    public static NetworkInterface getByName(String s) throws SocketException {
-        return new NetworkInterface(java.net.NetworkInterface.getByName(s));
-    }
-
-    public static NetworkInterface getByInetAddress(InetAddress inetAddress) throws SocketException {
-        return new NetworkInterface(java.net.NetworkInterface.getByInetAddress(inetAddress));
-    }
-
     public static Enumeration<NetworkInterface> getNetworkInterfaces() throws SocketException {
         Enumeration<java.net.NetworkInterface> enumeratedNetworkInterfaces = java.net.NetworkInterface.getNetworkInterfaces();
         List<NetworkInterface> networkInterfaceList = new ArrayList<NetworkInterface>();

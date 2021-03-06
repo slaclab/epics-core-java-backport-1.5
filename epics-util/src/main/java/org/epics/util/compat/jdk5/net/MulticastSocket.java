@@ -63,10 +63,14 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @throws IOException if there was a problem
      */
     public InetSocketAddress receive(ByteBuffer byteBuffer) throws IOException {
-        DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), byteBuffer.limit());
+        int maxPacketLength = byteBuffer.limit();
+        DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), maxPacketLength);
 
         receive(datagramPacket);
+        int bytesRead = datagramPacket.getLength();
+
         byteBuffer.put(datagramPacket.getData());
+        byteBuffer.limit(bytesRead);
 
         return new InetSocketAddress(datagramPacket.getAddress(), datagramPacket.getPort());
     }
@@ -91,20 +95,8 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @throws IOException if there is a problem sending
      */
     public void send(ByteBuffer byteBuffer, InetSocketAddress socketAddress) throws IOException {
-        DatagramPacket datagramPacket;
-        int offset = byteBuffer.arrayOffset();
-        int length = byteBuffer.limit();
-
-        // Send in chunks if greater than max un-fragmented size
-        while (length > 0) {
-            int chunkLength = Math.min(length, MAX_UDP_UNFRAGMENTED_SEND);
-
-            datagramPacket = new DatagramPacket(byteBuffer.array(), offset, chunkLength, socketAddress.getAddress(), socketAddress.getPort());
-            send(datagramPacket);
-
-            length -= chunkLength;
-            offset += chunkLength;
-        }
+        DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), byteBuffer.arrayOffset(), byteBuffer.limit(), socketAddress.getAddress(), socketAddress.getPort());
+        send(datagramPacket);
 
         // All done, set new position
         byteBuffer.position(byteBuffer.limit());
