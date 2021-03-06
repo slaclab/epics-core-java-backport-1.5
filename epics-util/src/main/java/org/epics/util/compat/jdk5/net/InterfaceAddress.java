@@ -2,7 +2,10 @@ package org.epics.util.compat.jdk5.net;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 
+import static org.epics.util.compat.jdk5.net.NetClass.*;
 
 /**
  * This class represents a Network Interface address. In short it's an
@@ -17,22 +20,50 @@ public class InterfaceAddress {
     private final InetAddress address;
     private final InetAddress broadcast;
     private final short maskLength;
+    private final short networkPrefixLength;
     private final NetClass addressClass;
-
-    public InterfaceAddress(InetAddress address) {
-        this.address = address;
-        this.addressClass = getAddressClass(address);
-        this.broadcast = getBroadCastAddress(address, this.addressClass);
-        this.maskLength = getMaskLength(address, this.addressClass);
-    }
+    private static boolean networkCustomised = false;
+    private static final String EPICS_NETWORK_PROPERTY_NAME = "EPICS_NETWORKS_CIDR_LIST";
 
     /**
-     * Get address class
-     *
-     * @return the address class
+     * Special networks (IPV4 bytes) to look for and the prefix length to use if found
+     * Network (specified with bytes followed by netmask : networkPrefixLength-to-use
      */
-    public NetClass getAddressClass() {
-        return this.addressClass;
+    private final static Map<byte[], String> NETWORKS = new HashMap<byte[], String>() {{
+        put(new byte[]{(byte) 10}, "8:24");  // For all CLASS_A use 24
+        put(new byte[]{(byte) 172, (byte) 16}, "12:24");  // For all CLASS_B use 24
+        put(new byte[]{(byte) 192, (byte) 168}, "16:24");  // For all CLASS_C use 24
+    }};
+
+    public InterfaceAddress(InetAddress address) {
+        // Add EPICS NETWORKS if specified in the environment
+        // e.g. EPICS NETWORKS=172.16/12:24,
+        synchronized (NETWORKS) {
+            if (!networkCustomised) {
+                String networkStringList = System.getenv(EPICS_NETWORK_PROPERTY_NAME);
+                if (networkStringList != null) {
+                    String[] networks = networkStringList.split(",");
+                    for (String networkCidr : networks) {
+                        String[] networkCidrComponents = networkCidr.split("/");
+                        String networkString = networkCidrComponents[0];
+                        String networkInfoString = networkCidrComponents[1];
+
+                        String[] networkComponents = networkString.split("\\.");
+                        byte[] b = new byte[networkComponents.length];
+                        for (int i = 0; i < networkComponents.length; i++) {
+                            b[i] = (byte) Short.parseShort(networkComponents[i]);
+                        }
+                        NETWORKS.put(b, networkInfoString);
+                    }
+                }
+                networkCustomised = true;
+            }
+        }
+        this.address = address;
+        this.addressClass = getAddressClass();
+        this.maskLength = getMaskLength();
+        this.networkPrefixLength = getNetworkPrefixLength();
+        this.broadcast = getBroadcastAddress();
     }
 
     /**
@@ -59,20 +90,6 @@ public class InterfaceAddress {
     }
 
     /**
-     * Returns the network prefix length for this address. This is also known
-     * as the subnet mask in the context of IPv4 addresses.
-     * Typical IPv4 values would be 8 (255.0.0.0), 16 (255.255.0.0)
-     * or 24 (255.255.255.0). <p>
-     * Typical IPv6 values would be 128 (::1/128) or 10 (fe80::203:baff:fe27:1243/10)
-     *
-     * @return a <code>short</code> representing the prefix length for the
-     * subnet of that address.
-     */
-    public short getNetworkPrefixLength() {
-        return this.maskLength;
-    }
-
-    /**
      * Compares this object against the specified object.
      * The result is <code>true</code> if and only if the argument is
      * not <code>null</code> and it represents the same interface address as
@@ -82,24 +99,21 @@ public class InterfaceAddress {
      * address if the InetAddress, the prefix length and the broadcast are
      * the same for both.
      *
-     * @param obj the object to compare against.
+     * @param o the object to compare against.
      * @return <code>true</code> if the objects are the same;
      * <code>false</code> otherwise.
      */
-    public boolean equals(Object obj) {
-        if (!(obj instanceof InterfaceAddress)) {
-            return false;
-        }
-        InterfaceAddress cmp = (InterfaceAddress) obj;
-        if ((address != null & cmp.address == null) ||
-                (!address.equals(cmp.address)))
-            return false;
-        if ((broadcast != null & cmp.broadcast == null) ||
-                (!broadcast.equals(cmp.broadcast)))
-            return false;
-        if (maskLength != cmp.maskLength)
-            return false;
-        return true;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof InterfaceAddress)) return false;
+
+        InterfaceAddress that = (InterfaceAddress) o;
+
+        if (maskLength != that.maskLength) return false;
+        if (!address.equals(that.address)) return false;
+        if (broadcast != null ? !broadcast.equals(that.broadcast) : that.broadcast != null) return false;
+        return addressClass == that.addressClass;
     }
 
     /**
@@ -107,8 +121,13 @@ public class InterfaceAddress {
      *
      * @return a hash code value for this Interface address.
      */
+    @Override
     public int hashCode() {
-        return address.hashCode() + ((broadcast != null) ? broadcast.hashCode() : 0) + maskLength;
+        int result = address.hashCode();
+        result = 31 * result + (broadcast != null ? broadcast.hashCode() : 0);
+        result = 31 * result + (int) maskLength;
+        result = 31 * result + addressClass.hashCode();
+        return result;
     }
 
     /**
@@ -117,117 +136,127 @@ public class InterfaceAddress {
      *
      * @return a string representation of this Interface address.
      */
+    @Override
     public String toString() {
-        return address + "/" + maskLength + " [" + broadcast + "]";
+        return "InterfaceAddress{" +
+                "address=" + getAddress() +
+                ", broadcast=" + getBroadcast() +
+                ", maskLength=" + getMaskLength() +
+                ", addressClass=" + getAddressClass() +
+                '}';
     }
 
-    private enum NetClass {
-        CLASS_A,
-        CLASS_B,
-        CLASS_C,
-        MULTICAST,
-        IPV4,
-        IPV6;
+    /**
+     * Get the network prefix length to use.
+     * TODO Should be using some other method to determine the real subnet by querying the host somehow
+     *
+     * @return the network prefix length
+     */
+    private short getNetworkPrefixLength() {
+        byte[] byteAddress = address.getAddress();
 
+        // look at special networks and see if first bytes match
+        for (Map.Entry<byte[], String> specialNetworkEntry : NETWORKS.entrySet()) {
+            byte[] specialNetwork = specialNetworkEntry.getKey();
+            String networkInfo = specialNetworkEntry.getValue();
+            String[] networkInfoParts = networkInfo.split(":");
+            short networkMaskLength = Short.parseShort(networkInfoParts[0]);
+            short networkPrefixLength = Short.parseShort(networkInfoParts[1]);
+
+            boolean special = true;
+            for (int i = 0; i < specialNetwork.length; i++) {
+                byte networkPartOfByteAddress = (byte) ((byteAddress[i] & (byte) (((i * 8) < networkMaskLength) ? 0xFF : (0xFF00 >> networkMaskLength % 8))));
+                if (specialNetwork[i] != networkPartOfByteAddress) {
+                    special = false;
+                    break;
+                }
+            }
+            if (special) {
+                return networkPrefixLength;
+            }
+        }
+
+        return getMaskLength();
     }
 
-    private short getMaskLength(InetAddress inetAddress, NetClass addressClass) {
+    /**
+     * Get the network mask length to use based on its address class
+     *
+     * @return the mask length
+     */
+    private short getMaskLength() {
         switch (addressClass) {
             case CLASS_A:
-                return 8;
+                return 8; // 10.0.0.0/8
             case CLASS_B:
-                return 16;
+                return 12; // 172.16.0.0/12
             case CLASS_C:
-                return 24;
-            case MULTICAST:
-                byte[] address = inetAddress.getAddress();
-                if (address.length == 4) {
-                    return 9;
-                } else {
-                    return 10;
-                }
+                return 16; // 192.168.0.0/16
+            case CLASS_D:
+                return 24; // 224.0.0.0/24
+            case IPV6_MULTICAST:
             case IPV6:
-                return 128;
+                return 8;  // ff00::0000.0000.0000.0000.0000.0000.0000/8
             default:
-                return 0;
+                return 0;  // 0.0.0.0/0
         }
     }
 
-    private NetClass getAddressClass(InetAddress inetAddress) {
-        byte[] address = inetAddress.getAddress();
-        int firstOctet = (address[0] & 0xFF);
-        if (address.length > 4) {
+    /**
+     * Determines the address class.  Uses some questionable
+     * heuristics to guess the class based on properties of the given address.
+     *
+     * @return the guessed address class
+     */
+    private NetClass getAddressClass() {
+        byte[] byteAddress = address.getAddress();
+        int firstOctet = (byteAddress[0] & 0xFF);
+        int secondOctet = (byteAddress[1] & 0xFF);
+        int thirdOctet = (byteAddress[2] & 0xFF);
+
+        if (byteAddress.length > 4) {
             if (firstOctet == 255) {
-                return NetClass.MULTICAST;
+                return IPV6_MULTICAST;
             }
-            return NetClass.IPV6;
+            return IPV6;
         }
 
-        if (firstOctet <= 127) {
-            return NetClass.CLASS_A;
-        } else if (firstOctet <= 191) {
-            return NetClass.CLASS_B;
-        } else if (firstOctet <= 223) {
-            return NetClass.CLASS_C;
-        } else if (firstOctet <= 239) {
-            return NetClass.MULTICAST;
+        if (firstOctet == 10) {
+            return CLASS_A;
+        } else if (firstOctet == 172 && (secondOctet >= 16 && secondOctet < 32)) {
+            return CLASS_B;
+        } else if (firstOctet == 192 && secondOctet == 168) {
+            return CLASS_C;
+        } else if (firstOctet == 224 && secondOctet == 0 && thirdOctet == 0) {
+            return CLASS_D;
         } else {
-            return NetClass.IPV4;
+            return IPV4;
         }
     }
 
-    private InetAddress getBroadCastAddress(InetAddress inetAddress, NetClass addressClass) {
-        byte[] bytes = inetAddress.getAddress();
-        byte[] newBytes = new byte[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            if (addressClass == NetClass.IPV4 || addressClass == NetClass.IPV6) {
-                newBytes[i] = (byte) 255;
-                continue;
-            }
+    /**
+     * Get the broadcast address to use for a specified internet address based on the specified address class
+     *
+     * @return the broadcast address to use
+     */
+    private InetAddress getBroadcastAddress() {
+        if (addressClass == IPV6 || addressClass == IPV6_MULTICAST || address.isLoopbackAddress()) {
+            return null;
+        }
 
-            switch (i) {
-                case 0:
-                    if (addressClass == NetClass.MULTICAST && bytes.length == 4) {
-                        newBytes[i] = (byte) (bytes[i] | 0x07);
-                    } else {
-                        newBytes[i] = bytes[i];
-                    }
-                    break;
-                case 1:
-                    switch (addressClass) {
-                        case CLASS_A:
-                        case MULTICAST:
-                            newBytes[i] = (byte) 255;
-                            break;
-                        default:
-                            newBytes[i] = bytes[i];
-                    }
-                    break;
-                case 2:
-                    switch (addressClass) {
-                        case CLASS_A:
-                        case CLASS_B:
-                        case MULTICAST:
-                            newBytes[i] = (byte) 255;
-                            break;
-                        default:
-                            newBytes[i] = bytes[i];
-                    }
-                    break;
-                case 3:
-                    switch (addressClass) {
-                        case CLASS_A:
-                        case CLASS_B:
-                        case CLASS_C:
-                        case MULTICAST:
-                            newBytes[i] = (byte) 255;
-                            break;
-                        default:
-                            newBytes[i] = bytes[i];
-                    }
-                    break;
-                default:
-                    newBytes[i] = (byte) 255;
+        byte[] bytes = address.getAddress();
+        byte[] newBytes = new byte[bytes.length];
+
+        short networkPrefixLengthBytes = (byte) (networkPrefixLength / 8);
+        byte networkPrefixMask = (byte) (0x00FF >> (networkPrefixLength % 8));
+
+        for (int i = 0; i < bytes.length; i++) {
+            if (i < networkPrefixLengthBytes) {
+                newBytes[i] = bytes[i];
+            } else if (i == networkPrefixLengthBytes) {
+                newBytes[i] = (byte) (bytes[i] | networkPrefixMask);
+            } else {
+                newBytes[i] = (byte) 0xFF;
             }
         }
         try {

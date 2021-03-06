@@ -74,7 +74,7 @@ The following compatibility implementations are provided:
     + `Random`
   + `net` - various classes used by the networking services that are missing some methods in `1.5`
     + `InterfaceAddress`
-    + `MulticastSocket` - exists in 1.5 but does not track groups or close when socket closes
+    + `MulticastSocket` - exists in 1.5 but does not track groups or close when socket closes.  This is a subclass of `DatagramChannel` but the `DatagramChannel.open()` method cannot be called so getDatagramChannel() will always return null.  The assumption here is that a unicast socket can be achieved using `MulticastSocket` by specifying only one destination address/port and binding to only one local address/port. So this can be truly polyvalent allowing broadcast for IPV4 (no destination addresses), multicast (joining a group), or unicast (one destination, no group) - in theory ;).  Note that all IPV6 multicast addresses must begin with `0xFF00::/8` and IPV4 with `224.0.0.0/4`
     + `NetworkInterface` _delegate_
   + `service`
     + `ServiceLoader`
@@ -91,7 +91,7 @@ The following compatibility implementations are provided:
 + Continue to use `ByteBuffer` but whenever we do communications on the net convert to and from a `DatagramPacket`
 + Remove all `@Override` annotations from overridden implementations of interface methods
 + Use [Joda-Time](https://www.joda.org/joda-time/) instead of `java.time` classes
-  + Note that Joda-Time is only accurate to the millisecond whereas java.time is accurate to the nanosecond.  
+  + Note that Joda-Time is only accurate to the millisecond whereas java.time is accurate to the nanosecond.
     `EPICS` expects to be accurate to the nanosecond, and many tests verify this, so we've had to change tests
     to millisecond and will have to look for a more accurate library before this can be used in production.
 + in `DefaultBeaconServerDataProvider`:`99` and `ServerRPCService`:`367` - `synchroniser` usage not supported so always `findMonitorDeadlockedThreads()`
