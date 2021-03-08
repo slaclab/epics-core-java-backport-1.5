@@ -62,7 +62,7 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @return the address datagram came from
      * @throws IOException if there was a problem
      */
-    public InetSocketAddress receive(ByteBuffer byteBuffer) throws IOException {
+    public synchronized InetSocketAddress receive(ByteBuffer byteBuffer) throws IOException {
         int maxPacketLength = byteBuffer.limit();
         DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), maxPacketLength);
 
@@ -94,7 +94,7 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @param socketAddress the address to send to
      * @throws IOException if there is a problem sending
      */
-    public void send(ByteBuffer byteBuffer, InetSocketAddress socketAddress) throws IOException {
+    public synchronized void send(ByteBuffer byteBuffer, InetSocketAddress socketAddress) throws IOException {
         DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), byteBuffer.arrayOffset(), byteBuffer.limit(), socketAddress.getAddress(), socketAddress.getPort());
         send(datagramPacket);
 

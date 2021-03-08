@@ -74,17 +74,6 @@ public class BlockingUDPConnector implements Connector {
             if (broadcast)
                 multicastSocket.setBroadcast(true);
 
-            // TODO tune buffer sizes?! Win32 defaults are 8k, which is OK
-            //socket.socket().setReceiveBufferSize();
-            //socket.socket().setSendBufferSize();
-
-            // try already set to reuse in creation of MulticastSocket
-//            if (reuseSocket)
-//                multicastSocket.setReuseAddress(true);
-
-            // Already bound in creation of MulticastSocket
-//            socket.bind(bindAddress);
-
             // create transport
             return new BlockingUDPTransport(context, responseHandler, multicastSocket,
                     bindAddress, sendAddresses, transportRevision);

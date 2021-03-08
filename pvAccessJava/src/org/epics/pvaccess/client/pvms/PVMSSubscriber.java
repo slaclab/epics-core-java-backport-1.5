@@ -80,49 +80,6 @@ class PVMSSubscriber extends PVMSCodec implements DeserializableControl {
         socket.joinGroup(address);
     }
 
-    public void joinGroup(InetAddress address) throws IOException {
-        synchronized (joinedGroups) {
-            if (!joinedGroups.contains(address)) {
-                socket.joinGroup(address);
-                joinedGroups.add(address);
-            }
-        }
-    }
-
-    public void leaveGroup(InetAddress address) throws IOException {
-        synchronized (joinedGroups) {
-            if (joinedGroups.contains(address)) {
-                socket.leaveGroup(address);
-                joinedGroups.remove(address);
-            }
-        }
-    }
-
-	/*
-	protected synchronized void sendSubscribeControlMessage(String topicID, int expirationTimeSec) throws IOException
-	{
-		buffer.clear();
-
-		pmsSubscribeControlMessage(buffer, expirationTimeSec, topicID);
-
-		packet.setLength(buffer.position());
-
-		socket.send(packet);
-	}
-
-	public void subscribe(String topicId) throws IOException
-	{
-		// TODO * as all, some filtering?
-		// TODO periodic send
-
-		sendSubscribeControlMessage(topicId, 3);
-	}
-	*/
-
-    public void unsubscribe(String topicId) throws IOException {
-        // TODO
-    }
-
     public void ensureData(int size) {
         // TODO Auto-generated method stub
 

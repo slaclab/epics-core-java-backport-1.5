@@ -519,8 +519,7 @@ public class ServerContextImpl implements ServerContext, Context {
             if (localNIF != null) {
                 try {
                     InetAddress group = InetAddress.getByName("224.0.0.128");
-                    InetSocketAddress inetSocketAddress = new InetSocketAddress(group, broadcastPort);
-                    broadcastTransport.join(inetSocketAddress, localNIF);
+                    broadcastTransport.join(group, localNIF);
 
                     InetSocketAddress anyAddress = new InetSocketAddress(0);
                     // NOTE: localMulticastTransport is not started (no read is called on a socket)
@@ -530,7 +529,9 @@ public class ServerContextImpl implements ServerContext, Context {
                             anyAddress, PVAConstants.PVA_PROTOCOL_REVISION,
                             PVAConstants.PVA_DEFAULT_PRIORITY);
                     localMulticastTransport.setMulticastNIF(localNIF, true);
-                    localMulticastTransport.setSendAddresses(new InetSocketAddress[]{inetSocketAddress});
+                    localMulticastTransport.setSendAddresses(new InetSocketAddress[]{
+                            new InetSocketAddress(group, broadcastPort)
+                    });
 
                     logger.config("Local multicast enabled on " + group + ":" + broadcastPort + " using " + localNIF.getDisplayName() + ".");
                 } catch (Throwable th) {

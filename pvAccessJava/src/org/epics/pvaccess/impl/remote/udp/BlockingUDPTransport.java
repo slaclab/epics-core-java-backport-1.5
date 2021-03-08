@@ -349,7 +349,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 // prepare buffer
                 byteBuffer.flip();
 
-                //context.getLogger().finest("Sending " + buffer.limit() + " bytes to " + sendAddresses[i] + ".");
+                context.getLogger().finest("Sending " + byteBuffer.limit() + " bytes to " + sendAddresses[i] + ".");
 
                 this.channel.send(byteBuffer, sendAddresses[i]);
             } catch (NoRouteToHostException noRouteToHostException) {
@@ -394,13 +394,14 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         }
     }
 
-    public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
-        this.channel.joinGroup(group, nif.getNetworkInterface());
+    public void join(InetAddress group, NetworkInterface nif) throws IOException {
+        this.channel.setNetworkInterface(nif.getNetworkInterface());
+        this.channel.joinGroup(group);
     }
 
     // set NIF used to send packets
     public void setMulticastNIF(NetworkInterface nif, boolean loopback) throws IOException {
-        this.channel.setLoopbackMode(true);
+        this.channel.setLoopbackMode(loopback);
         this.channel.setNetworkInterface(nif.getNetworkInterface());
     }
 

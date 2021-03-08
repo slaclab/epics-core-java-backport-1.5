@@ -33,6 +33,7 @@ public class InterfaceAddress {
         put(new byte[]{(byte) 10}, "8:24");  // For all CLASS_A use 24
         put(new byte[]{(byte) 172, (byte) 16}, "12:24");  // For all CLASS_B use 24
         put(new byte[]{(byte) 192, (byte) 168}, "16:24");  // For all CLASS_C use 24
+        put(new byte[]{(byte) 169, (byte) 254}, "16:16");  // For all APIPA use 16
     }};
 
     public InterfaceAddress(InetAddress address) {
@@ -147,7 +148,10 @@ public class InterfaceAddress {
     }
 
     /**
-     * Get the network prefix length to use.
+     * Get the network prefix length to use.  This is supposed to be the true topology of the site networking
+     * With JDK 1.5 we don't know what that is so we make some guesses and allow properties to be set in the
+     * Environment to describe the actual picture.
+     * <p>
      * TODO Should be using some other method to determine the real subnet by querying the host somehow
      *
      * @return the network prefix length
@@ -180,7 +184,9 @@ public class InterfaceAddress {
     }
 
     /**
-     * Get the network mask length to use based on its address class
+     * Get the network mask length to use based on its address class.  This is the
+     * maximum amount the net mask could be.  Site network administrators will divide these
+     * up.  That value is the networkPrefixLength.
      *
      * @return the mask length
      */
@@ -193,7 +199,7 @@ public class InterfaceAddress {
             case CLASS_C:
                 return 16; // 192.168.0.0/16
             case CLASS_D:
-                return 24; // 224.0.0.0/24
+                return 4; // 224.0.0.0/4
             case IPV6_MULTICAST:
             case IPV6:
                 return 8;  // ff00::0000.0000.0000.0000.0000.0000.0000/8
@@ -223,11 +229,11 @@ public class InterfaceAddress {
 
         if (firstOctet == 10) {
             return CLASS_A;
-        } else if (firstOctet == 172 && (secondOctet >= 16 && secondOctet < 32)) {
+        } else if (firstOctet == 172 && (secondOctet & 0xF0) == 16) {
             return CLASS_B;
         } else if (firstOctet == 192 && secondOctet == 168) {
             return CLASS_C;
-        } else if (firstOctet == 224 && secondOctet == 0 && thirdOctet == 0) {
+        } else if ((firstOctet & 0xF0) == 224) {
             return CLASS_D;
         } else {
             return IPV4;
