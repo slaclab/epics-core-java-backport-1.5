@@ -75,7 +75,7 @@ public class MulticastSocket extends java.net.MulticastSocket {
         return new InetSocketAddress(datagramPacket.getAddress(), datagramPacket.getPort());
     }
 
-    public void send(ByteBuffer byteBuffer) throws IOException {
+    public synchronized void send(ByteBuffer byteBuffer) throws IOException {
         if (!isConnected()) {
             throw new IOException("Socket must be connected to send buffer");
         }

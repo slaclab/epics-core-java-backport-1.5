@@ -34,6 +34,10 @@ public class InterfaceAddress {
         put(new byte[]{(byte) 172, (byte) 16}, "12:24");  // For all CLASS_B use 24
         put(new byte[]{(byte) 192, (byte) 168}, "16:24");  // For all CLASS_C use 24
         put(new byte[]{(byte) 169, (byte) 254}, "16:16");  // For all APIPA use 16
+        put(new byte[]{(byte) 134, (byte) 79, (byte) 48}, "22:22");  // For stanford networks use 22:22
+        put(new byte[]{(byte) 134, (byte) 79, (byte) 151}, "24:24");  // For stanford networks use 24:24
+        put(new byte[]{(byte) 172, (byte) 19, (byte) 52}, "12:22");  // For stanford networks use 24:24
+        put(new byte[]{(byte) 172, (byte) 27, (byte) 0}, "12:16");  // For stanford networks use 24:24
     }};
 
     public InterfaceAddress(InetAddress address) {
@@ -246,7 +250,7 @@ public class InterfaceAddress {
      * @return the broadcast address to use
      */
     private InetAddress getBroadcastAddress() {
-        if (addressClass == IPV6 || addressClass == IPV6_MULTICAST || address.isLoopbackAddress()) {
+        if (addressClass == IPV6 || addressClass == IPV6_MULTICAST || address.getHostAddress().startsWith("169")) {
             return null;
         }
 

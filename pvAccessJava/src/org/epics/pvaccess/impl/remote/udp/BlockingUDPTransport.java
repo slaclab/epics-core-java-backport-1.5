@@ -394,9 +394,9 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         }
     }
 
-    public void join(InetAddress group, NetworkInterface nif) throws IOException {
-        this.channel.setNetworkInterface(nif.getNetworkInterface());
-        this.channel.joinGroup(group);
+    public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
+        this.context.getLogger().log(Level.FINER, "Joining multicast group " + group + " using " + nif.getDisplayName() + ".");
+        this.channel.joinGroup(group, nif.getNetworkInterface());
     }
 
     // set NIF used to send packets

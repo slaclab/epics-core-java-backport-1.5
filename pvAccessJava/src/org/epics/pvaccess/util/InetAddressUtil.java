@@ -98,8 +98,7 @@ public class InetAddressUtil {
 					List<InterfaceAddress> interfaceAddresses = net.getInterfaceAddresses();
 					if (interfaceAddresses != null)
 						for (InterfaceAddress addr : interfaceAddresses)
-							if (addr.getBroadcast() != null)
-							{
+							if (addr.getBroadcast() != null && !addr.getAddress().getHostAddress().startsWith("169")) {
 								InetSocketAddress isa = new InetSocketAddress(addr.getBroadcast(), port);
 								if (!list.contains(isa))
 									list.add(isa);

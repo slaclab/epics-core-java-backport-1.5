@@ -69,9 +69,9 @@ public class NetworkInterface {
 
     public boolean supportsMulticast() {
         // TODO Find a good way to determine whether multicast supported.
-        //  For the moment we return true for everything except loopback
+        //  For the moment we return true for everything
 
-        return !isLoopback();
+        return true;
     }
 
     public boolean isVirtual() {
@@ -91,7 +91,7 @@ public class NetworkInterface {
         //  except localhost where we will return 16384
 
         if (isLoopback()) {
-            return 16384;
+            return 4168;
         } else {
             return 1500;
         }
