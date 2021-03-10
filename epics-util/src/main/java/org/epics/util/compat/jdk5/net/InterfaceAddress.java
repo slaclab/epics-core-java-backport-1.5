@@ -250,7 +250,7 @@ public class InterfaceAddress {
      * @return the broadcast address to use
      */
     private InetAddress getBroadcastAddress() {
-        if (addressClass == IPV6 || addressClass == IPV6_MULTICAST || address.getHostAddress().startsWith("169")) {
+        if (addressClass == IPV6 || addressClass == IPV6_MULTICAST || address.isLoopbackAddress() || address.getHostAddress().startsWith("169")) {
             return null;
         }
 

@@ -49,13 +49,15 @@ public abstract class AbstractResponseHandler implements ResponseHandler {
      */
     public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
         if (debug) {
-            if (payloadBuffer.hasArray() && command != 0)
-                HexDump.hexDump("Message [" + command + ", v" + Integer.toHexString(version) + "] received from " + responseFrom, description,
-                        payloadBuffer.array(),
-                        payloadBuffer.position(),
-                        Math.min(payloadSize, payloadBuffer.limit() - payloadBuffer.position()));    // TODO can be segmented
-            else
-                System.out.println("Message [" + command + ", v" + Integer.toHexString(version) + "] received from " + responseFrom + ", payload size = " + payloadSize);
+            if (command != 0) {
+                if (payloadBuffer.hasArray())
+                    HexDump.hexDump("Message [" + command + ", v" + Integer.toHexString(version) + "] received from " + responseFrom, description,
+                            payloadBuffer.array(),
+                            payloadBuffer.position(),
+                            Math.min(payloadSize, payloadBuffer.limit() - payloadBuffer.position()));    // TODO can be segmented
+                else
+                    System.out.println("Message [" + command + ", v" + Integer.toHexString(version) + "] received from " + responseFrom + ", payload size = " + payloadSize);
+            }
         }
     }
 

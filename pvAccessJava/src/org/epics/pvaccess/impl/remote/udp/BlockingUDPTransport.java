@@ -349,8 +349,9 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 // prepare buffer
                 byteBuffer.flip();
 
-                context.getLogger().finest("Sending " + byteBuffer.limit() + " bytes to " + sendAddresses[i] + ".");
-
+                if (byteBuffer.limit() != 166) {    // Ignore Beacons
+                    context.getLogger().finest("Sending " + byteBuffer.limit() + " bytes to " + sendAddresses[i] + ".");
+                }
                 this.channel.send(byteBuffer, sendAddresses[i]);
             } catch (NoRouteToHostException noRouteToHostException) {
                 this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + this.sendAddresses[i] + ".", noRouteToHostException);
@@ -382,8 +383,12 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
      */
     public void send(ByteBuffer byteBuffer, InetSocketAddress address) {
         try {
-            // context.getLogger().finest("Sending " + buffer.limit() + " bytes to " + address + ".");
+            // prepare buffer
             byteBuffer.flip();
+
+            if (byteBuffer.limit() != 166) {    // Ignore Beacons
+                context.getLogger().finest("Sending " + byteBuffer.limit() + " bytes to " + address + ".");
+            }
             this.channel.send(byteBuffer, address);
         } catch (NoRouteToHostException noRouteToHostException) {
             this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + address + ".", noRouteToHostException);
@@ -395,7 +400,6 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
     }
 
     public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
-        this.context.getLogger().log(Level.FINER, "Joining multicast group " + group + " using " + nif.getDisplayName() + ".");
         this.channel.joinGroup(group, nif.getNetworkInterface());
     }
 
