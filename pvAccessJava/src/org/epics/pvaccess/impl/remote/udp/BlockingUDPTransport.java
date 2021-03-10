@@ -20,6 +20,7 @@ import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
 import org.epics.pvaccess.plugins.SecurityPlugin.SecuritySession;
 import org.epics.pvaccess.server.ServerContext;
+import org.epics.pvaccess.util.HexDump;
 import org.epics.pvaccess.util.InetAddressUtil;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
@@ -350,7 +351,12 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 byteBuffer.flip();
 
                 if (byteBuffer.limit() != 166) {    // Ignore Beacons
-                    context.getLogger().finest("Sending " + byteBuffer.limit() + " bytes to " + sendAddresses[i] + ".");
+                    byte version = byteBuffer.array()[1];
+                    byte command = byteBuffer.array()[3];
+                    HexDump.hexDump("Message [" + command + ", v" + version + "] sending to " + sendAddresses[i], "Message-" + command,
+                            byteBuffer.array(),
+                            byteBuffer.position(),
+                            byteBuffer.limit() - byteBuffer.position());
                 }
                 this.channel.send(byteBuffer, sendAddresses[i]);
             } catch (NoRouteToHostException noRouteToHostException) {
@@ -387,7 +393,12 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
             byteBuffer.flip();
 
             if (byteBuffer.limit() != 166) {    // Ignore Beacons
-                context.getLogger().finest("Sending " + byteBuffer.limit() + " bytes to " + address + ".");
+                byte version = byteBuffer.array()[1];
+                byte command = byteBuffer.array()[3];
+                HexDump.hexDump("Message [" + command + ", v" + version + "] sending to " + address, "Message-" + command,
+                        byteBuffer.array(),
+                        byteBuffer.position(),
+                        byteBuffer.limit() - byteBuffer.position());
             }
             this.channel.send(byteBuffer, address);
         } catch (NoRouteToHostException noRouteToHostException) {
@@ -399,7 +410,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         }
     }
 
-    public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
+    public void join(InetAddress group, NetworkInterface nif) throws IOException {
         this.channel.joinGroup(group, nif.getNetworkInterface());
     }
 

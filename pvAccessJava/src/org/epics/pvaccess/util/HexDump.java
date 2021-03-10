@@ -14,8 +14,11 @@
 
 package org.epics.pvaccess.util;
 
+import org.joda.time.DateTime;
+
 /**
  * Utility for dumping binary data.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
@@ -112,14 +115,13 @@ public class HexDump {
 				//additional whitespaces after four bytes
 				pad += (delta_bytes / 4);
 
-				for( int i = 0; i < pad; i++ )
-				{
-					chars.insert( 0, ' ' );
+				for (int i = 0; i < pad; i++) {
+					chars.insert(0, ' ');
 				}
 			}
 
-			out.append( chars );
-			System.out.println( out );
+		out.append(chars);
+		System.out.printf("%s %s%n", new DateTime().toString().substring(0, 23), out);
 	}
 
 	/**

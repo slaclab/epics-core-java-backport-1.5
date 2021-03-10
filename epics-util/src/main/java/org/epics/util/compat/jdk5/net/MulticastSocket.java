@@ -1,10 +1,8 @@
 package org.epics.util.compat.jdk5.net;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.net.NetworkInterface;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,6 +38,13 @@ public class MulticastSocket extends java.net.MulticastSocket {
     }
 
     public void joinGroup(InetAddress mcastaddr) throws IOException {
+        super.joinGroup(mcastaddr);
+        this.groups.add(mcastaddr);
+    }
+
+    public void joinGroup(InetAddress mcastaddr, NetworkInterface netIf) throws IOException {
+        super.setNetworkInterface(netIf);
+        super.setLoopbackMode(true);
         super.joinGroup(mcastaddr);
         this.groups.add(mcastaddr);
     }
