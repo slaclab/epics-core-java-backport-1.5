@@ -732,7 +732,6 @@ public abstract class AbstractCodec
         }
 
 //context.getLogger().finest("Sending " + bytesToSend + " of total " + limit + " bytes in the packet to " + socketAddress + ".");
-        System.out.println("Sending " + bytesToSend + " of total " + limit + " bytes in the packet to " + getLastReadBufferSocketAddress() + ".");
 
         int tries = 0;
         while (buffer.hasRemaining()) {

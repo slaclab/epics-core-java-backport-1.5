@@ -20,7 +20,6 @@ import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
 import org.epics.pvaccess.plugins.SecurityPlugin.SecuritySession;
 import org.epics.pvaccess.server.ServerContext;
-import org.epics.pvaccess.util.HexDump;
 import org.epics.pvaccess.util.InetAddressUtil;
 import org.epics.pvdata.pv.Field;
 import org.epics.pvdata.pv.FieldCreate;
@@ -347,17 +346,8 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                     continue;
 
             try {
-                // prepare buffer
+                // prepare then send buffer
                 byteBuffer.flip();
-
-                if (byteBuffer.limit() != 166) {    // Ignore Beacons
-                    byte version = byteBuffer.array()[1];
-                    byte command = byteBuffer.array()[3];
-                    HexDump.hexDump("Message [" + command + ", v" + version + "] sending to " + sendAddresses[i], "Message-" + command,
-                            byteBuffer.array(),
-                            byteBuffer.position(),
-                            byteBuffer.limit() - byteBuffer.position());
-                }
                 this.channel.send(byteBuffer, sendAddresses[i]);
             } catch (NoRouteToHostException noRouteToHostException) {
                 this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + this.sendAddresses[i] + ".", noRouteToHostException);
@@ -389,17 +379,8 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
      */
     public void send(ByteBuffer byteBuffer, InetSocketAddress address) {
         try {
-            // prepare buffer
+            // prepare then send buffer
             byteBuffer.flip();
-
-            if (byteBuffer.limit() != 166) {    // Ignore Beacons
-                byte version = byteBuffer.array()[1];
-                byte command = byteBuffer.array()[3];
-                HexDump.hexDump("Message [" + command + ", v" + version + "] sending to " + address, "Message-" + command,
-                        byteBuffer.array(),
-                        byteBuffer.position(),
-                        byteBuffer.limit() - byteBuffer.position());
-            }
             this.channel.send(byteBuffer, address);
         } catch (NoRouteToHostException noRouteToHostException) {
             this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + address + ".", noRouteToHostException);
