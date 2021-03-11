@@ -14,8 +14,6 @@
 
 package org.epics.pvaccess.util;
 
-import org.joda.time.DateTime;
-
 /**
  * Utility for dumping binary data.
  *
@@ -121,7 +119,7 @@ public class HexDump {
 			}
 
 		out.append(chars);
-		System.out.printf("%s %s%n", new DateTime().toString().substring(0, 23), out);
+		System.out.println(out);
 	}
 
 	/**

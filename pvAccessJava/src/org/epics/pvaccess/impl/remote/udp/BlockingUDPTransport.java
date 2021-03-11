@@ -410,14 +410,14 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         }
     }
 
-    public void join(InetAddress group, NetworkInterface nif) throws IOException {
-        this.channel.joinGroup(group, nif.getNetworkInterface());
+    public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
+        this.channel.joinGroup(group, nif);
     }
 
     // set NIF used to send packets
     public void setMulticastNIF(NetworkInterface nif, boolean loopback) throws IOException {
         this.channel.setLoopbackMode(loopback);
-        this.channel.setNetworkInterface(nif.getNetworkInterface());
+        this.channel.setNetworkInterface(nif);
     }
 
     /**

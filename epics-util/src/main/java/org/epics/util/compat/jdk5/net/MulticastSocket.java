@@ -1,22 +1,14 @@
 package org.epics.util.compat.jdk5.net;
 
 import java.io.IOException;
-import java.net.NetworkInterface;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
 public class MulticastSocket extends java.net.MulticastSocket {
-    /**
-     * UDP maximum send message size (for sending search requests).
-     * Calculation is specific to EPICS
-     * MAX_UDP: 1500 (max of ethernet and 802.{2,3} MTU) - 20/40(IPv4/IPv6) - 8(UDP) - some reserve (e.g. IPSEC)
-     * (the MTU of Ethernet is currently independent of its speed variant)
-     */
-    public static final int MAX_UDP_UNFRAGMENTED_SEND = 1440;
-
-    private final Set<InetAddress> groups = new HashSet<InetAddress>();
+    private NetworkInterface networkInterface;
+    private final Set<SocketAddress> groups = new HashSet<SocketAddress>();
     private InetSocketAddress inetSocketAddress;
 
     public InetSocketAddress getInetSocketAddress() {
@@ -37,23 +29,29 @@ public class MulticastSocket extends java.net.MulticastSocket {
         inetSocketAddress = new InetSocketAddress(address, port);
     }
 
+    /**
+     * DONT USE THIS:
+     * TODO implement a way that this can also work
+     *
+     * @param mcastaddr ??
+     * @throws IOException ??
+     */
     public void joinGroup(InetAddress mcastaddr) throws IOException {
         super.joinGroup(mcastaddr);
-        this.groups.add(mcastaddr);
     }
 
-    public void joinGroup(InetAddress mcastaddr, NetworkInterface netIf) throws IOException {
-        super.setNetworkInterface(netIf);
+    public void joinGroup(InetSocketAddress mcastaddr, NetworkInterface netIf) throws IOException {
+        setNetworkInterface(netIf);
         super.setLoopbackMode(true);
-        super.joinGroup(mcastaddr);
+        super.joinGroup(mcastaddr, netIf.getNetworkInterface());
         this.groups.add(mcastaddr);
     }
 
     @Override
     public void close() {
-        for (InetAddress group : this.groups) {
+        for (SocketAddress group : this.groups) {
             try {
-                super.leaveGroup(group);
+                super.leaveGroup(group, getNetworkInterface());
             } catch (IOException ignored) {
             }
         }
@@ -105,5 +103,20 @@ public class MulticastSocket extends java.net.MulticastSocket {
 
         // All done, set new position
         byteBuffer.position(byteBuffer.limit());
+    }
+
+    /**
+     * Only set network interface if it supports multicast
+     *
+     * @param netIf network interface that supports multicast
+     * @throws SocketException if does not support multicast
+     */
+    public void setNetworkInterface(NetworkInterface netIf) throws SocketException {
+        if (netIf.supportsMulticast() && (this.networkInterface == null || this.networkInterface.equals(netIf))) {
+            super.setNetworkInterface(netIf.getNetworkInterface());
+            this.networkInterface = netIf;
+            return;
+        }
+        throw new SocketException("Invalid argument.  The specified network interface does not support multicast or the socket is already assigned to a different network interface");
     }
 }

@@ -67,11 +67,27 @@ public class NetworkInterface {
         return false;
     }
 
+    /**
+     * Does this interface support multicast.
+     *
+     * @return true iff any of its addresses are site local but not wild card local,
+     * link local, loopback or a multicast address
+     * <p>
+     * from: https://stackoverflow.com/questions/18747134/getting-cant-assign-requested-address-java-net-socketexception-using-ehcache
+     */
     public boolean supportsMulticast() {
-        // TODO Find a good way to determine whether multicast supported.
-        //  For the moment we return true for everything
-
-        return true;
+        Enumeration<InetAddress> inetAddresses = this.getInetAddresses();
+        while (inetAddresses.hasMoreElements()) {
+            InetAddress inetAddress = inetAddresses.nextElement();
+            if (inetAddress.isSiteLocalAddress()
+                    && !inetAddress.isAnyLocalAddress()
+                    && !inetAddress.isLinkLocalAddress()
+                    && !inetAddress.isLoopbackAddress()
+                    && !inetAddress.isMulticastAddress()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isVirtual() {
@@ -126,12 +142,17 @@ public class NetworkInterface {
 
     @Override
     public boolean equals(Object o) {
-        return networkInterface.equals(o);
+        if (this == o) return true;
+        if (!(o instanceof NetworkInterface)) return false;
+
+        NetworkInterface that = (NetworkInterface) o;
+
+        return networkInterface != null ? networkInterface.equals(that.networkInterface) : that.networkInterface == null;
     }
 
     @Override
     public int hashCode() {
-        return networkInterface.hashCode();
+        return networkInterface != null ? networkInterface.hashCode() : 0;
     }
 
     @Override

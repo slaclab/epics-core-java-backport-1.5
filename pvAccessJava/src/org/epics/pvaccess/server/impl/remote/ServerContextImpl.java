@@ -515,12 +515,13 @@ public class ServerContextImpl implements ServerContext, Context {
 
             // TODO configurable local NIF, address
             // setup local broadcasting
-            NetworkInterface localNIF = InetAddressUtil.getLoopbackNIF();
-            if (localNIF != null) {
+            NetworkInterface multicastNIF = InetAddressUtil.getFirstMulticastNIF();
+            if (multicastNIF != null) {
                 try {
                     InetAddress group = InetAddress.getByName("224.0.0.128");
-                    broadcastTransport.join(group, localNIF);
-                    broadcastTransport.setMulticastNIF(localNIF, true);
+                    InetSocketAddress localMulticastAddress = new InetSocketAddress(group, broadcastPort);
+                    broadcastTransport.join(localMulticastAddress, multicastNIF);
+                    broadcastTransport.setMulticastNIF(multicastNIF, true);
 
                     InetSocketAddress anyAddress = new InetSocketAddress(0);
                     // NOTE: localMulticastTransport is not started (no read is called on a socket)
@@ -529,10 +530,10 @@ public class ServerContextImpl implements ServerContext, Context {
                             null, serverResponseHandler,
                             anyAddress, PVAConstants.PVA_PROTOCOL_REVISION,
                             PVAConstants.PVA_DEFAULT_PRIORITY);
-                    localMulticastTransport.setMulticastNIF(localNIF, true);
-                    localMulticastTransport.setSendAddresses(new InetSocketAddress[]{new InetSocketAddress(group, broadcastPort)});
+                    localMulticastTransport.setMulticastNIF(multicastNIF, true);
+                    localMulticastTransport.setSendAddresses(new InetSocketAddress[]{localMulticastAddress});
 
-                    logger.config("Local multicast enabled on " + group + ":" + broadcastPort + " using " + localNIF.getDisplayName() + ".");
+                    logger.config("Local multicast enabled on " + group + ":" + broadcastPort + " using " + multicastNIF.getDisplayName() + ".");
                 } catch (Throwable th) {
                     if (localMulticastTransport != null) {
                         try {
