@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class MulticastSocket extends java.net.MulticastSocket {
     private NetworkInterface networkInterface;
-    private final Set<SocketAddress> groups = new HashSet<SocketAddress>();
+    private final Set<InetSocketAddress> groups = new HashSet<InetSocketAddress>();
     private InetSocketAddress inetSocketAddress;
 
     public InetSocketAddress getInetSocketAddress() {
@@ -30,28 +30,33 @@ public class MulticastSocket extends java.net.MulticastSocket {
     }
 
     /**
-     * DONT USE THIS:
-     * TODO implement a way that this can also work
+     * Join multicast group.
      *
-     * @param mcastaddr ??
-     * @throws IOException ??
+     * @param mcastaddr the group to join.  No port is specified
+     * @throws IOException if the group cannot be joined
      */
+    @Override
     public void joinGroup(InetAddress mcastaddr) throws IOException {
         super.joinGroup(mcastaddr);
     }
 
     public void joinGroup(InetSocketAddress mcastaddr, NetworkInterface netIf) throws IOException {
-        setNetworkInterface(netIf);
-        super.setLoopbackMode(true);
+        // Uncomment3 lines to join the group in the recommended way for JDK 1.5
+        //        super.setLoopbackMode(true);
+        //        setNetworkInterface(netIf);
+        //        super.joinGroup(mcastaddr.getAddress());
+
+        // Next line to join group in more up-to-date way
         super.joinGroup(mcastaddr, netIf.getNetworkInterface());
+
         this.groups.add(mcastaddr);
     }
 
     @Override
     public void close() {
-        for (SocketAddress group : this.groups) {
+        for (InetSocketAddress group : this.groups) {
             try {
-                super.leaveGroup(group, getNetworkInterface());
+                super.leaveGroup(group.getAddress());
             } catch (IOException ignored) {
             }
         }

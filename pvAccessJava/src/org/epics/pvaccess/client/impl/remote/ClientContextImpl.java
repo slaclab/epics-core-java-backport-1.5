@@ -443,7 +443,7 @@ public class ClientContextImpl implements Context {
 			NetworkInterface multicastNIF = InetAddressUtil.getFirstMulticastNIF();
 			if (multicastNIF != null) {
 				try {
-					InetAddress group = InetAddress.getByName("224.0.0.128");
+					InetAddress group = InetAddressUtil.getMulticastGroup();
 					localBroadcastAddress = new InetSocketAddress(group, broadcastPort);
 					searchTransport.join(localBroadcastAddress, multicastNIF);
 

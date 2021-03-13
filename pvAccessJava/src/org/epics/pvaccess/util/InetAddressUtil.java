@@ -306,4 +306,14 @@ public class InetAddressUtil {
             System.arraycopy(appendList, 0, isar, al.size(), appendSize);
         return isar;
     }
+
+    /**
+     * Returns the IPV4 multicast group to use for EPICS
+     *
+     * @return multicast group[
+     * @throws UnknownHostException should never be thrown unless there is a mistake in the multicast address
+     */
+    public static InetAddress getMulticastGroup() throws UnknownHostException {
+        return InetAddress.getByName("224.0.0.128");
+    }
 }

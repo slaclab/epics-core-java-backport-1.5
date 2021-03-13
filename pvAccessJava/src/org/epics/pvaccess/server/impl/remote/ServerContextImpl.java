@@ -518,7 +518,7 @@ public class ServerContextImpl implements ServerContext, Context {
             NetworkInterface multicastNIF = InetAddressUtil.getFirstMulticastNIF();
             if (multicastNIF != null) {
                 try {
-                    InetAddress group = InetAddress.getByName("224.0.0.128");
+                    InetAddress group = InetAddressUtil.getMulticastGroup();
                     InetSocketAddress localMulticastAddress = new InetSocketAddress(group, broadcastPort);
                     broadcastTransport.join(localMulticastAddress, multicastNIF);
                     broadcastTransport.setMulticastNIF(multicastNIF, true);
