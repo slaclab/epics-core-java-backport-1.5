@@ -32,7 +32,11 @@ public class InetAddressUtil {
     private static final String HOSTNAME_KEY = "HOSTNAME";
     private static final String STRIP_HOSTNAME_KEY = "STRIP_HOSTNAME";
 
+    private static final String MULTICAST_GROUP_KEY = "EPICS_PVA_MULTICAST_GROUP";
+
     private static String hostName = null;
+
+    private static String MULTICAST_GROUP = null;
 
     public static synchronized String getHostName() {
         if (hostName == null)
@@ -313,7 +317,17 @@ public class InetAddressUtil {
      * @return multicast group[
      * @throws UnknownHostException should never be thrown unless there is a mistake in the multicast address
      */
-    public static InetAddress getMulticastGroup() throws UnknownHostException {
-        return InetAddress.getByName("224.0.0.128");
+    public static synchronized InetAddress getMulticastGroup() throws UnknownHostException {
+        // Initialise cache first time
+        if (MULTICAST_GROUP == null) {
+            MULTICAST_GROUP = System.getenv(MULTICAST_GROUP_KEY);
+
+            // If not defined then use default
+            if (MULTICAST_GROUP == null) {
+                MULTICAST_GROUP = "224.0.0.128";
+            }
+        }
+
+        return InetAddress.getByName(MULTICAST_GROUP);
     }
 }

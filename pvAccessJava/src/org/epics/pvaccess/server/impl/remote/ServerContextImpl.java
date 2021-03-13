@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.logging.Handler;
@@ -733,6 +734,10 @@ public class ServerContextImpl implements ServerContext, Context {
         out.println("AUTO_BEACON_ADDR_LIST : " + autoBeaconAddressList);
         out.println("BEACON_PERIOD : " + beaconPeriod);
         out.println("BROADCAST_PORT : " + broadcastPort);
+        try {
+            out.println("MULTICAST_GROUP : " + InetAddressUtil.getMulticastGroup().getHostAddress());
+        } catch (UnknownHostException ignored) {
+        }
         out.println("SERVER_PORT : " + serverPort);
         out.println("RCV_BUFFER_SIZE : " + receiveBufferSize);
         out.println("IGNORE_ADDR_LIST: " + ignoreAddressList);
