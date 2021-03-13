@@ -41,13 +41,13 @@ public class MulticastSocket extends java.net.MulticastSocket {
     }
 
     public void joinGroup(InetSocketAddress mcastaddr, NetworkInterface netIf) throws IOException {
-        // Uncomment3 lines to join the group in the recommended way for JDK 1.5
-        //        super.setLoopbackMode(true);
-        //        setNetworkInterface(netIf);
-        //        super.joinGroup(mcastaddr.getAddress());
+        // Uncomment 3 lines to join the group in the recommended way for JDK 1.5
+        super.setLoopbackMode(true);
+        setNetworkInterface(netIf);
+        super.joinGroup(mcastaddr.getAddress());
 
-        // Next line to join group in more up-to-date way
-        super.joinGroup(mcastaddr, netIf.getNetworkInterface());
+        // Uncomment next line to join group in more up-to-date way
+        //        super.joinGroup(mcastaddr, netIf.getNetworkInterface());
 
         this.groups.add(mcastaddr);
     }

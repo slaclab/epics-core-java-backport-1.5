@@ -33,6 +33,7 @@ public class InetAddressUtil {
     private static final String STRIP_HOSTNAME_KEY = "STRIP_HOSTNAME";
 
     private static final String MULTICAST_GROUP_KEY = "EPICS_PVA_MULTICAST_GROUP";
+    private static final String MULTICAST_GROUP_DEFAULT = "224.0.0.128";
 
     private static String hostName = null;
 
@@ -324,7 +325,7 @@ public class InetAddressUtil {
 
             // If not defined then use default
             if (MULTICAST_GROUP == null) {
-                MULTICAST_GROUP = "224.0.0.128";
+                MULTICAST_GROUP = MULTICAST_GROUP_DEFAULT;
             }
         }
 
