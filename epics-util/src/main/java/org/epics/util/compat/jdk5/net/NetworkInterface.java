@@ -71,7 +71,8 @@ public class NetworkInterface {
     }
 
     /**
-     * Does this interface support multicast.  Determine by trying to see if we can create a join a multicast group on this channel
+     * Does this interface support multicast.  Determine by trying to see if we can create and
+     * join a multicast group on this channel
      *
      * @return true iff it supports multicast
      */
