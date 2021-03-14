@@ -170,6 +170,7 @@ public class InetAddressUtil {
         try {
             nets = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException se) {
+            System.err.println(se.getMessage());
             return null;
         }
 
@@ -179,6 +180,7 @@ public class InetAddressUtil {
                 if (net.isUp() && net.supportsMulticast())
                     return net;
             } catch (Throwable th) {
+                System.err.println(th.getMessage());
                 // some methods throw exceptions, some return null (and they shouldn't)
                 // noop, skip that interface
             }
@@ -323,9 +325,9 @@ public class InetAddressUtil {
         if (MULTICAST_GROUP == null) {
             MULTICAST_GROUP = System.getenv(MULTICAST_GROUP_KEY);
 
-            // If not defined then use default
+            // If not defined then try a property
             if (MULTICAST_GROUP == null) {
-                MULTICAST_GROUP = MULTICAST_GROUP_DEFAULT;
+                MULTICAST_GROUP = System.getProperty(MULTICAST_GROUP_KEY, MULTICAST_GROUP_DEFAULT);
             }
         }
 

@@ -41,8 +41,9 @@ public class MulticastSocket extends java.net.MulticastSocket {
     }
 
     public void joinGroup(InetSocketAddress mcastaddr, NetworkInterface netIf) throws IOException {
-        // Uncomment 3 lines to join the group in the recommended way for JDK 1.5
         super.setLoopbackMode(true);
+
+        // Uncomment 2 lines to join the group in the recommended way for JDK 1.5
         setNetworkInterface(netIf);
         super.joinGroup(mcastaddr.getAddress());
 

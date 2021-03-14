@@ -1,11 +1,10 @@
 package org.epics.util.compat.jdk5.net;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 /**
  * Implementation of NetworkfInterface networking class
@@ -13,6 +12,10 @@ import java.util.List;
  * @author George McIntyre. 15-Feb-2021, SLAC
  */
 public class NetworkInterface {
+    private static final Map<NetworkInterface, Boolean> SUPPORTS_MULTICAST_CACHE = new HashMap<NetworkInterface, Boolean>();
+    private static final String MULTICAST_PROBE_GROUP = "237.0.0.1";
+    private static final int MULTICAST_PROBE_PORT = 9000;
+
     private final java.net.NetworkInterface networkInterface;
 
     public java.net.NetworkInterface getNetworkInterface() {
@@ -68,26 +71,28 @@ public class NetworkInterface {
     }
 
     /**
-     * Does this interface support multicast.
+     * Does this interface support multicast.  Determine by trying to see if we can create a join a multicast group on this channel
      *
-     * @return true iff any of its addresses are site local but not wild card local,
-     * link local, loopback or a multicast address
-     * <p>
-     * from: https://stackoverflow.com/questions/18747134/getting-cant-assign-requested-address-java-net-socketexception-using-ehcache
+     * @return true iff it supports multicast
      */
-    public boolean supportsMulticast() {
-        Enumeration<InetAddress> inetAddresses = this.getInetAddresses();
-        while (inetAddresses.hasMoreElements()) {
-            InetAddress inetAddress = inetAddresses.nextElement();
-            if (inetAddress.isSiteLocalAddress()
-                    && !inetAddress.isAnyLocalAddress()
-                    && !inetAddress.isLinkLocalAddress()
-                    && !inetAddress.isLoopbackAddress()
-                    && !inetAddress.isMulticastAddress()) {
-                return true;
-            }
+    public synchronized boolean supportsMulticast() {
+        Boolean supportsMulticastCachedValue = SUPPORTS_MULTICAST_CACHE.get(this);
+        if (supportsMulticastCachedValue != null) {
+            return supportsMulticastCachedValue;
         }
-        return false;
+
+        try {
+            InetAddress multicastGroup = InetAddress.getByName(MULTICAST_PROBE_GROUP);
+            MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PROBE_PORT);
+            multicastSocket.setNetworkInterface(getNetworkInterface());
+            multicastSocket.joinGroup(multicastGroup);
+            multicastSocket.leaveGroup(multicastGroup);
+            multicastSocket.close();
+            SUPPORTS_MULTICAST_CACHE.put(this, true);
+        } catch (IOException ignored) {
+            return false;
+        }
+        return true;
     }
 
     public boolean isVirtual() {
