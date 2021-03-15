@@ -13,8 +13,8 @@ import java.util.*;
  */
 public class NetworkInterface {
     private static final Map<NetworkInterface, Boolean> SUPPORTS_MULTICAST_CACHE = new HashMap<NetworkInterface, Boolean>();
-    private static final String MULTICAST_PROBE_GROUP = "237.0.0.1";
-    private static final int MULTICAST_PROBE_PORT = 9000;
+    private static final String MULTICAST_PROBE_GROUP = "237.42.42.42";
+    private static final int MULTICAST_PROBE_PORT = 9042;
 
     private final java.net.NetworkInterface networkInterface;
 
