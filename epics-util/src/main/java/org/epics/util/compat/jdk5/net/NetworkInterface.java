@@ -7,7 +7,7 @@ import java.net.SocketException;
 import java.util.*;
 
 /**
- * Implementation of NetworkfInterface networking class
+ * Implementation of NetworkInterface networking class
  *
  * @author George McIntyre. 15-Feb-2021, SLAC
  */
