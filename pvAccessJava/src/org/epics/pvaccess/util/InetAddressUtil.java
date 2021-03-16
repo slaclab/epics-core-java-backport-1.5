@@ -33,7 +33,15 @@ public class InetAddressUtil {
     private static final String STRIP_HOSTNAME_KEY = "STRIP_HOSTNAME";
 
     private static final String MULTICAST_GROUP_KEY = "EPICS_PVA_MULTICAST_GROUP";
-    private static final String MULTICAST_GROUP_DEFAULT = "224.0.0.128";
+    private static final String MULTICAST_GROUP_DEFAULT = "239.219.1.200";
+
+    private static final Set<NetworkInterface> MULTICAST_NIFS = new HashSet<NetworkInterface>();
+    private static boolean MULTICAST_NIFS_INITIALISED = false;
+
+    private static final Set<InetAddress> BROADCAST_LIST = new HashSet<InetAddress>(10);
+    private static boolean BROADCAST_LIST_INITIALISED = false;
+
+    private static InetSocketAddress[] BROADCAST_SOCKETS;
 
     private static String hostName = null;
 
@@ -81,39 +89,22 @@ public class InetAddressUtil {
      * @param port port to be added to get socket address.
      * @return array of broadcast addresses with given port.
      */
-    public static InetSocketAddress[] getBroadcastAddresses(int port) {
-        Enumeration<NetworkInterface> nets;
-        try {
-            nets = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException se) {
-            // fallback
-            return new InetSocketAddress[]{new InetSocketAddress("255.255.255.255", port)};
+    public static synchronized InetSocketAddress[] getBroadcastAddresses(int port) {
+        if (BROADCAST_SOCKETS != null) {
+            return BROADCAST_SOCKETS;
         }
 
-        ArrayList<InetSocketAddress> list = new ArrayList<InetSocketAddress>(10);
-
-        while (nets.hasMoreElements()) {
-            NetworkInterface net = nets.nextElement();
-            try {
-                if (net.isUp()) {
-                    List<InterfaceAddress> interfaceAddresses = net.getInterfaceAddresses();
-                    if (interfaceAddresses != null)
-                        for (InterfaceAddress addr : interfaceAddresses)
-                            if (addr.getBroadcast() != null && !addr.getAddress().getHostAddress().startsWith("169")) {
-                                InetSocketAddress isa = new InetSocketAddress(addr.getBroadcast(), port);
-                                if (!list.contains(isa))
-                                    list.add(isa);
-                            }
-                }
-            } catch (Throwable th) {
-                // some methods throw exceptions, some return null (and they shouldn't)
-                // noop, skip that interface
-            }
+        Set<InetAddress> broadcastList = getBroadcastAddresses();
+        ArrayList<InetSocketAddress> list = new ArrayList<InetSocketAddress>(broadcastList.size());
+        for (InetAddress broadcastAddress : broadcastList) {
+            InetSocketAddress isa = new InetSocketAddress(broadcastAddress, port);
+            if (!list.contains(isa))
+                list.add(isa);
         }
 
-        InetSocketAddress[] retVal = new InetSocketAddress[list.size()];
-        list.toArray(retVal);
-        return retVal;
+        BROADCAST_SOCKETS = new InetSocketAddress[list.size()];
+        list.toArray(BROADCAST_SOCKETS);
+        return BROADCAST_SOCKETS;
     }
 
     /**
@@ -121,21 +112,22 @@ public class InetAddressUtil {
      *
      * @return set of broadcast addresses.
      */
-    public static Set<InetAddress> getBroadcastAddresses() {
+    public static synchronized Set<InetAddress> getBroadcastAddresses() {
+        if (BROADCAST_LIST_INITIALISED) {
+            return BROADCAST_LIST;
+        }
 
-        Set<InetAddress> set = new HashSet<InetAddress>(10);
-
+        BROADCAST_LIST_INITIALISED = true;
         Enumeration<NetworkInterface> nets;
         try {
             nets = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException se) {
             // fallback
             try {
-                set.add(InetAddress.getByAddress(new byte[]{(byte) 255, (byte) 255, (byte) 255, (byte) 255}));
-            } catch (UnknownHostException e) {
-                // noop
+                BROADCAST_LIST.add(InetAddress.getByAddress(new byte[]{(byte) 255, (byte) 255, (byte) 255, (byte) 255}));
+            } catch (UnknownHostException ignored) {
             }
-            return set;
+            return BROADCAST_LIST;
         }
 
         while (nets.hasMoreElements()) {
@@ -146,8 +138,8 @@ public class InetAddressUtil {
                     if (interfaceAddresses != null)
                         for (InterfaceAddress addr : interfaceAddresses) {
                             InetAddress ba = addr.getBroadcast();
-                            if (ba != null)        // Set class takes care of duplicates
-                                set.add(ba);
+                            if (ba != null && !addr.getAddress().getHostAddress().startsWith("169"))        // Set class takes care of duplicates
+                                BROADCAST_LIST.add(ba);
                         }
                 }
             } catch (Throwable th) {
@@ -156,7 +148,7 @@ public class InetAddressUtil {
             }
         }
 
-        return set;
+        return BROADCAST_LIST;
     }
 
     /**
@@ -165,28 +157,32 @@ public class InetAddressUtil {
      * @return a multicast capable NIF, <code>null</code> if not found.
      */
     public static NetworkInterface getFirstMulticastNIF() {
-
-        Enumeration<NetworkInterface> nets;
-        try {
-            nets = NetworkInterface.getNetworkInterfaces();
-        } catch (SocketException se) {
-            System.err.println(se.getMessage());
+        Set<NetworkInterface> multicastNifs = getMulticastNIFs();
+        if (multicastNifs.isEmpty()) {
             return null;
+        } else {
+            return multicastNifs.iterator().next();
         }
+    }
 
-        while (nets.hasMoreElements()) {
-            NetworkInterface net = nets.nextElement();
+    public static synchronized Set<NetworkInterface> getMulticastNIFs() {
+        if (!MULTICAST_NIFS_INITIALISED) {
             try {
-                if (net.isUp() && net.supportsMulticast())
-                    return net;
-            } catch (Throwable th) {
-                System.err.println(th.getMessage());
-                // some methods throw exceptions, some return null (and they shouldn't)
-                // noop, skip that interface
+                Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+                while (nets.hasMoreElements()) {
+                    NetworkInterface net = nets.nextElement();
+                    try {
+                        if (net.isUp() && net.supportsMulticast())
+                            MULTICAST_NIFS.add(net);
+                    } catch (Throwable ignored) {
+                    }
+                }
+            } catch (SocketException ignored) {
             }
+            MULTICAST_NIFS_INITIALISED = true;
         }
 
-        return null;
+        return MULTICAST_NIFS;
     }
 
     /**

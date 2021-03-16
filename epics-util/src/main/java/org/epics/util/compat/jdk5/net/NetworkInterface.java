@@ -13,8 +13,8 @@ import java.util.*;
  */
 public class NetworkInterface {
     private static final Map<NetworkInterface, Boolean> SUPPORTS_MULTICAST_CACHE = new HashMap<NetworkInterface, Boolean>();
-    private static final String MULTICAST_PROBE_GROUP = "237.42.42.42";
-    private static final int MULTICAST_PROBE_PORT = 9042;
+    private static final String MULTICAST_PROBE_GROUP = "239.219.1.200";
+    private static final int MULTICAST_PROBE_PORT = 2000;
 
     private final java.net.NetworkInterface networkInterface;
 
@@ -82,10 +82,16 @@ public class NetworkInterface {
             return supportsMulticastCachedValue;
         }
 
+        if (isLoopback() || hasAutoIpAssignments()) {
+            return false;
+        }
+
         try {
             InetAddress multicastGroup = InetAddress.getByName(MULTICAST_PROBE_GROUP);
             MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PROBE_PORT);
+            multicastSocket.setLoopbackMode(true);
             multicastSocket.setNetworkInterface(getNetworkInterface());
+            multicastSocket.setTimeToLive(0);
             multicastSocket.joinGroup(multicastGroup);
             multicastSocket.leaveGroup(multicastGroup);
             multicastSocket.close();
@@ -94,6 +100,21 @@ public class NetworkInterface {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Has any IP addresses that are auto-assigned
+     *
+     * @return true if has auto-assigned addresses
+     */
+    private boolean hasAutoIpAssignments() {
+        List<InterfaceAddress> interfaceAddresses = getInterfaceAddresses();
+        for (InterfaceAddress interfaceAddress : interfaceAddresses) {
+            if (interfaceAddress.getAddress().getHostAddress().startsWith("169")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isVirtual() {
