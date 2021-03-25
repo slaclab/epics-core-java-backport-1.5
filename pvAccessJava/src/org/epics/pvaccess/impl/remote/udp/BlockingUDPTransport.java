@@ -168,9 +168,14 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         if (this.bindAddress != null)
             context.getLogger().finer("UDP connection to " + this.bindAddress + " closed.");
         //context.getReactor().unregisterAndClose(channel);
-        // TODO this just does not exit socket.receive()!!!!
-        // maybe try with setSoTimeout(int timeout)
-        this.channel.close();
+        try {
+            // TODO this just does not exit socket.receive()!!!!
+            // maybe try with setSoTimeout(int timeout)
+            this.channel.close();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /* (non-Javadoc)
@@ -220,6 +225,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 if (this.ignoredAddresses != null) {
                     boolean ignore = false;
 
+                    // we do not care about the port
                     final InetAddress fromAddressOnly = fromAddress.getAddress();
                     for (InetSocketAddress ignoredAddress : this.ignoredAddresses)
                         if (ignoredAddress.getAddress().equals(fromAddressOnly)) {
@@ -391,7 +397,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         }
     }
 
-    public void join(InetSocketAddress group, NetworkInterface nif) throws IOException {
+    public void join(InetAddress group, NetworkInterface nif) throws IOException {
         this.channel.joinGroup(group, nif);
     }
 

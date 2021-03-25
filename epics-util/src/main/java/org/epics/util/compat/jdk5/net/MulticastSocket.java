@@ -7,9 +7,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MulticastSocket extends java.net.MulticastSocket {
+    static {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+    }
+
     private NetworkInterface networkInterface;
-    private final Set<InetSocketAddress> groups = new HashSet<InetSocketAddress>();
+    private final Set<InetAddress> groups = new HashSet<InetAddress>();
     private InetSocketAddress inetSocketAddress;
+
+    public MulticastSocket() throws IOException {
+        super();
+    }
 
     public InetSocketAddress getInetSocketAddress() {
         return inetSocketAddress;
@@ -37,31 +45,48 @@ public class MulticastSocket extends java.net.MulticastSocket {
      */
     @Override
     public void joinGroup(InetAddress mcastaddr) throws IOException {
-        super.joinGroup(mcastaddr);
+        synchronized (this.groups) {
+            if (!this.groups.contains(mcastaddr)) {
+                super.joinGroup(mcastaddr);
+                this.groups.add(mcastaddr);
+            }
+        }
     }
 
-    public void joinGroup(InetSocketAddress mcastaddr, NetworkInterface netIf) throws IOException {
-        super.setLoopbackMode(true);
-
-        // Uncomment 2 lines to join the group in the recommended way for JDK 1.5
-        setNetworkInterface(netIf);
-        super.joinGroup(mcastaddr.getAddress());
-
-        // Uncomment next line to join group in more up-to-date way
-        //        super.joinGroup(mcastaddr, netIf.getNetworkInterface());
-
-        this.groups.add(mcastaddr);
+    /**
+     * Join multicast group and set interface to first address on specified nif
+     *
+     * @param mcastaddr group
+     * @param nif       network interface
+     * @throws IOException if there is a problem
+     */
+    public void joinGroup(InetAddress mcastaddr, NetworkInterface nif) throws IOException {
+        setInterface(nif.getInetAddresses().nextElement());
+        joinGroup(mcastaddr);
     }
 
+    /**
+     * Close the socket and leave any groups that may have been joined
+     */
     @Override
     public void close() {
-        for (InetSocketAddress group : this.groups) {
+        for (InetAddress group : this.groups) {
             try {
-                super.leaveGroup(group.getAddress());
+                super.leaveGroup(group);
             } catch (IOException ignored) {
             }
         }
         super.close();
+    }
+
+    @Override
+    public void leaveGroup(InetAddress mcastaddr) throws IOException {
+        synchronized (this.groups) {
+            if (this.groups.contains(mcastaddr)) {
+                super.leaveGroup(mcastaddr);
+                this.groups.add(mcastaddr);
+            }
+        }
     }
 
     /**

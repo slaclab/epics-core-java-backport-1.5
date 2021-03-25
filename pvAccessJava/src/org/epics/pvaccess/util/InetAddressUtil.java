@@ -38,6 +38,9 @@ public class InetAddressUtil {
     private static final Set<NetworkInterface> MULTICAST_NIFS = new HashSet<NetworkInterface>();
     private static boolean MULTICAST_NIFS_INITIALISED = false;
 
+    private static final Set<NetworkInterface> LOOPBACK_NIFS = new HashSet<NetworkInterface>();
+    private static boolean LOOPBACK_NIFS_INITIALISED = false;
+
     private static final Set<InetAddress> BROADCAST_LIST = new HashSet<InetAddress>(10);
     private static boolean BROADCAST_LIST_INITIALISED = false;
 
@@ -172,22 +175,52 @@ public class InetAddressUtil {
      */
     public static synchronized Set<NetworkInterface> getMulticastNIFs() {
         if (!MULTICAST_NIFS_INITIALISED) {
-            try {
-                Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-                while (nets.hasMoreElements()) {
-                    NetworkInterface net = nets.nextElement();
-                    try {
-                        if (net.isUp() && net.supportsMulticast())
-                            MULTICAST_NIFS.add(net);
-                    } catch (Throwable ignored) {
-                    }
-                }
-            } catch (SocketException ignored) {
+            for (NetworkInterface net : getLoopbackNIFs()) {
+                if (net.supportsMulticast())
+                    MULTICAST_NIFS.add(net);
             }
             MULTICAST_NIFS_INITIALISED = true;
         }
 
         return MULTICAST_NIFS;
+    }
+
+    /**
+     * Get a loopback NIF.
+     *
+     * @return a loopback NIF, <code>null</code> if not found.
+     */
+    public static NetworkInterface getLoopbackNIF() {
+        Set<NetworkInterface> loopbackNIFs = getLoopbackNIFs();
+        if (loopbackNIFs.isEmpty()) {
+            return null;
+        } else {
+            return loopbackNIFs.iterator().next();
+        }
+    }
+
+    /**
+     * Get a loopback NIF.
+     *
+     * @return all loopback NIFs.
+     */
+    public static synchronized Set<NetworkInterface> getLoopbackNIFs() {
+        if (!LOOPBACK_NIFS_INITIALISED) {
+            try {
+                Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+                while (nets.hasMoreElements()) {
+                    NetworkInterface net = nets.nextElement();
+                    try {
+                        if (net.isUp() && net.isLoopback())
+                            LOOPBACK_NIFS.add(net);
+                    } catch (Throwable ignored) {
+                    }
+                }
+            } catch (SocketException ignored) {
+            }
+            LOOPBACK_NIFS_INITIALISED = true;
+        }
+        return LOOPBACK_NIFS;
     }
 
     /**

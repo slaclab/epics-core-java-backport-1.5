@@ -516,13 +516,11 @@ public class ServerContextImpl implements ServerContext, Context {
 
             // TODO configurable local NIF, address
             // setup local broadcasting
-            NetworkInterface multicastNIF = InetAddressUtil.getFirstMulticastNIF();
-            if (multicastNIF != null) {
+            NetworkInterface localNIF = InetAddressUtil.getLoopbackNIF();
+            if (localNIF != null) {
                 try {
                     InetAddress group = InetAddressUtil.getMulticastGroup();
-                    InetSocketAddress localMulticastAddress = new InetSocketAddress(group, broadcastPort);
-                    broadcastTransport.join(localMulticastAddress, multicastNIF);
-                    broadcastTransport.setMulticastNIF(multicastNIF, true);
+                    broadcastTransport.join(group, localNIF);
 
                     InetSocketAddress anyAddress = new InetSocketAddress(0);
                     // NOTE: localMulticastTransport is not started (no read is called on a socket)
@@ -531,10 +529,12 @@ public class ServerContextImpl implements ServerContext, Context {
                             null, serverResponseHandler,
                             anyAddress, PVAConstants.PVA_PROTOCOL_REVISION,
                             PVAConstants.PVA_DEFAULT_PRIORITY);
-                    localMulticastTransport.setMulticastNIF(multicastNIF, true);
-                    localMulticastTransport.setSendAddresses(new InetSocketAddress[]{localMulticastAddress});
+                    localMulticastTransport.setMulticastNIF(localNIF, true);
+                    localMulticastTransport.setSendAddresses(new InetSocketAddress[]{
+                            new InetSocketAddress(group, broadcastPort)
+                    });
 
-                    logger.config("Local multicast enabled on " + group + ":" + broadcastPort + " using " + multicastNIF.getDisplayName() + ".");
+                    logger.config("Local multicast enabled on " + group + ":" + broadcastPort + " using " + localNIF.getDisplayName() + ".");
                 } catch (Throwable th) {
                     if (localMulticastTransport != null) {
                         try {
