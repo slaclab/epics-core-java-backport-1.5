@@ -28,30 +28,25 @@ public class MulticastTest {
                 System.out.println("Testing Multicast for Network Interface: " + networkInterface.getDisplayName());
                 System.out.println("=======================================================");
 
-                // Not set up the test parameters
+                // Now set up the test parameters
                 byte[] message = {'H', 'e', 'l', 'l', 'o'};
                 NetworkInterface multicastNIF = networkInterface.getNetworkInterface();
                 MulticastSocket multicastSocket = new MulticastSocket(2000);
+                InetAddress multicastInterfaceAddress = multicastNIF.getInetAddresses().nextElement();
                 InetAddress multicastGroup = InetAddressUtil.getMulticastGroup();
 
-                // Set loopback mode so that the messages loop back to the same socket
-                // so they can be read using the same socket object
-                multicastSocket.setLoopbackMode(true);
-                if (!multicastSocket.getLoopbackMode()) {
-                    System.err.println("Warning Loopback mode not supported");
-                }
-
-                System.out.print("Joining Multicast Group: " + multicastGroup + " ... ");
-                multicastSocket.setNetworkInterface(multicastNIF);
-                multicastSocket.setTimeToLive(0);
+                System.out.print("Joining Multicast Group: " + multicastGroup + " on network interface: " + multicastInterfaceAddress + " ... ");
+                multicastSocket.setInterface(multicastInterfaceAddress);
                 multicastSocket.joinGroup(multicastGroup);
                 System.out.println("Done");
 
                 // Send message
                 String stringToSend = new String(message, "ASCII");
                 System.out.print("Sending Message to Multicast Group: " + stringToSend + " ... ");
+                MulticastSocket socket = new MulticastSocket();
+                socket.setNetworkInterface(multicastNIF);
                 DatagramPacket datagramPacketToSend = new DatagramPacket(message, message.length, multicastGroup, 2000);
-                multicastSocket.send(datagramPacketToSend);
+                socket.send(datagramPacketToSend);
                 System.out.println("Done");
 
                 // get response

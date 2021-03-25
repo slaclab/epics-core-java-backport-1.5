@@ -165,6 +165,11 @@ public class InetAddressUtil {
         }
     }
 
+    /**
+     * For the purposes of EPICS we only want to use the loopback NIFs for multicast
+     *
+     * @return all loopback NIFs that are capable of multicast
+     */
     public static synchronized Set<NetworkInterface> getMulticastNIFs() {
         if (!MULTICAST_NIFS_INITIALISED) {
             try {

@@ -82,16 +82,10 @@ public class NetworkInterface {
             return supportsMulticastCachedValue;
         }
 
-        if (isLoopback() || hasAutoIpAssignments()) {
-            return false;
-        }
-
         try {
             InetAddress multicastGroup = InetAddress.getByName(MULTICAST_PROBE_GROUP);
             MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PROBE_PORT);
-            multicastSocket.setLoopbackMode(true);
-            multicastSocket.setNetworkInterface(getNetworkInterface());
-            multicastSocket.setTimeToLive(0);
+            multicastSocket.setInterface(getNetworkInterface().getInetAddresses().nextElement());
             multicastSocket.joinGroup(multicastGroup);
             multicastSocket.leaveGroup(multicastGroup);
             multicastSocket.close();
