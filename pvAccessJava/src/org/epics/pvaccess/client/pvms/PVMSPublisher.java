@@ -9,8 +9,8 @@ import org.epics.pvdata.pv.SerializableControl;
 import org.epics.util.compat.jdk5.net.MulticastSocket;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,6 +18,7 @@ import java.util.TimerTask;
 class PVMSPublisher extends PVMSCodec implements SerializableControl {
 
     private final MulticastSocket socket;
+    private final DatagramPacket packet;
 
     private final ByteBuffer buffer = ByteBuffer.allocate(PVAConstants.MAX_UDP_PACKET);
 
@@ -35,8 +36,8 @@ class PVMSPublisher extends PVMSCodec implements SerializableControl {
     }
 
     public PVMSPublisher(InetAddress sendAddress, int port, Timer timer, final int keepAlivePeriod) throws IOException {
-        socket = new MulticastSocket(new InetSocketAddress(0));
-        socket.connect(sendAddress, port);
+        socket = new MulticastSocket();
+        packet = new DatagramPacket(buffer.array(), 0, sendAddress, port);
 
         // optional feature; can not be used or manager by external code
         // by calling sendKeepAliveControlMessage() periodically
@@ -80,7 +81,9 @@ class PVMSPublisher extends PVMSCodec implements SerializableControl {
 
         pmsShutdownControlMessage(buffer);
 
-        socket.send(buffer);
+        packet.setLength(buffer.position());
+
+        socket.send(packet);
     }
 
     protected synchronized void sendKeepAliveControlMessage(int expirationTimeSec) throws IOException {
@@ -88,15 +91,9 @@ class PVMSPublisher extends PVMSCodec implements SerializableControl {
 
         pmsKeepAliveControlMessage(buffer, expirationTimeSec);
 
-        socket.send(buffer);
-    }
+        packet.setLength(buffer.position());
 
-    protected synchronized void sendData(String topicId, String[] tags, PVField data) throws IOException {
-        buffer.clear();
-
-        pmsDataMessage(buffer, topicId, tags, data);
-
-        socket.send(buffer);
+        socket.send(packet);
     }
 
     private void pmsDataMessage(ByteBuffer buffer, String topicId, String[] tags, PVField data) {
@@ -123,6 +120,16 @@ class PVMSPublisher extends PVMSCodec implements SerializableControl {
             this.cachedSerialize(data.getField(), buffer);
             data.serialize(buffer, this);
         }
+    }
+
+    protected synchronized void sendData(String topicId, String[] tags, PVField data) throws IOException {
+        buffer.clear();
+
+        pmsDataMessage(buffer, topicId, tags, data);
+
+        packet.setLength(buffer.position());
+
+        socket.send(packet);
     }
 
     // TODO avoid auto-unboxing !!!

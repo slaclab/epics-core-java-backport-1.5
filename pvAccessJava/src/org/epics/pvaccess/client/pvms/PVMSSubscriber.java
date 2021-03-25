@@ -10,6 +10,7 @@ import org.epics.pvdata.pv.PVField;
 import org.epics.util.compat.jdk5.net.MulticastSocket;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -19,6 +20,7 @@ class PVMSSubscriber extends PVMSCodec implements DeserializableControl {
     private static PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
 
     private final MulticastSocket socket;
+    private final DatagramPacket packet;
 
     private final ByteBuffer buffer = ByteBuffer.allocate(PVAConstants.MAX_UDP_PACKET);
 
@@ -78,6 +80,7 @@ class PVMSSubscriber extends PVMSCodec implements DeserializableControl {
     public PVMSSubscriber(InetAddress address, int port) throws IOException {
         socket = new MulticastSocket(port);
         socket.joinGroup(address);
+        packet = new DatagramPacket(buffer.array(), buffer.capacity());
     }
 
     public void ensureData(int size) {
@@ -111,7 +114,11 @@ class PVMSSubscriber extends PVMSCodec implements DeserializableControl {
 
     public void receive(PVMSMessage message, String[] filterTags) throws IOException {
         while (true) {
-            InetSocketAddress socketAddress = socket.receive(buffer);
+            socket.receive(packet);
+            InetSocketAddress socketAddress = (InetSocketAddress) packet.getSocketAddress();
+
+            buffer.clear();
+            buffer.limit(packet.getLength());
 
             int t = buffer.getInt();
 
