@@ -17,6 +17,10 @@ import static org.epics.util.compat.jdk5.net.NetClass.*;
  * @see java.net.NetworkInterface
  */
 public class InterfaceAddress {
+    static {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+    }
+
     private final InetAddress address;
     private final InetAddress broadcast;
     private final short maskLength;

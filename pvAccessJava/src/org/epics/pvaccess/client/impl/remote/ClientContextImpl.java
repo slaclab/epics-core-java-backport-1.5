@@ -439,18 +439,18 @@ public class ClientContextImpl implements Context {
             // TODO do not use searchBroadcast in future
             // TODO configurable local NIF, address
             // setup local broadcasting
-            NetworkInterface multicastNIF = InetAddressUtil.getFirstMulticastNIF();
-            if (multicastNIF != null) {
+            NetworkInterface localNIF = InetAddressUtil.getFirstMulticastNIF();
+            if (localNIF != null) {
                 try {
                     InetAddress group = InetAddressUtil.getMulticastGroup();
                     localBroadcastAddress = new InetSocketAddress(group, broadcastPort);
-                    searchTransport.join(localBroadcastAddress, multicastNIF);
+                    searchTransport.join(group, localNIF);
 
                     // NOTE: this disables usage of multicast addresses in EPICS_PVA_ADDR_LIST
-                    searchTransport.setMulticastNIF(multicastNIF, true);
+                    searchTransport.setMulticastNIF(localNIF, true);
 
                     logger.config("Local multicast enabled on " + localBroadcastAddress + ":" + broadcastPort
-                            + " using " + multicastNIF.getDisplayName() + ".");
+                            + " using " + localNIF.getDisplayName() + ".");
                 } catch (Exception th) {
                     logger.log(Level.CONFIG, "Failed to initialize local multicast, functionality disabled.", th);
                 }

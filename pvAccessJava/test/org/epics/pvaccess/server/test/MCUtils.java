@@ -11,7 +11,6 @@ import java.util.Enumeration;
 public class MCUtils {
     public static final String MC_ADDRESS = "239.219.1.200";
     public static final short MC_PORT = 6789;
-    public static final InetSocketAddress MC_GROUP = new InetSocketAddress(MC_ADDRESS, MC_PORT);
 
     public static final byte[] TEST_PACKET_DATA = {0, 1, 2, 3, 4, 5, 6, 8};
 
@@ -53,7 +52,7 @@ public class MCUtils {
         System.out.println("MC Group:   " + getMCAddress() + ":" + MCUtils.MC_PORT);
         System.out.println("Network IF: " + netIfAddr);
         if (netIfAddr instanceof Inet6Address) {
-            System.out.println("NOTE: IPv6 network inteface used");
+            System.out.println("NOTE: IPv6 network interface used");
         }
         return netIf;
     }

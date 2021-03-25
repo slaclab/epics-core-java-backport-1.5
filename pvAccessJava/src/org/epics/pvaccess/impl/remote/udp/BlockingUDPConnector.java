@@ -66,22 +66,22 @@ public class BlockingUDPConnector implements Connector {
             throws ConnectionException {
         context.getLogger().finer("Creating datagram socket to " + bindAddress + ".");
 
-        MulticastSocket multicastSocket = null;
+        MulticastSocket socket = null;
         try {
-            multicastSocket = new MulticastSocket(bindAddress);
+            socket = new MulticastSocket(bindAddress);
 
             // set broadcast mode
             if (broadcast)
-                multicastSocket.setBroadcast(true);
+                socket.setBroadcast(true);
 
             // create transport
-            return new BlockingUDPTransport(context, responseHandler, multicastSocket,
+            return new BlockingUDPTransport(context, responseHandler, socket,
                     bindAddress, sendAddresses, transportRevision);
         } catch (Throwable th) {
             // close socket, if open
             try {
-                if (multicastSocket != null)
-                    multicastSocket.close();
+                if (socket != null)
+                    socket.close();
             } catch (Throwable t) { /* noop */ }
 
             throw new ConnectionException("Failed to bind to '" + bindAddress + "'.", bindAddress, ProtocolType.udp.name(), th);

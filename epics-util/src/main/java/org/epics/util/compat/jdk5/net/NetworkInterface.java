@@ -12,6 +12,10 @@ import java.util.*;
  * @author George McIntyre. 15-Feb-2021, SLAC
  */
 public class NetworkInterface {
+    static {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+    }
+
     private static final Map<NetworkInterface, Boolean> SUPPORTS_MULTICAST_CACHE = new HashMap<NetworkInterface, Boolean>();
     private static final String MULTICAST_PROBE_GROUP = "239.219.1.200";
     private static final int MULTICAST_PROBE_PORT = 2000;

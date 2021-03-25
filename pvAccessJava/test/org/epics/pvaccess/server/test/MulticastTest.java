@@ -12,9 +12,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Simple test to check whether multicast is supported on the host
+ * Simple test to check whether multicast is supported on the host on its local interfaces
  */
 public class MulticastTest {
+    static {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+    }
+
+    private static int PORT = 6789;
+
     public static void main(String[] args) {
         Set<org.epics.util.compat.jdk5.net.NetworkInterface> nifs = InetAddressUtil.getMulticastNIFs();
 
@@ -36,46 +42,46 @@ public class MulticastTest {
 
                     // Now set up the test parameters
                     byte[] message = {'H', 'e', 'l', 'l', 'o'};
-                    MulticastSocket multicastSocket = new MulticastSocket(2000);
+                    MulticastSocket receiveSocket = new MulticastSocket(PORT);
+                    receiveSocket.setInterface(multicastInterfaceAddress);
+                    MulticastSocket sendSocket = new MulticastSocket();
+                    sendSocket.setNetworkInterface(multicastNIF);
                     InetAddress multicastGroup = InetAddressUtil.getMulticastGroup();
 
                     System.out.print("Joining Multicast Group: " + multicastGroup + " ... ");
-                    multicastSocket.setInterface(multicastInterfaceAddress);
-                    multicastSocket.joinGroup(multicastGroup);
+                    receiveSocket.joinGroup(multicastGroup);
                     System.out.println("Done");
 
                     // Send message
                     String stringToSend = new String(message, "ASCII");
                     System.out.print("Sending Message to Multicast Group: " + stringToSend + " ... ");
-                    MulticastSocket socket = new MulticastSocket();
-                    socket.setNetworkInterface(multicastNIF);
-                    DatagramPacket datagramPacketToSend = new DatagramPacket(message, message.length, multicastGroup, 2000);
-                    socket.send(datagramPacketToSend);
+                    DatagramPacket sentPacket = new DatagramPacket(message, message.length, multicastGroup, PORT);
+                    sendSocket.send(sentPacket);
                     System.out.println("Done");
 
                     // get response
                     System.out.print("Receiving Message from Multicast Group: " + multicastGroup + " ... ");
                     byte[] buffer = new byte[message.length];
-                    DatagramPacket datagramPacketToReceive = new DatagramPacket(buffer, buffer.length);
-                    multicastSocket.setSoTimeout(3000); // Wait up to 3 seconds
+                    DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+                    receiveSocket.setSoTimeout(3000); // Wait up to 3 seconds
                     try {
-                        multicastSocket.receive(datagramPacketToReceive);
+                        receiveSocket.receive(receivedPacket);
                     } catch (IOException e) {
                         System.err.println("Timeout waiting for data: " + e.getMessage());
-                        datagramPacketToReceive.setLength(0);
+                        receivedPacket.setLength(0);
                     }
 
                     String receivedString = new String(buffer, "ASCII");
-                    if (datagramPacketToReceive.getLength() > 0) {
+                    if (receivedPacket.getLength() > 0) {
                         System.out.println("\"" + receivedString + "\" Received");
                     } else {
                         System.out.println("Nothing Received");
                     }
 
                     // leave the group...
-                    multicastSocket.leaveGroup(multicastGroup);
-                    socket.close();
-                    multicastSocket.close();
+                    receiveSocket.leaveGroup(multicastGroup);
+                    receiveSocket.close();
+                    sendSocket.close();
 
                     if (stringToSend.equals(receivedString)) {
                         System.out.println("Multicast Test successful");

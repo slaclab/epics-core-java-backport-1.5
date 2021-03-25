@@ -18,7 +18,6 @@ public class MCSend {
 
         MulticastSocket socket = new MulticastSocket();
         socket.setNetworkInterface(MCUtils.getMCNetworkInterface());
-        //socket.setTimeToLive(1);
 
         while (true) {
             DatagramPacket packet = new DatagramPacket(
