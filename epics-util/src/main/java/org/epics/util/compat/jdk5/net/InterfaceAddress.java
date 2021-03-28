@@ -248,6 +248,10 @@ public class InterfaceAddress {
         }
     }
 
+    public boolean isIPV4Address() {
+        return !(getAddressClass().equals(IPV6) || getAddressClass().equals(IPV6_MULTICAST));
+    }
+
     /**
      * Get the broadcast address to use for a specified internet address based on the specified address class
      *

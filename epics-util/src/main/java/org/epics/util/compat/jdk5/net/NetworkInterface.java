@@ -26,6 +26,17 @@ public class NetworkInterface {
         return networkInterface;
     }
 
+    public InetAddress getFirstIPV4Address() {
+        List<InetAddress> addresses = Collections.list(getInetAddresses());
+        for (InetAddress address : addresses) {
+            InterfaceAddress interfaceAddress = new InterfaceAddress(address);
+            if (interfaceAddress.isIPV4Address()) {
+                return address;
+            }
+        }
+        return null;
+    }
+
     public NetworkInterface(java.net.NetworkInterface networkInterface) {
         this.networkInterface = networkInterface;
     }
@@ -89,7 +100,7 @@ public class NetworkInterface {
         try {
             InetAddress multicastGroup = InetAddress.getByName(MULTICAST_PROBE_GROUP);
             MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PROBE_PORT);
-            multicastSocket.setInterface(getNetworkInterface().getInetAddresses().nextElement());
+            multicastSocket.setInterface(getFirstIPV4Address());
             multicastSocket.joinGroup(multicastGroup);
             multicastSocket.leaveGroup(multicastGroup);
             multicastSocket.close();

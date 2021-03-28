@@ -61,7 +61,7 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @throws IOException if there is a problem
      */
     public void joinGroup(InetAddress mcastaddr, NetworkInterface nif) throws IOException {
-        setInterface(nif.getInetAddresses().nextElement());
+        setInterface(nif.getFirstIPV4Address());
         joinGroup(mcastaddr);
     }
 
@@ -148,6 +148,7 @@ public class MulticastSocket extends java.net.MulticastSocket {
             this.networkInterface = netIf;
             return;
         }
+        System.err.println("The specified network interface does not support multicast");
         throw new SocketException("Invalid argument.  The specified network interface does not support multicast or the socket is already assigned to a different network interface");
     }
 }
