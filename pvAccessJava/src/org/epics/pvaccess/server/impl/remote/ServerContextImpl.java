@@ -491,8 +491,10 @@ public class ServerContextImpl implements ServerContext, Context {
 
             broadcastTransport = (BlockingUDPTransport) broadcastConnector.connect(
 //			broadcastTransport = (UDPTransport)broadcastConnector.connect(
-                    null, serverResponseHandler,
-                    listenLocalAddress, PVAConstants.PVA_PROTOCOL_REVISION,
+                    null,
+                    serverResponseHandler,
+                    listenLocalAddress,
+                    PVAConstants.PVA_PROTOCOL_REVISION,
                     PVAConstants.PVA_DEFAULT_PRIORITY);
 
             // set ignore address list
@@ -516,7 +518,7 @@ public class ServerContextImpl implements ServerContext, Context {
 
             // TODO configurable local NIF, address
             // setup local broadcasting
-            NetworkInterface localNIF = InetAddressUtil.getLoopbackNIF();
+            NetworkInterface localNIF = InetAddressUtil.getFirstMulticastNIF();
             if (localNIF != null) {
                 try {
                     InetAddress group = InetAddressUtil.getMulticastGroup();
