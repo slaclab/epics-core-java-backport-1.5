@@ -5,24 +5,9 @@
  */
 package org.epics.pvaccess.impl.remote.utils;
 
-import java.io.PrintStream;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.epics.pvaccess.PVAConstants;
-import org.epics.pvaccess.client.Channel;
+import org.epics.pvaccess.client.*;
 import org.epics.pvaccess.client.Channel.ConnectionState;
-import org.epics.pvaccess.client.ChannelGet;
-import org.epics.pvaccess.client.ChannelGetRequester;
-import org.epics.pvaccess.client.ChannelProvider;
-import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
-import org.epics.pvaccess.client.ChannelRequester;
 import org.epics.pvaccess.impl.remote.utils.getopt.Getopt;
 import org.epics.pvaccess.util.logging.ConsoleLogHandler;
 import org.epics.pvaccess.util.logging.LoggingUtils;
@@ -32,31 +17,17 @@ import org.epics.pvdata.misc.BitSet;
 import org.epics.pvdata.monitor.Monitor;
 import org.epics.pvdata.monitor.MonitorElement;
 import org.epics.pvdata.monitor.MonitorRequester;
-import org.epics.pvdata.pv.MessageType;
-import org.epics.pvdata.pv.PVBoolean;
-import org.epics.pvdata.pv.PVByte;
-import org.epics.pvdata.pv.PVDouble;
-import org.epics.pvdata.pv.PVField;
-import org.epics.pvdata.pv.PVFloat;
-import org.epics.pvdata.pv.PVInt;
-import org.epics.pvdata.pv.PVLong;
-import org.epics.pvdata.pv.PVScalar;
-import org.epics.pvdata.pv.PVScalarArray;
-import org.epics.pvdata.pv.PVShort;
-import org.epics.pvdata.pv.PVString;
-import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.PVStructureArray;
-import org.epics.pvdata.pv.PVUByte;
-import org.epics.pvdata.pv.PVUInt;
-import org.epics.pvdata.pv.PVULong;
-import org.epics.pvdata.pv.PVUShort;
-import org.epics.pvdata.pv.PVUnion;
-import org.epics.pvdata.pv.PVUnionArray;
-import org.epics.pvdata.pv.Status;
-import org.epics.pvdata.pv.Structure;
-import org.epics.pvdata.pv.StructureArrayData;
-import org.epics.pvdata.pv.Type;
-import org.epics.pvdata.pv.UnionArrayData;
+import org.epics.pvdata.pv.*;
+
+import java.io.PrintStream;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author mse
@@ -264,36 +235,34 @@ public class PVGet {
 		pvArray.get(0, length, sad);
 
 	    boolean first = true;
-	    for (PVUnion pvUnion : sad.data)
-	    {
+	    for (PVUnion pvUnion : sad.data) {
 			if (first)
 				first = false;
 			else
 				o.print(separator);
 
 			terseUnion(o, pvUnion, separator);
-	    }
+		}
 	}
 
-	enum PrintMode { ValueOnlyMode, StructureMode, TerseMode };
+	enum PrintMode {ValueOnlyMode, StructureMode, TerseMode}
 
-	public static void usage()
-	{
-	    System.err.println (
-		    "\nUsage: java " + PVGet.class.getName() + " [options] <PV name>...\n\n" +
-		    "  -h: Help: Print this message\n" +
-		    "options:\n" +
-		    "  -r <pv request>:   Request, specifies what fields to return and options, default is '" + DEFAULT_REQUEST + "'\n" +
-		    "  -w <sec>:          Wait time, specifies timeout, default is " + DEFAULT_TIMEOUT + " second(s)\n" +
-		    "  -t:                Terse mode - print only value, without names\n" +
-	//	    "  -m:                Monitor mode\n" +
-	//	    "  -q:                Quiet mode, print only error messages\n" +
-		    "  -d:                Enable debug output\n" +
-		    "  -F <ofs>:          Use <ofs> as an alternate output field separator\n" // +
-	//	    "  -f <input file>:   Use <input file> as an input that provides a list PV name(s) to be read, use '-' for stdin\n" +
-	//	    "  -c:                Wait for clean shutdown and report used instance count (for expert users)\n" +
-	//	    "\nexample: pvget double01\n"
-	    );
+	public static void usage() {
+		System.err.println(
+				"\nUsage: java " + PVGet.class.getName() + " [options] <PV name>...\n\n" +
+						"  -h: Help: Print this message\n" +
+						"options:\n" +
+						"  -r <pv request>:   Request, specifies what fields to return and options, default is '" + DEFAULT_REQUEST + "'\n" +
+						"  -w <sec>:          Wait time, specifies timeout, default is " + DEFAULT_TIMEOUT + " second(s)\n" +
+						"  -t:                Terse mode - print only value, without names\n" +
+						//	    "  -m:                Monitor mode\n" +
+						//	    "  -q:                Quiet mode, print only error messages\n" +
+						"  -d:                Enable debug output\n" +
+						"  -F <ofs>:          Use <ofs> as an alternate output field separator\n" // +
+				//	    "  -f <input file>:   Use <input file> as an input that provides a list PV name(s) to be read, use '-' for stdin\n" +
+				//	    "  -c:                Wait for cliean shutdown and report used instance count (for expert users)\n" +
+				//	    "\nexample: pvget double01\n"
+		);
 	}
 
     public static void main(String[] args) throws Throwable

@@ -18,7 +18,6 @@ import org.epics.pvaccess.client.ChannelFind;
 import org.epics.pvaccess.client.ChannelFindRequester;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.impl.remote.*;
-import org.epics.pvaccess.impl.remote.udp.BlockingUDPTransport;
 import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
 import org.epics.pvaccess.util.InetAddressUtil;
 import org.epics.pvdata.factory.StatusFactory;
@@ -102,6 +101,8 @@ public class SearchHandler extends AbstractServerResponseHandler {
         //
         // locally broadcast if unicast (qosCode & 0x80 == 0x80)
         //
+/*
+        // this needs to be disabled since we use PVAForwarder
         if ((qosCode & 0x80) == 0x80) {
             BlockingUDPTransport bt = context.getLocalMulticastTransport();
             if (bt != null) {
@@ -118,6 +119,7 @@ public class SearchHandler extends AbstractServerResponseHandler {
                 return;
             }
         }
+*/
 
         final int protocolsCount = SerializeHelper.readSize(payloadBuffer, transport);
         boolean allowed = (protocolsCount == 0);

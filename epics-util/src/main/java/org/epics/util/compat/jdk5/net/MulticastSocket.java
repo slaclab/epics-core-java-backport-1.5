@@ -114,14 +114,13 @@ public class MulticastSocket extends java.net.MulticastSocket {
         byteBuffer.put(datagramPacket.getData());
         byteBuffer.limit(bytesRead);
 
-        System.out.println("** [" + this + "] =>  receive(" + bytesRead + ")");
         return new InetSocketAddress(datagramPacket.getAddress(), datagramPacket.getPort());
     }
 
     @Override
     public synchronized void receive(DatagramPacket packet) throws IOException {
         super.receive(packet);
-        System.out.println("** [" + this + "] =>  receive(" + packet.getLength() + ")");
+        System.out.println("** [" + this + "] =>  receive(" + packet.getLength() + ", " + packet.getSocketAddress() + ")");
     }
 
     public synchronized void send(ByteBuffer byteBuffer) throws IOException {
@@ -160,7 +159,7 @@ public class MulticastSocket extends java.net.MulticastSocket {
      */
     public void setNetworkInterface(NetworkInterface netIf) throws SocketException {
         System.out.println("** [" + this + "] =>  setNetworkInterface(" + netIf.getDisplayName() + ")");
-        if (netIf.supportsMulticast() && (this.networkInterface == null || this.networkInterface.equals(netIf))) {
+        if (this.networkInterface == null || this.networkInterface.equals(netIf)) {
             super.setNetworkInterface(netIf.getNetworkInterface());
             this.networkInterface = netIf;
             return;

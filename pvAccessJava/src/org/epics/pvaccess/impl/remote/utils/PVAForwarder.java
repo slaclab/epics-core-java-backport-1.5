@@ -1,4 +1,4 @@
-package org.epics.pvaccess.server.test;
+package org.epics.pvaccess.impl.remote.utils;
 
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -42,12 +42,12 @@ public class PVAForwarder {
      * @param address address to encode.
      * @throws RuntimeException thrown if address is unsupported.
      */
-    public static final void encodeAsIPv6Address(ByteBuffer buffer, InetAddress address) throws RuntimeException {
+    public static void encodeAsIPv6Address(ByteBuffer buffer, InetAddress address) throws RuntimeException {
         if (address instanceof Inet6Address)
             buffer.put(address.getAddress());    // always network byte order
         else if (address instanceof Inet4Address) {
             // IPv4 compatible IPv6 address
-            // first 80-bit are 0
+            // fist 80-bit are 0
             buffer.putLong(0);
             buffer.putShort((short) 0);
             // next 16-bits are 1
@@ -100,6 +100,7 @@ public class PVAForwarder {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             receiveSocket.receive(packet);
             InetSocketAddress responseFrom = (InetSocketAddress) packet.getSocketAddress();
+
             if (responseFrom.getAddress().isLoopbackAddress()) {
                 continue;
             }
@@ -214,6 +215,4 @@ public class PVAForwarder {
             }
         }
     }
-
-
 }

@@ -29,10 +29,7 @@ import org.epics.util.compat.jdk5.net.MulticastSocket;
 import org.epics.util.compat.jdk5.net.NetworkInterface;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -218,8 +215,9 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                 // check if datagram not available
                 // NOTE: If this channel is in non-blocking mode and a datagram is not
                 // immediately available then this method immediately returns <tt>null</tt>.
-                if (fromAddress == null)
+                if (fromAddress == null) {
                     break;
+                }
 
                 // check if received from ignore address list
                 if (this.ignoredAddresses != null) {
@@ -387,7 +385,17 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         try {
             // prepare then send buffer
             byteBuffer.flip();
-            this.channel.send(byteBuffer, address);
+            // TODO(port) we create new UDP socket for each send
+            //  check if this is necessary
+            DatagramSocket socket = new DatagramSocket();
+            DatagramPacket packet = new DatagramPacket(
+                    byteBuffer.array(),
+                    byteBuffer.limit(),
+                    address.getAddress(), address.getPort());
+            System.out.println("** [" + this + "] =>  send(" + byteBuffer.limit() + ", " + address + ")");
+            socket.send(packet);
+            socket.close();
+//            this.channel.send(byteBuffer, address);
         } catch (NoRouteToHostException noRouteToHostException) {
             this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + address + ".", noRouteToHostException);
         } catch (UnresolvedAddressException uae) {

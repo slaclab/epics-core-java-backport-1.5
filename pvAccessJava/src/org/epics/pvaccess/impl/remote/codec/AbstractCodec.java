@@ -43,7 +43,6 @@ public abstract class AbstractCodec
 
     public enum ReadMode {NORMAL, SPLIT, SEGMENTED}
 
-    ;
     protected ReadMode readMode = ReadMode.NORMAL;
 
     protected byte version;
@@ -115,7 +114,7 @@ public abstract class AbstractCodec
 	}
 	*/
 
-    private final void processHeader() throws IOException {
+    private void processHeader() throws IOException {
         // magic code
         final byte magicCode = socketBuffer.get();
 
@@ -441,7 +440,7 @@ public abstract class AbstractCodec
     }
 
 
-    public static final int alignedValue(int value, int alignment) {
+    public static int alignedValue(int value, int alignment) {
         final int k = (alignment - 1);
         return (value + k) & (~k);
     }
@@ -578,7 +577,7 @@ public abstract class AbstractCodec
         endMessage(false);
     }
 
-    private final void endMessage(boolean hasMoreSegments) {
+    private void endMessage(boolean hasMoreSegments) {
         if (lastMessageStartPosition >= 0) {
             final int lastPayloadBytePosition = sendBuffer.position();
 
@@ -689,7 +688,6 @@ public abstract class AbstractCodec
 
     public enum WriteMode {PROCESS_SEND_QUEUE, WAIT_FOR_READY_SIGNAL}
 
-    ;
     protected WriteMode writeMode = WriteMode.PROCESS_SEND_QUEUE;
     protected boolean writeOpReady = false;
 
@@ -737,6 +735,8 @@ public abstract class AbstractCodec
         while (buffer.hasRemaining()) {
 
 //int p = buffer.position();
+            System.out.println("** [" + this + "] =>  write(" + bytesToSend + ")");
+            logger.finest("Buffer position " + buffer.position() + " of total " + limit + " bytes.");
             final int bytesSent = this.write(buffer);
 //HexDump.hexDump("WRITE", buffer.array(), p, bytesSent);
 
@@ -831,7 +831,7 @@ public abstract class AbstractCodec
         senderThread = Thread.currentThread();
     }
 
-    private final void processSender(TransportSender sender) {
+    private void processSender(TransportSender sender) {
         sender.lock();
         try {
             lastMessageStartPosition = sendBuffer.position();

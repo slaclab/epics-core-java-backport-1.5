@@ -21,6 +21,8 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import static org.epics.pvaccess.PVAConstants.PVA_BROADCAST_PORT;
+
 /**
  * <code>InetAddress</code> utility methods.
  *
@@ -34,6 +36,7 @@ public class InetAddressUtil {
 
     private static final String MULTICAST_GROUP_KEY = "EPICS_PVA_MULTICAST_GROUP";
     private static final String MULTICAST_GROUP_DEFAULT = "239.219.1.200";
+    public static final InetSocketAddress MULTICAST_GROUP = new InetSocketAddress(MULTICAST_GROUP_DEFAULT, PVA_BROADCAST_PORT);
 
     private static final Set<NetworkInterface> MULTICAST_NIFS = new HashSet<NetworkInterface>();
     private static boolean MULTICAST_NIFS_INITIALISED = false;
@@ -48,7 +51,7 @@ public class InetAddressUtil {
 
     private static String hostName = null;
 
-    private static String MULTICAST_GROUP = null;
+    private static String MULTICAST_GROUP_OVERRIDE = null;
 
     public static synchronized String getHostName() {
         if (hostName == null)
@@ -175,10 +178,7 @@ public class InetAddressUtil {
      */
     public static synchronized Set<NetworkInterface> getMulticastNIFs() {
         if (!MULTICAST_NIFS_INITIALISED) {
-            for (NetworkInterface net : getLoopbackNIFs()) {
-                if (net.supportsMulticast())
-                    MULTICAST_NIFS.add(net);
-            }
+            MULTICAST_NIFS.addAll(getLoopbackNIFs());
             MULTICAST_NIFS_INITIALISED = true;
         }
 
@@ -356,15 +356,15 @@ public class InetAddressUtil {
      */
     public static synchronized InetAddress getMulticastGroup() throws UnknownHostException {
         // Initialise cache first time
-        if (MULTICAST_GROUP == null) {
-            MULTICAST_GROUP = System.getenv(MULTICAST_GROUP_KEY);
+        if (MULTICAST_GROUP_OVERRIDE == null) {
+            MULTICAST_GROUP_OVERRIDE = System.getenv(MULTICAST_GROUP_KEY);
 
             // If not defined then try a property
-            if (MULTICAST_GROUP == null) {
-                MULTICAST_GROUP = System.getProperty(MULTICAST_GROUP_KEY, MULTICAST_GROUP_DEFAULT);
+            if (MULTICAST_GROUP_OVERRIDE == null) {
+                MULTICAST_GROUP_OVERRIDE = System.getProperty(MULTICAST_GROUP_KEY, MULTICAST_GROUP_DEFAULT);
             }
         }
 
-        return InetAddress.getByName(MULTICAST_GROUP);
+        return InetAddress.getByName(MULTICAST_GROUP_OVERRIDE);
     }
 }

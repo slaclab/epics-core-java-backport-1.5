@@ -50,6 +50,8 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.epics.pvaccess.util.InetAddressUtil.MULTICAST_GROUP;
+
 /**
  * Implementation of <code>ServerContext</code>.
  *
@@ -480,9 +482,6 @@ public class ServerContextImpl implements ServerContext, Context {
 
         // setup UDP transport
         try {
-            // where to bind (listen) address
-            InetSocketAddress listenLocalAddress = new InetSocketAddress(broadcastPort);
-
             // where to send address
             InetSocketAddress[] broadcastAddresses = InetAddressUtil.getBroadcastAddresses(broadcastPort);
 
@@ -493,7 +492,7 @@ public class ServerContextImpl implements ServerContext, Context {
 //			broadcastTransport = (UDPTransport)broadcastConnector.connect(
                     null,
                     serverResponseHandler,
-                    listenLocalAddress,
+                    MULTICAST_GROUP,
                     PVAConstants.PVA_PROTOCOL_REVISION,
                     PVAConstants.PVA_DEFAULT_PRIORITY);
 
@@ -508,7 +507,7 @@ public class ServerContextImpl implements ServerContext, Context {
             if (beaconAddressList != null && beaconAddressList.length() > 0) {
                 // if auto is true, add it to specified list
                 InetSocketAddress[] appendList = null;
-                if (autoBeaconAddressList == true)
+                if (autoBeaconAddressList)
                     appendList = broadcastTransport.getSendAddresses();
 
                 InetSocketAddress[] list = InetAddressUtil.getSocketAddressList(beaconAddressList, broadcastPort, appendList);

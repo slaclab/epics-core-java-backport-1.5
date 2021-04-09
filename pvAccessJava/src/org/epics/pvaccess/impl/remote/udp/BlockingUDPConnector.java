@@ -68,12 +68,7 @@ public class BlockingUDPConnector implements Connector {
 
         MulticastSocket socket = null;
         try {
-            int port = bindAddress.getPort();
-            if (port < 1) {
-                socket = new MulticastSocket();
-            } else {
-                socket = new MulticastSocket(port);
-            }
+            socket = new MulticastSocket(bindAddress);
 
             // set broadcast mode
 //            if (broadcast)
