@@ -14,16 +14,21 @@ public class MCReceive {
         System.setProperty("java.net.preferIPv4Stack", "true");
     }
 
-    public static void main(String[] args) throws Throwable {
-        MulticastSocket socket = new MulticastSocket(MCUtils.MC_PORT);
-        socket.setInterface(MCUtils.getMCNetworkInterfaceAddress());
-        socket.joinGroup(MCUtils.getMCAddress());
+    public static void main(String[] args) {
+        try {
+            MulticastSocket socket = new MulticastSocket(MCUtils.MC_GROUP);
+//            MulticastSocket socket = new MulticastSocket(MCUtils.MC_PORT);
+            socket.setInterface(MCUtils.getMCNetworkInterfaceAddress());
+            socket.joinGroup(MCUtils.getMCAddress());
 
-        byte[] buffer = new byte[1500];
-        while (true) {
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
-            System.out.println("Received packet from: " + packet.getSocketAddress());
+            byte[] buffer = new byte[1500];
+            while (true) {
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+                System.out.println("Received packet from: " + packet.getSocketAddress());
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
         }
     }
 

@@ -11,6 +11,7 @@ import java.util.Enumeration;
 public class MCUtils {
     public static final String MC_ADDRESS = "239.219.1.200";
     public static final short MC_PORT = 6789;
+    public static final InetSocketAddress MC_GROUP = new InetSocketAddress(MC_ADDRESS, MC_PORT);
 
     public static final byte[] TEST_PACKET_DATA = {0, 1, 2, 3, 4, 5, 6, 8};
 
