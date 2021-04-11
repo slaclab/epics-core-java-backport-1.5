@@ -29,7 +29,13 @@ public class TCPClient {
             } else {
                 System.out.println("no data");
             }
-            Thread.sleep(5000);
+
+            // Reply
+            msg = ByteBuffer.wrap("from Client".getBytes());
+            int nwritten = socket.write(msg);
+            System.out.println("Reply back to server, bytes written: " + nwritten);
+
+            Thread.sleep(4000);
             socket.close();
             System.out.println("done.");
         } catch (Throwable th) {
