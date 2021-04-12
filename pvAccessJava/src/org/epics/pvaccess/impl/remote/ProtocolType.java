@@ -16,10 +16,11 @@ package org.epics.pvaccess.impl.remote;
 
 /**
  * Enumeration class of standard protocol types (string is being used to be open).
+ *
  * @author msekoranja
  * @version $Id$
  */
 public enum ProtocolType {
-	tcp,		// pvAccess over TCP
-	udp;		// pvAccess over UDP
+    tcp,        // pvAccess over TCP
+    udp         // pvAccess over UDP
 }

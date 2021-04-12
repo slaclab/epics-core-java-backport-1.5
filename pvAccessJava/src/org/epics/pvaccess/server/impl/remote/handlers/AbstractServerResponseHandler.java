@@ -24,14 +24,14 @@ import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
  */
 public abstract class AbstractServerResponseHandler extends AbstractResponseHandler {
 
-	/**
-	 * Context instance.
-	 */
-	protected final ServerContextImpl context;
+    /**
+     * Context instance.
+     */
+    protected final ServerContextImpl context;
 
-	public AbstractServerResponseHandler(ServerContextImpl context, String description) {
-		super(description, context.getDebugLevel() >= 3);
-		this.context = context;
-	}
+    public AbstractServerResponseHandler(ServerContextImpl context, String description) {
+        super(description, context.getDebugLevel() >= 3);
+        this.context = context;
+    }
 
 }

@@ -1,4 +1,5 @@
 package org.epics.pvaccess.server.test;
+
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -38,11 +39,11 @@ public class TCPServer3 {
                             ByteBuffer msg = ByteBuffer.allocate(1000);
                             while (true) {
                                 msg.clear();
-                                int nread = socket.read(msg);
-                                System.out.println("Bytes read: " + nread);
-                                if (nread == 0) {
+                                int nRead = socket.read(msg);
+                                System.out.println("Bytes read: " + nRead);
+                                if (nRead == 0) {
                                     Thread.sleep(25);
-                                } else if (nread < 0) {
+                                } else if (nRead < 0) {
                                     System.out.println("Detected closed socket.  Exiting!");
                                     break;
                                 }
@@ -64,8 +65,8 @@ public class TCPServer3 {
                     public void run() {
                         try {
                             ByteBuffer msg = ByteBuffer.wrap("from Server".getBytes());
-                            int nwritten = socket.write(msg);
-                            System.out.println("Message sent, bytes written: " + nwritten);
+                            int nWritten = socket.write(msg);
+                            System.out.println("Message sent, bytes written: " + nWritten);
                         } catch (Throwable th) {
                             th.printStackTrace();
                         }

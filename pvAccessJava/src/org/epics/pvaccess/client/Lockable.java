@@ -7,9 +7,11 @@ package org.epics.pvaccess.client;
 
 /**
  * Instance allowing lock/unlock.
+ *
  * @author mse
  */
 public interface Lockable {
-	void lock();
-	void unlock();
+    void lock();
+
+    void unlock();
 }

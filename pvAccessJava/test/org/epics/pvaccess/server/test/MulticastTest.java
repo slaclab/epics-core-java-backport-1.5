@@ -19,8 +19,6 @@ public class MulticastTest {
         System.setProperty("java.net.preferIPv4Stack", "true");
     }
 
-    private static int PORT = 6789;
-
     public static void main(String[] args) {
         Set<org.epics.util.compat.jdk5.net.NetworkInterface> nifs = InetAddressUtil.getMulticastNIFs();
 
@@ -32,16 +30,17 @@ public class MulticastTest {
 
         for (org.epics.util.compat.jdk5.net.NetworkInterface networkInterface : nifs) {
             NetworkInterface multicastNIF = networkInterface.getNetworkInterface();
-            List<InetAddress> multicastInterfaceAddresss = Collections.list(multicastNIF.getInetAddresses());
+            List<InetAddress> multicastInterfaceAddresses = Collections.list(multicastNIF.getInetAddresses());
 
-            for (InetAddress multicastInterfaceAddress : multicastInterfaceAddresss) {
+            for (InetAddress multicastInterfaceAddress : multicastInterfaceAddresses) {
                 try {
-                    System.out.println("");
+                    System.out.println();
                     System.out.println("Testing Multicast for Network Interface: " + networkInterface.getDisplayName() + " on network: " + multicastInterfaceAddress);
                     System.out.println("=======================================================");
 
                     // Now set up the test parameters
                     byte[] message = {'H', 'e', 'l', 'l', 'o'};
+                    int PORT = 6789;
                     MulticastSocket receiveSocket = new MulticastSocket(PORT);
                     receiveSocket.setInterface(multicastInterfaceAddress);
                     MulticastSocket sendSocket = new MulticastSocket();

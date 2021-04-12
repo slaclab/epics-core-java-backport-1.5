@@ -22,8 +22,8 @@ import java.util.logging.Logger;
  * but what if other side cannot empty receive buffer because it cannot send!
  * <p>
  * non-blocking
- * processRead -> ensureData -> pollOne -> processRead -> enusreData -> pullOne... first one has data, second not -> live-loop; solution: disable first
- * processRead -> ensureData -> pollOne -> processWrite -> enusreBuffer -> flush -> buffer full -> poolOne... same story as above
+ * processRead -> ensureData -> pollOne -> processRead -> ensureData -> pullOne... first one has data, second not -> live-loop; solution: disable first
+ * processRead -> ensureData -> pollOne -> processWrite -> ensureBuffer -> flush -> buffer full -> poolOne... same story as above
  */
 public abstract class AbstractCodec
         implements ReadableByteChannel, WritableByteChannel, TransportSendControl {
@@ -60,15 +60,8 @@ public abstract class AbstractCodec
                          int socketSendBufferSize, boolean blockingProcessQueue, Logger logger) {
         if (receiveBuffer.capacity() < 2 * MAX_ENSURE_SIZE)
             throw new IllegalArgumentException("receiveBuffer.capacity() < 2*MAX_ENSURE_SIZE");
-        // require aligned buffer size (not condition, but simplifies alignment code)
-        if (receiveBuffer.capacity() % PVAConstants.PVA_ALIGNMENT != 0)
-            throw new IllegalArgumentException("receiveBuffer.capacity() % PVAConstants.PVA_ALIGNMENT != 0");
-
         if (sendBuffer.capacity() < 2 * MAX_ENSURE_SIZE)
             throw new IllegalArgumentException("sendBuffer() < 2*MAX_ENSURE_SIZE");
-        // require aligned buffer size (not condition, but simplifies alignment code)
-        if (sendBuffer.capacity() % PVAConstants.PVA_ALIGNMENT != 0)
-            throw new IllegalArgumentException("sendBuffer() % PVAConstants.PVA_ALIGNMENT != 0");
 
         this.clientServerFlag = serverFlag ? 0x40 : 0x00;
         this.socketBuffer = receiveBuffer;
@@ -90,31 +83,17 @@ public abstract class AbstractCodec
 
     @SuppressWarnings("incomplete-switch")
     public final void processRead() throws IOException, ConnectionClosedException, InvalidDataStreamException {
-        //System.out.println("processRead");
         switch (readMode) {
             case NORMAL:
                 processReadNormal();
                 break;
-				/*
-			case SPLIT:
-				processReadSplit();
-				break;
-				*/
             case SEGMENTED:
                 processReadSegmented();
                 break;
         }
     }
 
-	/*
-	private final void processReadSplit() throws IOException
-	{
-		// read as much as available
-		readToBuffer(1, false);
-	}
-	*/
-
-    private void processHeader() throws IOException {
+    private void processHeader() throws InvalidDataStreamException {
         // magic code
         final byte magicCode = socketBuffer.get();
 
@@ -138,7 +117,7 @@ public abstract class AbstractCodec
         }
     }
 
-    private final void processReadNormal() throws IOException {
+    private void processReadNormal() throws IOException {
         try {
             int messageProcessCount = 0;
             while (messageProcessCount++ < MAX_MESSAGE_PROCESS) {
@@ -170,25 +149,15 @@ public abstract class AbstractCodec
                     storedPosition = socketBuffer.position();
                     storedLimit = socketBuffer.limit();
                     socketBuffer.limit(Math.min(storedPosition + storedPayloadSize, storedLimit));
-                    Throwable storedException = null;    // TODO
                     try {
                         // handle response
                         processApplicationMessage();
-                    }
-					/*
-					catch (Throwable th) {
-						storedException = th;
-						throw th;
-					}
-					*/ finally {
+                    } finally {
                         if (!isOpen())
                             return;
 
                         // can be closed by now
-                        // isOpen() should be efficiently implemented
-                        while (true)
-                        //while (isOpen())
-                        {
+                        while (true) {
                             // set position as whole message was read (in case code haven't done so)
                             int newPosition = alignedValue(storedPosition + storedPayloadSize, PVAConstants.PVA_ALIGNMENT);
                             // aligned buffer size ensures that there is enough space in buffer,
@@ -213,9 +182,9 @@ public abstract class AbstractCodec
                                 }
 
                                 // TODO we do not handle this for now (maybe never)
-                                logger.log(Level.WARNING, "unprocessed read buffer from client " + getLastReadBufferSocketAddress() + ", disconnecting...", storedException);
+                                logger.log(Level.WARNING, "unprocessed read buffer from client " + getLastReadBufferSocketAddress() + ", disconnecting...");
                                 invalidDataStreamHandler();
-                                throw new InvalidDataStreamException("unprocessed read buffer", storedException);
+                                throw new InvalidDataStreamException("unprocessed read buffer");
                             }
                             socketBuffer.limit(storedLimit);
                             socketBuffer.position(newPosition);
@@ -224,16 +193,16 @@ public abstract class AbstractCodec
                     }
                 }
             }
-        } catch (InvalidDataStreamException idse) {
+        } catch (InvalidDataStreamException ignored) {
             // noop, should be already handled (and logged)
-        } catch (ConnectionClosedException cce) {
+        } catch (ConnectionClosedException ignored) {
             // noop, should be already handled (and logged)
-        } catch (ClosedByInterruptException cbie) {
+        } catch (ClosedByInterruptException ignored) {
             close();
         }
     }
 
-    private final void processReadSegmented() throws IOException {
+    private void processReadSegmented() throws IOException {
         while (true) {
             // read as much as available, but at least for a header
             // readFromSocket checks if reading from socket is really necessary
@@ -248,7 +217,7 @@ public abstract class AbstractCodec
             else {
                 // last segment bit set (means in-between segment or last segment)
                 // we expect this, no non-control messages between segmented message are supported
-                // NOTE: for now... it is easy to support non-semgented messages between segmented messages
+                // NOTE: for now... it is easy to support non-segmented messages between segmented messages
                 final boolean notFirstSegment = (flags & 0x20) != 0;
                 if (!notFirstSegment) {
                     logger.warning("Not-a-first segmented message expected from client " + getLastReadBufferSocketAddress() + ", disconnecting...");
@@ -296,7 +265,7 @@ public abstract class AbstractCodec
         //
 
         // a new start position, we are careful to preserve alignment
-        startPosition = MAX_ENSURE_SIZE + socketBuffer.position() % PVAConstants.PVA_ALIGNMENT;
+        startPosition = MAX_ENSURE_SIZE;
         final int endPosition = startPosition + remainingBytes;
         for (int i = startPosition; i < endPosition; i++)
             socketBuffer.put(i, socketBuffer.get());
@@ -366,12 +335,9 @@ public abstract class AbstractCodec
                 readToBuffer(size, true);
                 readMode = storedMode;
                 storedPosition = socketBuffer.position();
-                storedLimit = socketBuffer.limit();
-                socketBuffer.limit(Math.min(storedPosition + storedPayloadSize, storedLimit));
 
                 // check needed, if not enough data is available or
                 // we run into segmented message
-                ensureData(size);
             }
             // SEGMENTED message case
             else {
@@ -390,15 +356,7 @@ public abstract class AbstractCodec
                 socketBuffer.limit(storedLimit);
 
                 // remember alignment offset of end of the message (to be restored)
-                int storedAlignmentOffset = socketBuffer.position() % PVAConstants.PVA_ALIGNMENT;
-
-                // skip post-message alignment bytes
-                if (storedAlignmentOffset > 0) {
-                    int toSkip = PVAConstants.PVA_ALIGNMENT - storedAlignmentOffset;
-                    readToBuffer(toSkip, true);
-                    int currentPos = socketBuffer.position();
-                    socketBuffer.position(currentPos + toSkip);
-                }
+                int storedAlignmentOffset = 0;
 
                 // we expect segmented message, we expect header
                 // that (and maybe some control packets) needs to be "removed"
@@ -423,12 +381,13 @@ public abstract class AbstractCodec
 
                 storedPayloadSize += remainingBytes - storedAlignmentOffset;
                 storedPosition = startPosition;
-                storedLimit = socketBuffer.limit();
-                socketBuffer.limit(Math.min(storedPosition + storedPayloadSize, storedLimit));
 
                 // sequential small segmented messages in the buffer
-                ensureData(size);
             }
+
+            storedLimit = socketBuffer.limit();
+            socketBuffer.limit(Math.min(storedPosition + storedPayloadSize, storedLimit));
+            ensureData(size);
         } catch (IOException ex) {
             try {
                 close();
@@ -450,21 +409,21 @@ public abstract class AbstractCodec
 
         final int k = (alignment - 1);
         final int pos = socketBuffer.position();
-        int newpos = (pos + k) & (~k);
-        if (pos == newpos)
+        int newPos = (pos + k) & (~k);
+        if (pos == newPos)
             return;
 
-        int diff = socketBuffer.limit() - newpos;
+        int diff = socketBuffer.limit() - newPos;
         if (diff > 0) {
-            socketBuffer.position(newpos);
+            socketBuffer.position(newPos);
             return;
         }
 
         ensureData(diff);
 
         // position has changed, recalculate
-        newpos = (socketBuffer.position() + k) & (~k);
-        socketBuffer.position(newpos);
+        newPos = (socketBuffer.position() + k) & (~k);
+        socketBuffer.position(newPos);
     }
 
     /// --------------------------------------------------------------- ///
@@ -527,18 +486,12 @@ public abstract class AbstractCodec
 
         final int k = (alignment - 1);
         final int pos = sendBuffer.position();
-        int newpos = (pos + k) & (~k);
-        if (pos == newpos)
+        int newPos = (pos + k) & (~k);
+        if (pos == newPos)
             return;
 
-		/*
-		// there is always enough of space
-		// since sendBuffer capacity % PVA_ALIGNMENT == 0
-		sendBuffer.position(newpos);
-		*/
-
         // for safety reasons we really pad (override previous message data)
-        int padCount = newpos - pos;
+        int padCount = newPos - pos;
         sendBuffer.put(PADDING_BYTES, 0, padCount);
     }
 
@@ -584,7 +537,7 @@ public abstract class AbstractCodec
             // align
             alignBuffer(PVAConstants.PVA_ALIGNMENT);
 
-            // set paylaod size (non-aligned)
+            // set payload size (non-aligned)
             final int payloadSize = lastPayloadBytePosition - lastMessageStartPosition -
                     PVAConstants.PVA_MESSAGE_HEADER_SIZE;
             this.sendBuffer.putInt(lastMessageStartPosition + (Short.SIZE / Byte.SIZE + 2),
@@ -602,7 +555,6 @@ public abstract class AbstractCodec
                     lastSegmentedMessageType = (byte) (type | 0x30);
                     lastSegmentedMessageCommand = sendBuffer.get(flagsPosition + 1);
                 }
-                nextMessagePayloadOffset = lastPayloadBytePosition % PVAConstants.PVA_ALIGNMENT;
             } else {
                 // last segment
                 if (lastSegmentedMessageType != 0) {
@@ -611,24 +563,8 @@ public abstract class AbstractCodec
                     sendBuffer.put(flagsPosition, (byte) (lastSegmentedMessageType & 0xEF));
                     lastSegmentedMessageType = 0;
                 }
-                nextMessagePayloadOffset = 0;
             }
-
-            // TODO
-			/*
-			// manage markers
-			final int position = sendBuffer.position();
-			final int bytesLeft = sendBuffer.remaining();
-			if (position >= nextMarkerPosition && bytesLeft >= PVAConstants.PVA_MESSAGE_HEADER_SIZE)
-			{
-				sendBuffer.put(PVAConstants.PVA_MAGIC);
-				sendBuffer.put(PVAConstants.PVA_VERSION);
-				sendBuffer.put((byte)(0x01 | byteOrderFlag));	// control data
-				sendBuffer.put((byte)0);	// marker
-				sendBuffer.putInt((int)(totalBytesSent + position + PVAConstants.PVA_MESSAGE_HEADER_SIZE));
-				nextMarkerPosition = position + markerPeriodBytes;
-			}
-			*/
+            nextMessagePayloadOffset = 0;
             lastMessageStartPosition = -1;
         }
     }
@@ -738,16 +674,12 @@ public abstract class AbstractCodec
             System.out.println("** [" + this + "] =>  write(" + bytesToSend + ")");
             logger.finest("Buffer position " + buffer.position() + " of total " + limit + " bytes.");
             final int bytesSent = this.write(buffer);
-//HexDump.hexDump("WRITE", buffer.array(), p, bytesSent);
 
             if (bytesSent < 0) {
                 // connection lost
                 close();
                 throw new ConnectionClosedException("bytesSent < 0");
             } else if (bytesSent == 0) {
-//context.getLogger().finest("Buffer full, position " + buffer.position() + " of total " + limit + " bytes.");
-//System.out.println("Buffer full, position " + buffer.position() + " of total " + limit + " bytes.");
-
                 sendBufferFull(tries++);
                 continue;
             }
@@ -761,19 +693,8 @@ public abstract class AbstractCodec
                 buffer.limit(buffer.position() + bytesToSend);
             }
             tries = 0;
-
-//context.getLogger().finest("Sent, position " + buffer.position() + " of total " + limit + " bytes.");
-//System.out.println("Sent, position " + buffer.position() + " of total " + limit + " bytes.");
         }
     }
-
-	/*
-	// sendBufferFull for non-blocking
-				writeOpReady = false;
-				writeMode = WriteMode.WAIT_FOR_READY_SIGNAL;
-				this.writePollOne();
-				writeMode = WriteMode.PROCESS_SEND_QUEUE;
-	 */
 
     protected abstract void sendBufferFull(int tries) throws IOException;
 
@@ -784,7 +705,7 @@ public abstract class AbstractCodec
     // NOTE: code can use Thread.interrupt() to get out of blocking wait
     // can be called anytime (no race condition problem)
     // method ensures that messages are processed (if connection not closed) even if interrupted
-    public final void processSendQueue() throws IOException {
+    public final void processSendQueue() {
         try {
             int senderProcessed = 0;
             while (senderProcessed++ < MAX_MESSAGE_SEND) {
@@ -815,7 +736,6 @@ public abstract class AbstractCodec
         // flush
         if (sendBuffer.position() > 0)
             flush(true);
-
     }
 
     public final void clearSendQueue() {

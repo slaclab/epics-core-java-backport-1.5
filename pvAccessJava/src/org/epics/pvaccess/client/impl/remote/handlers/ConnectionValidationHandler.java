@@ -14,48 +14,50 @@
 
 package org.epics.pvaccess.client.impl.remote.handlers;
 
+import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
+import org.epics.pvaccess.impl.remote.Transport;
+import org.epics.pvdata.misc.SerializeHelper;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
-import org.epics.pvaccess.impl.remote.Transport;
-import org.epics.pvdata.misc.SerializeHelper;
-
 
 /**
  * Connection validation message handler.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public class ConnectionValidationHandler extends AbstractClientResponseHandler {
 
-	public ConnectionValidationHandler(ClientContextImpl context) {
-		super(context, "Connection validation");
-	}
+    public ConnectionValidationHandler(ClientContextImpl context) {
+        super(context, "Connection validation");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		transport.setRemoteRevision(version);
+        transport.setRemoteRevision(version);
 
-		transport.ensureData(4+2);
-		transport.setRemoteTransportReceiveBufferSize(payloadBuffer.getInt());
-		// TODO
-		// TODO serverIntrospectionRegistryMaxSize
-		/*int serverIntrospectionRegistryMaxSize = */ payloadBuffer.getShort(); // & 0x0000FFFF;
-		// TODO authNZ
-		int size = SerializeHelper.readSize(payloadBuffer, transport);
-		List<String> offeredSecurityPlugins = new ArrayList<String>(size);
-		for (int i = 0; i < size; i++)
-			offeredSecurityPlugins.add(SerializeHelper.deserializeString(payloadBuffer, transport));
+        transport.ensureData(4 + 2);
+        transport.setRemoteTransportReceiveBufferSize(payloadBuffer.getInt());
+        // TODO
+        // TODO serverIntrospectionRegistryMaxSize
+        /*int serverIntrospectionRegistryMaxSize = */
+        payloadBuffer.getShort(); // & 0x0000FFFF;
+        // TODO authNZ
+        int size = SerializeHelper.readSize(payloadBuffer, transport);
+        List<String> offeredSecurityPlugins = new ArrayList<String>(size);
+        for (int i = 0; i < size; i++)
+            offeredSecurityPlugins.add(SerializeHelper.deserializeString(payloadBuffer, transport));
 
-		transport.authNZInitialize(offeredSecurityPlugins);
-	}
+        transport.authNZInitialize(offeredSecurityPlugins);
+    }
 
 }

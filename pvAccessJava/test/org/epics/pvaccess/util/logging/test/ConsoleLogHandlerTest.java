@@ -14,13 +14,12 @@
 
 package org.epics.pvaccess.util.logging.test;
 
+import junit.framework.TestCase;
+import org.epics.pvaccess.util.logging.ConsoleLogHandler;
+
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
-import junit.framework.TestCase;
-
-import org.epics.pvaccess.util.logging.ConsoleLogHandler;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
@@ -31,27 +30,26 @@ public class ConsoleLogHandlerTest extends TestCase {
     public ConsoleLogHandlerTest(String methodName) {
         super(methodName);
     }
-    
+
     /*
      * Test handler.
      */
-    public void testHandler()
-    {
-		Handler handler = new ConsoleLogHandler();
-		handler.setLevel(Level.CONFIG);
-		
-        LogRecord msg = new LogRecord(Level.INFO, "This is a simple message.");
-		handler.publish(msg);
-		
-		assertTrue(handler.isLoggable(msg));
+    public void testHandler() {
+        Handler handler = new ConsoleLogHandler();
+        handler.setLevel(Level.CONFIG);
 
-		handler.setLevel(Level.OFF);
-		assertTrue(!handler.isLoggable(msg));
-		// and is not published
-		handler.publish(msg);
-		
-		handler.flush();
-		handler.close();
+        LogRecord msg = new LogRecord(Level.INFO, "This is a simple message.");
+        handler.publish(msg);
+
+        assertTrue(handler.isLoggable(msg));
+
+        handler.setLevel(Level.OFF);
+        assertFalse(handler.isLoggable(msg));
+        // and is not published
+        handler.publish(msg);
+
+        handler.flush();
+        handler.close();
     }
 
 }

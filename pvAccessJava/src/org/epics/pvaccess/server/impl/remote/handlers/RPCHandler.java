@@ -14,16 +14,9 @@
 
 package org.epics.pvaccess.server.impl.remote.handlers;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.client.ChannelRPC;
 import org.epics.pvaccess.client.ChannelRPCRequester;
-import org.epics.pvaccess.impl.remote.QoS;
-import org.epics.pvaccess.impl.remote.SerializationHelper;
-import org.epics.pvaccess.impl.remote.Transport;
-import org.epics.pvaccess.impl.remote.TransportSendControl;
-import org.epics.pvaccess.impl.remote.TransportSender;
+import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.server.ChannelHostingTransport;
 import org.epics.pvaccess.server.impl.remote.ServerChannelImpl;
 import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
@@ -31,202 +24,195 @@ import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.Status.StatusType;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+
 /**
  * RPC handler.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  */
 public class RPCHandler extends AbstractServerResponseHandler {
 
-	public RPCHandler(ServerContextImpl context) {
-		super(context, "RPC request");
-	}
+    public RPCHandler(ServerContextImpl context) {
+        super(context, "RPC request");
+    }
 
 
-	private static class ChannelRPCRequesterImpl extends BaseChannelRequester implements ChannelRPCRequester, TransportSender {
+    private static class ChannelRPCRequesterImpl extends BaseChannelRequester implements ChannelRPCRequester, TransportSender {
 
-		private volatile ChannelRPC channelRPC;
-		private volatile PVStructure pvResponse;
-		private volatile Status status;
+        private volatile ChannelRPC channelRPC;
+        private volatile PVStructure pvResponse;
+        private volatile Status status;
 
-		public ChannelRPCRequesterImpl(ServerContextImpl context, ServerChannelImpl channel, int ioid, Transport transport,
-				PVStructure pvRequest) {
-			super(context, channel, ioid, transport);
+        public ChannelRPCRequesterImpl(ServerContextImpl context, ServerChannelImpl channel, int ioid, Transport transport,
+                                       PVStructure pvRequest) {
+            super(context, channel, ioid, transport);
 
-			startRequest(QoS.INIT.getMaskValue());
-			channel.registerRequest(ioid, this);
+            startRequest(QoS.INIT.getMaskValue());
+            channel.registerRequest(ioid, this);
 
-			try {
-				channelRPC = channel.getChannel().createChannelRPC(this, pvRequest);
-			} catch (Throwable th) {
-				// simply cannot trust code above
-				BaseChannelRequester.sendFailureMessage((byte)20, transport, ioid, (byte)QoS.INIT.getMaskValue(),
-						statusCreate.createStatus(StatusType.FATAL, "Unexpected exception caught: " + th.getMessage(), th));
-				destroy();
-			}
-		}
+            try {
+                channelRPC = channel.getChannel().createChannelRPC(this, pvRequest);
+            } catch (Throwable th) {
+                // simply cannot trust code above
+                BaseChannelRequester.sendFailureMessage((byte) 20, transport, ioid, (byte) QoS.INIT.getMaskValue(),
+                        statusCreate.createStatus(StatusType.FATAL, "Unexpected exception caught: " + th.getMessage(), th));
+                destroy();
+            }
+        }
 
-		/* (non-Javadoc)
-		 * @see org.epics.pvaccess.client.ChannelRPCRequester#channelRPCConnect(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelRPC, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
-		 */
-		public void channelRPCConnect(Status status, ChannelRPC channelRPC) {
-			this.status = status;
-			this.channelRPC = channelRPC;
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelRPCRequester#channelRPCConnect(org.epics.pvdata.pv.Status, org.epics.pvaccess.client.ChannelRPC, org.epics.pvdata.pv.PVStructure, org.epics.pvdata.misc.BitSet)
+         */
+        public void channelRPCConnect(Status status, ChannelRPC channelRPC) {
+            this.status = status;
+            this.channelRPC = channelRPC;
 
-			transport.enqueueSendRequest(this);
+            transport.enqueueSendRequest(this);
 
-			// self-destruction
-			if (!status.isSuccess()) {
-				destroy();
-			}
-		}
+            // self-destruction
+            if (!status.isSuccess()) {
+                destroy();
+            }
+        }
 
-		public void requestDone(Status status, ChannelRPC channelRPC, PVStructure pvResponse) {
-			this.status = status;
-			this.pvResponse = pvResponse;
+        public void requestDone(Status status, ChannelRPC channelRPC, PVStructure pvResponse) {
+            this.status = status;
+            this.pvResponse = pvResponse;
 
-			transport.enqueueSendRequest(this);
-		}
+            transport.enqueueSendRequest(this);
+        }
 
-		/* (non-Javadoc)
-		 * @see org.epics.pvdata.misc.Destroyable#destroy()
-		 */
-		public void destroy() {
-			channel.unregisterRequest(ioid);
+        /* (non-Javadoc)
+         * @see org.epics.pvdata.misc.Destroyable#destroy()
+         */
+        public void destroy() {
+            channel.unregisterRequest(ioid);
 
-			// asCheck
-			channel.getChannelSecuritySession().release(ioid);
+            // asCheck
+            channel.getChannelSecuritySession().release(ioid);
 
-			if (channelRPC != null)
-				channelRPC.destroy();
-		}
+            if (channelRPC != null)
+                channelRPC.destroy();
+        }
 
-		/**
-		 * @return the channelRPC
-		 */
-		public ChannelRPC getChannelRPC() {
-			return channelRPC;
-		}
+        /**
+         * @return the channelRPC
+         */
+        public ChannelRPC getChannelRPC() {
+            return channelRPC;
+        }
 
-		/* (non-Javadoc)
-		 * @see org.epics.pvaccess.impl.remote.TransportSender#lock()
-		 */
-		public void lock() {
-			// noop
-		}
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.impl.remote.TransportSender#lock()
+         */
+        public void lock() {
+            // noop
+        }
 
-		/* (non-Javadoc)
-		 * @see org.epics.pvaccess.impl.remote.TransportSender#unlock()
-		 */
-		public void unlock() {
-			// noop
-		}
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.impl.remote.TransportSender#unlock()
+         */
+        public void unlock() {
+            // noop
+        }
 
-		/* (non-Javadoc)
-		 * @see org.epics.pvaccess.impl.remote.TransportSender#send(java.nio.ByteBuffer, org.epics.pvaccess.impl.remote.TransportSendControl)
-		 */
-		public void send(ByteBuffer buffer, TransportSendControl control) {
-			final int request = getPendingRequest();
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.impl.remote.TransportSender#send(java.nio.ByteBuffer, org.epics.pvaccess.impl.remote.TransportSendControl)
+         */
+        public void send(ByteBuffer buffer, TransportSendControl control) {
+            final int request = getPendingRequest();
 
-			control.startMessage((byte)20, Integer.SIZE/Byte.SIZE + 1);
-			buffer.putInt(ioid);
-			buffer.put((byte)request);
-			status.serialize(buffer, control);
+            control.startMessage((byte) 20, Integer.SIZE / Byte.SIZE + 1);
+            buffer.putInt(ioid);
+            buffer.put((byte) request);
+            status.serialize(buffer, control);
 
-			if (status.isSuccess())
-			{
-				if (QoS.INIT.isSet(request))
-				{
-					// no data
-				}
-				else
-				{
-					SerializationHelper.serializeStructureFull(buffer, control, pvResponse);
-					pvResponse = null;
-				}
-			}
+            if (status.isSuccess()) {
+                if (!QoS.INIT.isSet(request)) {
+                    SerializationHelper.serializeStructureFull(buffer, control, pvResponse);
+                    pvResponse = null;
+                }
+            }
 
-			stopRequest();
+            stopRequest();
 
-			// lastRequest
-			if (QoS.DESTROY.isSet(request))
-				destroy();
-		}
+            // lastRequest
+            if (QoS.DESTROY.isSet(request))
+                destroy();
+        }
 
-	};
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom, final Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom, final Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		// NOTE: we do not explicitly check if transport is OK
-		final ChannelHostingTransport casTransport = (ChannelHostingTransport)transport;
+        // NOTE: we do not explicitly check if transport is OK
+        final ChannelHostingTransport casTransport = (ChannelHostingTransport) transport;
 
-		transport.ensureData(2*Integer.SIZE/Byte.SIZE+1);
-		final int sid = payloadBuffer.getInt();
-		final int ioid = payloadBuffer.getInt();
+        transport.ensureData(2 * Integer.SIZE / Byte.SIZE + 1);
+        final int sid = payloadBuffer.getInt();
+        final int ioid = payloadBuffer.getInt();
 
-		final byte qosCode = payloadBuffer.get();
+        final byte qosCode = payloadBuffer.get();
 
-		final ServerChannelImpl channel = (ServerChannelImpl)casTransport.getChannel(sid);
-		if (channel == null) {
-			BaseChannelRequester.sendFailureMessage((byte)20, transport, ioid, qosCode, BaseChannelRequester.badCIDStatus);
-			return;
-		}
+        final ServerChannelImpl channel = (ServerChannelImpl) casTransport.getChannel(sid);
+        if (channel == null) {
+            BaseChannelRequester.sendFailureMessage((byte) 20, transport, ioid, qosCode, BaseChannelRequester.badCIDStatus);
+            return;
+        }
 
-		final boolean init = QoS.INIT.isSet(qosCode);
-		if (init)
-		{
-			// pvRequest
-		    final PVStructure pvRequest = SerializationHelper.deserializePVRequest(payloadBuffer, transport);
+        final boolean init = QoS.INIT.isSet(qosCode);
+        if (init) {
+            // pvRequest
+            final PVStructure pvRequest = SerializationHelper.deserializePVRequest(payloadBuffer, transport);
 
-			// asCheck
-			Status asStatus = channel.getChannelSecuritySession().authorizeCreateChannelRPC(ioid, pvRequest);
-			if (!asStatus.isSuccess())
-			{
-				BaseChannelRequester.sendFailureMessage((byte)20, transport, ioid, (byte)QoS.INIT.getMaskValue(), asStatus);
-				return;
-			}
+            // asCheck
+            Status asStatus = channel.getChannelSecuritySession().authorizeCreateChannelRPC(ioid, pvRequest);
+            if (!asStatus.isSuccess()) {
+                BaseChannelRequester.sendFailureMessage((byte) 20, transport, ioid, (byte) QoS.INIT.getMaskValue(), asStatus);
+                return;
+            }
 
-			// create...
-		    new ChannelRPCRequesterImpl(context, channel, ioid, transport, pvRequest);
-		}
-		else
-		{
-			final boolean lastRequest = QoS.DESTROY.isSet(qosCode);
+            // create...
+            new ChannelRPCRequesterImpl(context, channel, ioid, transport, pvRequest);
+        } else {
+            final boolean lastRequest = QoS.DESTROY.isSet(qosCode);
 
-			ChannelRPCRequesterImpl request = (ChannelRPCRequesterImpl)channel.getRequest(ioid);
-			if (request == null) {
-				BaseChannelRequester.sendFailureMessage((byte)20, transport, ioid, qosCode, BaseChannelRequester.badIOIDStatus);
-				return;
-			}
+            ChannelRPCRequesterImpl request = (ChannelRPCRequesterImpl) channel.getRequest(ioid);
+            if (request == null) {
+                BaseChannelRequester.sendFailureMessage((byte) 20, transport, ioid, qosCode, BaseChannelRequester.badIOIDStatus);
+                return;
+            }
 
-			if (!request.startRequest(qosCode)) {
-				BaseChannelRequester.sendFailureMessage((byte)20, transport, ioid, qosCode, BaseChannelRequester.otherRequestPendingStatus);
-				return;
-			}
+            if (!request.startRequest(qosCode)) {
+                BaseChannelRequester.sendFailureMessage((byte) 20, transport, ioid, qosCode, BaseChannelRequester.otherRequestPendingStatus);
+                return;
+            }
 
-			// deserialize put data
-			final PVStructure pvArgument = SerializationHelper.deserializeStructureFull(payloadBuffer, transport);
+            // deserialize put data
+            final PVStructure pvArgument = SerializationHelper.deserializeStructureFull(payloadBuffer, transport);
 
-			// asCheck
-			Status asStatus = channel.getChannelSecuritySession().authorizeRPC(ioid, pvArgument);
-			if (!asStatus.isSuccess())
-			{
-				BaseChannelRequester.sendFailureMessage((byte)20, transport, ioid, qosCode, asStatus);
-				if (lastRequest)
-					request.destroy();
-				return;
-			}
+            // asCheck
+            Status asStatus = channel.getChannelSecuritySession().authorizeRPC(ioid, pvArgument);
+            if (!asStatus.isSuccess()) {
+                BaseChannelRequester.sendFailureMessage((byte) 20, transport, ioid, qosCode, asStatus);
+                if (lastRequest)
+                    request.destroy();
+                return;
+            }
 
-			ChannelRPC channelRPC = request.getChannelRPC();
+            ChannelRPC channelRPC = request.getChannelRPC();
 
-			if (lastRequest)
-				channelRPC.lastRequest();
+            if (lastRequest)
+                channelRPC.lastRequest();
 
-			channelRPC.request(pvArgument);
-		}
-	}
+            channelRPC.request(pvArgument);
+        }
+    }
 }

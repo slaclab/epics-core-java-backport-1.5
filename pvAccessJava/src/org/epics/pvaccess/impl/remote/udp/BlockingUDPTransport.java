@@ -114,8 +114,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
     private final int clientServerWithBigEndianFlag;
 
     public BlockingUDPTransport(Context context, ResponseHandler responseHandler, MulticastSocket channel,
-                                InetSocketAddress bindAddress, InetSocketAddress[] sendAddresses,
-                                short remoteTransportRevision) {
+                                InetSocketAddress bindAddress, InetSocketAddress[] sendAddresses) {
         this.context = context;
         this.clientServerWithBigEndianFlag = (context instanceof ServerContext) ? 0xC0 : 0x80;
         this.responseHandler = responseHandler;
@@ -319,13 +318,6 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
     }
 
     /**
-     * Process output (write) IO event.
-     */
-    protected void processWrite() {
-        // noop (not used for datagrams)
-    }
-
-    /**
      * InetAddress type.
      */
     public enum InetAddressType {ALL, UNICAST, BROADCAST_MULTICAST}
@@ -385,8 +377,8 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
         try {
             // prepare then send buffer
             byteBuffer.flip();
-            // TODO(port) we create new UDP socket for each send
-            //  check if this is necessary
+
+            // We create new UDP socket for each send
             DatagramSocket socket = new DatagramSocket();
             DatagramPacket packet = new DatagramPacket(
                     byteBuffer.array(),
@@ -394,7 +386,7 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                     address.getAddress(), address.getPort());
             socket.send(packet);
             socket.close();
-//            this.channel.send(byteBuffer, address);
+
         } catch (NoRouteToHostException noRouteToHostException) {
             this.context.getLogger().log(Level.FINER, "No route to host exception caught when sending to: " + address + ".", noRouteToHostException);
         } catch (UnresolvedAddressException uae) {
@@ -475,24 +467,6 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
      */
     public InetSocketAddress[] getSendAddresses() {
         return this.sendAddresses;
-    }
-
-    /**
-     * Get list of ignored addresses.
-     *
-     * @return ignored addresses.
-     */
-    public InetSocketAddress[] getIgnoredAddresses() {
-        return this.ignoredAddresses;
-    }
-
-    /**
-     * Get bind address.
-     *
-     * @return bind address.
-     */
-    public InetSocketAddress getBindAddress() {
-        return this.bindAddress;
     }
 
     /**
@@ -602,8 +576,8 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
     public void alignBuffer(int alignment) {
         final int k = (alignment - 1);
         final int pos = this.sendBuffer.position();
-        int newpos = (pos + k) & (~k);
-        this.sendBuffer.position(newpos);
+        int newPos = (pos + k) & (~k);
+        this.sendBuffer.position(newPos);
     }
 
     /* (non-Javadoc)
@@ -682,20 +656,8 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
     public void alignData(int alignment) {
         final int k = (alignment - 1);
         final int pos = this.receiveBuffer.position();
-        int newpos = (pos + k) & (~k);
-        this.receiveBuffer.position(newpos);
-    }
-
-    /* (non-Javadoc)
-     * @see org.epics.pvaccess.impl.remote.Transport#setByteOrder(java.nio.ByteOrder)
-     */
-    public void setByteOrder(ByteOrder byteOrder) {
-        // called from receive thread... or before processing
-        this.receiveBuffer.order(byteOrder);
-
-        synchronized (this) {
-            this.sendBuffer.order(byteOrder);
-        }
+        int newPos = (pos + k) & (~k);
+        this.receiveBuffer.position(newPos);
     }
 
     /* (non-Javadoc)

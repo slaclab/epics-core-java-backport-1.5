@@ -15,7 +15,6 @@
 package org.epics.pvaccess.impl.remote.utils.test;
 
 import junit.framework.TestCase;
-
 import org.epics.pvaccess.impl.remote.utils.ServerStatusMonitor;
 
 /**
@@ -23,15 +22,14 @@ import org.epics.pvaccess.impl.remote.utils.ServerStatusMonitor;
  */
 public class ServerStatusMonitorTest extends TestCase {
 
-	public ServerStatusMonitorTest(String methodName) {
-		super(methodName);
-	}
+    public ServerStatusMonitorTest(String methodName) {
+        super(methodName);
+    }
 
-	public void testServerStatusMonitor() throws Throwable
-	{
-		ServerStatusMonitor ssm = new ServerStatusMonitor();
-		ssm.execute();
-		Thread.sleep(5000);
-		ssm.destroy();
-	}
+    public void testServerStatusMonitor() throws Throwable {
+        ServerStatusMonitor ssm = new ServerStatusMonitor();
+        ssm.execute();
+        Thread.sleep(5000);
+        ssm.destroy();
+    }
 }

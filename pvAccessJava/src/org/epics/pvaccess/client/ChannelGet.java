@@ -7,8 +7,8 @@ package org.epics.pvaccess.client;
 
 /**
  * Request to get data from a channel.
- * @author mrk
  *
+ * @author mrk
  */
 public interface ChannelGet extends ChannelRequest {
     /**

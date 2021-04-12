@@ -14,6 +14,11 @@
 
 package org.epics.pvaccess.impl.remote.utils;
 
+import org.epics.pvaccess.PVAException;
+import org.epics.pvaccess.client.impl.remote.BeaconHandler;
+import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
+import org.epics.pvdata.pv.PVField;
+
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -21,81 +26,72 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.epics.pvaccess.PVAException;
-import org.epics.pvaccess.client.impl.remote.BeaconHandler;
-import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
-import org.epics.pvdata.pv.PVField;
-
 /**
  * Simple server monitor GUI.
+ *
  * @author msekoranja
  * @version $Id$
  */
 public class ServerStatusMonitor {
 
-	/**
-	 * Context implementation.
-	 */
-	private static class BeaconMonitorContextImpl extends ClientContextImpl
-	{
-		/**
-		 * Beacon handler map.
-		 */
-		private final Map<String, BeaconHandler> beaconHandlerMap =
-				Collections.synchronizedMap(new HashMap<String, BeaconHandler>());
+    /**
+     * Context implementation.
+     */
+    private static class BeaconMonitorContextImpl extends ClientContextImpl {
+        /**
+         * Beacon handler map.
+         */
+        private final Map<String, BeaconHandler> beaconHandlerMap =
+                Collections.synchronizedMap(new HashMap<String, BeaconHandler>());
 
-		/**
-		 * Constructor.
-		 */
-		public BeaconMonitorContextImpl() {
-			super();
-		}
+        /**
+         * Constructor.
+         */
+        public BeaconMonitorContextImpl() {
+            super();
+        }
 
-		@Override
-		public BeaconHandler getBeaconHandler(String protocol, InetSocketAddress responseFrom) {
-			BeaconHandler bh = beaconHandlerMap.get(protocol);
-			if (bh == null)
-			{
-				bh = new BeaconHandlerImpl(protocol);
-				beaconHandlerMap.put(protocol, bh);
-			}
-			return bh;
-		}
+        @Override
+        public BeaconHandler getBeaconHandler(String protocol, InetSocketAddress responseFrom) {
+            BeaconHandler bh = beaconHandlerMap.get(protocol);
+            if (bh == null) {
+                bh = new BeaconHandlerImpl(protocol);
+                beaconHandlerMap.put(protocol, bh);
+            }
+            return bh;
+        }
 
-	}
+    }
 
 
-	static class BeaconHandlerImpl implements BeaconHandler
-	{
-		/**
-		 * ISO 8601 date formatter.
-		 */
-		private static SimpleDateFormat timeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    static class BeaconHandlerImpl implements BeaconHandler {
+        /**
+         * ISO 8601 date formatter.
+         */
+        private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
-		private final String protocol;
+        private final String protocol;
 
-		public BeaconHandlerImpl(String protocol)
-		{
-			this.protocol = protocol;
-		}
+        public BeaconHandlerImpl(String protocol) {
+            this.protocol = protocol;
+        }
 
-		public void beaconNotify(InetSocketAddress from, byte remoteTransportRevision,
-								 long timestamp, byte[] guid, int sequentalID,
-								 int changeCount, PVField data) {
-			// sync timeFormatter and System.out
-			synchronized(timeFormatter)
-			{
-				System.out.printf("[%s] %s@%s: seqID %d, version %d, guid %s, change %d\n",
-						timeFormatter.format(new Date(timestamp)),
-						protocol, from,
-						sequentalID, remoteTransportRevision,
-						GUID.toString(guid),
-						changeCount);
-				if (data != null)
-					System.out.println(data);
-			}
-		}
-	}
+        public void beaconNotify(InetSocketAddress from, byte remoteTransportRevision,
+                                 long timestamp, byte[] guid, int sequentialID,
+                                 int changeCount, PVField data) {
+            // sync timeFormatter and System.out
+            synchronized (timeFormatter) {
+                System.out.printf("[%s] %s@%s: seqID %d, version %d, guid %s, change %d\n",
+                        timeFormatter.format(new Date(timestamp)),
+                        protocol, from,
+                        sequentialID, remoteTransportRevision,
+                        GUID.toString(guid),
+                        changeCount);
+                if (data != null)
+                    System.out.println(data);
+            }
+        }
+    }
 
 
     /**
@@ -105,17 +101,19 @@ public class ServerStatusMonitor {
 
     /**
      * Initialize JCA context.
-     * @throws PVAException	throws on any failure.
+     *
+     * @throws PVAException throws on any failure.
      */
     private void initialize() throws PVAException {
 
-		// Create a context with default configuration values.
-		context = new BeaconMonitorContextImpl();
-		context.initialize();
+        // Create a context with default configuration values.
+        context = new BeaconMonitorContextImpl();
+        context.initialize();
 
-		// Display basic information about the context.
+        // Display basic information about the context.
         System.out.println(context.getVersion().getVersionString());
-        context.printInfo(); System.out.println();
+        context.printInfo();
+        System.out.println();
     }
 
     /**
@@ -134,30 +132,31 @@ public class ServerStatusMonitor {
         }
     }
 
-	/**
-	 * Do the work...
-	 */
-	public void execute() {
+    /**
+     * Do the work...
+     */
+    public void execute() {
 
-		try {
+        try {
 
-		    // initialize context
-		    initialize();
+            // initialize context
+            initialize();
 
-		} catch (Throwable th) {
-			th.printStackTrace();
-		}
+        } catch (Throwable th) {
+            th.printStackTrace();
+        }
 
-	}
+    }
 
 
-	/**
-	 * Program entry point.
-	 * @param args	command-line arguments
-	 */
-	public static void main(String[] args) {
-		// execute
-		new ServerStatusMonitor().execute();
-	}
+    /**
+     * Program entry point.
+     *
+     * @param args command-line arguments
+     */
+    public static void main(String[] args) {
+        // execute
+        new ServerStatusMonitor().execute();
+    }
 
 }

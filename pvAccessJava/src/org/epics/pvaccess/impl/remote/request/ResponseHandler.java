@@ -14,30 +14,32 @@
 
 package org.epics.pvaccess.impl.remote.request;
 
+import org.epics.pvaccess.impl.remote.Transport;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
-import org.epics.pvaccess.impl.remote.Transport;
-
 /**
  * Interface defining response handler.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface ResponseHandler {
 
-	/**
-	 * Handle response.
-	 * @param responseFrom	remove address of the responder, <code>null</code> if unknown. 
-	 * @param transport	response source transport.
-	 * @param version message version.
-	 * @param command command.
-	 * @param payloadSize size of this message data available in the <code>payloadBuffer</code>.
-	 * @param payloadBuffer	message payload data.
-	 * 						Note that this might not be the only message in the buffer.
-	 * 						Code must not manilupate buffer. 
-	 */
-	public void handleResponse(InetSocketAddress responseFrom, Transport transport,
-							   byte version, byte command, int payloadSize,
-							   ByteBuffer payloadBuffer);
+    /**
+     * Handle response.
+     *
+     * @param responseFrom  remove address of the responder, <code>null</code> if unknown.
+     * @param transport     response source transport.
+     * @param version       message version.
+     * @param command       command.
+     * @param payloadSize   size of this message data available in the <code>payloadBuffer</code>.
+     * @param payloadBuffer message payload data.
+     *                      Note that this might not be the only message in the buffer.
+     *                      Code must not manipulate buffer.
+     */
+    void handleResponse(InetSocketAddress responseFrom, Transport transport,
+                        byte version, byte command, int payloadSize,
+                        ByteBuffer payloadBuffer);
 }

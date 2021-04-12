@@ -55,8 +55,6 @@ public class TestChannelProviderImpl implements ChannelProvider {
             statusCreate.createStatus(StatusType.ERROR, "illegal pvRequest", null);
     private static final Status subFieldDoesNotExistStatus =
             statusCreate.createStatus(StatusType.ERROR, "subField does not exist", null);
-    //private static final Status subFieldNotDefinedStatus =
-    //	statusCreate.createStatus(StatusType.ERROR, "subField not defined", null);
     private static final Status subFieldNotArrayStatus =
             statusCreate.createStatus(StatusType.ERROR, "subField is not an array", null);
 
@@ -357,7 +355,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
                 try {
                     result = pvTopStructure.request(pvArgument);
                 } catch (Throwable th) {
-                    status = statusCreate.createStatus(StatusType.ERROR, "exceptuon caught: " + th.getMessage(), th);
+                    status = statusCreate.createStatus(StatusType.ERROR, "exception caught: " + th.getMessage(), th);
                 } finally {
                     pvTopStructure.unlock();
                 }
@@ -444,7 +442,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
             private final PVScalarArray pvCopy;
             private final boolean process;
 
-            public TestChannelScalarArrayImpl(PVTopStructure pvTopStructure, ChannelArrayRequester channelArrayRequester, PVScalarArray array, PVStructure pvRequest) {
+            public TestChannelScalarArrayImpl(PVTopStructure pvTopStructure, ChannelArrayRequester channelArrayRequester, PVScalarArray array) {
                 super(TestChannelImpl.this, pvTopStructure, null);
 
                 this.channelArrayRequester = channelArrayRequester;
@@ -470,7 +468,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
                 pvTopStructure.lock();
                 try {
                     if (count <= 0) count = pvCopy.getLength();
-                    convert.copyScalarArray(pvCopy, 0, (PVScalarArray) pvArray, offset, count);
+                    convert.copyScalarArray(pvCopy, 0, pvArray, offset, count);
 
                     if (process)
                         pvTopStructure.process();
@@ -498,9 +496,6 @@ public class TestChannelProviderImpl implements ChannelProvider {
                 lock();
                 pvTopStructure.lock();
                 try {
-                    //if (process)
-                    //	pvTopStructure.process();
-
                     if (count == 0) count = pvArray.getLength() - offset;
                     int len = convert.copyScalarArray(pvArray, offset, pvCopy, 0, count);
                     if (!pvCopy.isImmutable()) pvCopy.setLength(len);
@@ -751,7 +746,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
         private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
         public void destroy() {
-            if (destroyed.getAndSet(true) == false) {
+            if (!destroyed.getAndSet(true)) {
                 destroyRequests();
 
                 setConnectionState(ConnectionState.DISCONNECTED);
@@ -867,11 +862,6 @@ public class TestChannelProviderImpl implements ChannelProvider {
             if (channelRPCRequester == null)
                 throw new IllegalArgumentException("channelRPCRequester");
 
-			/*
-			if (pvRequest == null)
-				throw new IllegalArgumentException("pvRequest");
-			*/
-
             if (destroyed.get()) {
                 channelRPCRequester.channelRPCConnect(destroyedStatus, null);
                 return null;
@@ -946,7 +936,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
                 return null;
             }
             PVScalarArray pvArray = (PVScalarArray) pvField;
-            return new TestChannelScalarArrayImpl(pvTopStructure, channelArrayRequester, pvArray, pvRequest);
+            return new TestChannelScalarArrayImpl(pvTopStructure, channelArrayRequester, pvArray);
         }
     }
 
@@ -963,7 +953,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
         return PROVIDER_NAME;
     }
 
-    private ChannelFind channelFind = new ChannelFind() {
+    private final ChannelFind channelFind = new ChannelFind() {
 
         public ChannelProvider getChannelProvider() {
             return TestChannelProviderImpl.this;
@@ -984,7 +974,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
                     "testAny"
             };
 
-    private static Set<String> HOSTED_CHANNELS_SET =
+    private static final Set<String> HOSTED_CHANNELS_SET =
             new HashSet<String>(Arrays.asList(HOSTED_CHANNELS));
 
     private boolean isSupported(String channelName) {
@@ -994,7 +984,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
     private static final Timer timer = TimerFactory.create("counter timer", ThreadPriority.middle);
     private final HashMap<String, PVTopStructure> tops = new HashMap<String, PVTopStructure>();
 
-    private static final Pattern TESTARRAY_PATTERN = Pattern.compile("testArray(\\d+)(.+)?");
+    private static final Pattern TEST_ARRAY_PATTERN = Pattern.compile("testArray(\\d+)(.+)?");
 
     private synchronized PVTopStructure getTopStructure(String channelName) {
         //synchronized (tops) {
@@ -1024,7 +1014,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
             pvArray.setLength(ARRAY_VALUE.length);
             pvArray.put(0, ARRAY_VALUE.length, ARRAY_VALUE, 0);
         } else if (channelName.startsWith("testArray")) {
-            Matcher matcher = TESTARRAY_PATTERN.matcher(channelName);
+            Matcher matcher = TEST_ARRAY_PATTERN.matcher(channelName);
             int length = 1024 * 1024;
             double inc = 1.1;
             if (matcher.matches()) {
@@ -1044,7 +1034,7 @@ public class TestChannelProviderImpl implements ChannelProvider {
             double v = 0.0;
             int ix = 0;
             int ARRAY_SIZE = 1024;
-            int stage = 0;
+            int stage;
             double[] array = new double[ARRAY_SIZE];
             while (ix < length) {
                 int toFill = length - ix;

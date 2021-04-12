@@ -35,8 +35,8 @@ public class TCPServer2 {
                     public void run() {
                         try {
                             ByteBuffer msg = ByteBuffer.wrap("from Server".getBytes());
-                            int nwritten = socket.write(msg);
-                            System.out.println("Message sent, bytes written: " + nwritten);
+                            int nWritten = socket.write(msg);
+                            System.out.println("Message sent, bytes written: " + nWritten);
                         } catch (Throwable th) {
                             th.printStackTrace();
                         }

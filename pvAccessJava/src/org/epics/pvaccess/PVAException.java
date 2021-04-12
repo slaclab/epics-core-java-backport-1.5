@@ -16,41 +16,42 @@ package org.epics.pvaccess;
 
 /**
  * Base PVA exception.
+ *
  * @author msekoranja
  */
 public class PVAException extends Exception {
 
-	/**
-	 * Serializartion version ID.
-	 */
-	private static final long serialVersionUID = 6793616450810302722L;
+    /**
+     * Serialization version ID.
+     */
+    private static final long serialVersionUID = 6793616450810302722L;
 
-	/**
-	 * Default constructor.
-	 */
-	protected PVAException() {
-	}
+    /**
+     * Default constructor.
+     */
+    protected PVAException() {
+    }
 
-	/**
-	 * @param message exception message.
-	 */
-	public PVAException(String message) {
-		super(message);
-	}
+    /**
+     * @param message exception message.
+     */
+    public PVAException(String message) {
+        super(message);
+    }
 
-	/**
-	 * @param cause exception cause.
-	 */
-	public PVAException(Throwable cause) {
-		super(cause);
-	}
+    /**
+     * @param cause exception cause.
+     */
+    public PVAException(Throwable cause) {
+        super(cause);
+    }
 
-	/**
-	 * @param message exception message.
-	 * @param cause exception cause.
-	 */
-	public PVAException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * @param message exception message.
+     * @param cause   exception cause.
+     */
+    public PVAException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

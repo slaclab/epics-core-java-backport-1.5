@@ -25,7 +25,6 @@ import org.epics.pvaccess.impl.remote.server.ChannelHostingTransport;
 import org.epics.pvaccess.impl.remote.server.ServerChannel;
 import org.epics.pvaccess.impl.remote.tcp.NonBlockingTCPTransport;
 import org.epics.pvaccess.impl.security.NoSecurityPlugin;
-import org.epics.pvaccess.impl.security.SecurityPluginMessageTransportSender;
 import org.epics.pvaccess.plugins.SecurityPlugin;
 import org.epics.pvaccess.plugins.SecurityPlugin.SecurityPluginControl;
 import org.epics.pvaccess.plugins.SecurityPlugin.SecuritySession;
@@ -178,15 +177,6 @@ public class NonBlockingServerTCPTransport extends NonBlockingTCPTransport
             channels.values().toArray(sca);
             return sca;
         }
-    }
-
-    /**
-     * Get channel count.
-     *
-     * @return channel count.
-     */
-    public int getChannelCount() {
-        return channels.size();
     }
 
     /* (non-Javadoc)
@@ -376,11 +366,6 @@ public class NonBlockingServerTCPTransport extends NonBlockingTCPTransport
             ss.messageReceived(data);
         else
             context.getLogger().warning("authNZ message received but no security plug-in session active");
-    }
-
-    public void sendSecurityPluginMessage(PVField data) {
-        // TODO not optimal since it allocates a new object every time
-        enqueueSendRequest(new SecurityPluginMessageTransportSender(data));
     }
 
     public void authenticationCompleted(Status status) {

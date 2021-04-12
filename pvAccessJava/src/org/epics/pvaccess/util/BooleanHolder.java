@@ -20,25 +20,26 @@ package org.epics.pvaccess.util;
 
 /**
  * This class is a simple wrapper around a boolean value. It can be used in lieu of
- * the class org.omg.CORBA.BooleanHolder in order to avoid the dependency to the 
+ * the class org.omg.CORBA.BooleanHolder in order to avoid the dependency to the
  * Java 10 module java.corba, which is deprecated since Java 9 and subject to
  * removal in future versions.
  */
 public class BooleanHolder {
 
-	public boolean value = false;
-	
-	/**
-	 * Instantiates an object of this class where the initial value is set to <code>false</code>.
-	 */
-	public BooleanHolder() {
-	}
-	
-	/**
-	 * Instantiates an object of this class.
-	 * @param value The initial value.
-	 */
-	public BooleanHolder(boolean value) {
-		this.value = value;
-	}
+    public boolean value = false;
+
+    /**
+     * Instantiates an object of this class where the initial value is set to <code>false</code>.
+     */
+    public BooleanHolder() {
+    }
+
+    /**
+     * Instantiates an object of this class.
+     *
+     * @param value The initial value.
+     */
+    public BooleanHolder(boolean value) {
+        this.value = value;
+    }
 }

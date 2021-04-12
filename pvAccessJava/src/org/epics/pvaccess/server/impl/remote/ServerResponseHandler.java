@@ -25,73 +25,73 @@ import java.nio.ByteBuffer;
 
 /**
  * PVAS request handler - main handler which dispatches requests to appropriate handlers.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  */
 public final class ServerResponseHandler implements ResponseHandler {
 
-	/**
-	 * Table of response handlers for each command ID.
-	 */
-	private final ResponseHandler[] handlerTable;
+    /**
+     * Table of response handlers for each command ID.
+     */
+    private final ResponseHandler[] handlerTable;
 
-	/**
-	 * Context instance.
-	 */
-	private final ServerContextImpl context;
+    /**
+     * Context instance.
+     */
+    private final ServerContextImpl context;
 
-	public ServerResponseHandler(ServerContextImpl context) {
-		this.context = context;
+    public ServerResponseHandler(ServerContextImpl context) {
+        this.context = context;
 
-		final ResponseHandler badResponse = new BadResponse(context);
+        final ResponseHandler badResponse = new BadResponse(context);
 
-		handlerTable = new ResponseHandler[]
-			{
-				new NoopResponse(context, "Beacon"), /*  0 */
-				new ConnectionValidationHandler(context), /*  1 */
-				new EchoHandler(context), /*  2 */
-				new SearchHandler(context), /*  3 */
-				badResponse, /*  4 */
-				new AuthNZHandler(context.getDebugLevel() >= 3), /*  5 */
-				badResponse, /*  6 */
-				new CreateChannelHandler(context), /*  7 */
-				new DestroyChannelHandler(context), /*  8 */
-				badResponse, /*  9 */
-				new GetHandler(context), /* 10 */
-				new PutHandler(context), /* 11 */
-				new PutGetHandler(context), /* 12 */
-				new MonitorHandler(context), /* 13 */
-				new ArrayHandler(context), /* 14 */
-				new DestroyRequestHandler(context), /* 15 */
-				new ProcessHandler(context), /* 16 */
-				new GetFieldHandler(context), /* 17 */
-				badResponse, /* 18 */
-				badResponse, /* 19 */
-				new RPCHandler(context), /* 20 */
-				new CancelRequestHandler(context), /* 21 */
-				new NoopResponse(context, "Origin tag"), /* 22 - origin tag (unsupported) */
-				badResponse, /* 23 */
-				badResponse, /* 24 */
-				badResponse, /* 25 */
-				badResponse, /* 26 */
-				badResponse, /* 27 */
-			};
-	}
+        handlerTable = new ResponseHandler[]
+                {
+                        new NoopResponse(context, "Beacon"), /*  0 */
+                        new ConnectionValidationHandler(context), /*  1 */
+                        new EchoHandler(context), /*  2 */
+                        new SearchHandler(context), /*  3 */
+                        badResponse, /*  4 */
+                        new AuthNZHandler(context.getDebugLevel() >= 3), /*  5 */
+                        badResponse, /*  6 */
+                        new CreateChannelHandler(context), /*  7 */
+                        new DestroyChannelHandler(context), /*  8 */
+                        badResponse, /*  9 */
+                        new GetHandler(context), /* 10 */
+                        new PutHandler(context), /* 11 */
+                        new PutGetHandler(context), /* 12 */
+                        new MonitorHandler(context), /* 13 */
+                        new ArrayHandler(context), /* 14 */
+                        new DestroyRequestHandler(context), /* 15 */
+                        new ProcessHandler(context), /* 16 */
+                        new GetFieldHandler(context), /* 17 */
+                        badResponse, /* 18 */
+                        badResponse, /* 19 */
+                        new RPCHandler(context), /* 20 */
+                        new CancelRequestHandler(context), /* 21 */
+                        new NoopResponse(context, "Origin tag"), /* 22 - origin tag (unsupported) */
+                        badResponse, /* 23 */
+                        badResponse, /* 24 */
+                        badResponse, /* 25 */
+                        badResponse, /* 26 */
+                        badResponse, /* 27 */
+                };
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.core.ResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	public final void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.core.ResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    public final void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
 
-		if (command < 0 || command >= handlerTable.length)
-		{
-			context.getLogger().fine("Invalid (or unsupported) command: " + command + ".");
-			// TODO remove debug output
-			HexDump.hexDump("Invalid PVA header " + command + " + , its payload buffer", payloadBuffer.array(), payloadBuffer.position(), payloadSize);
-			return;
-		}
+        if (command < 0 || command >= handlerTable.length) {
+            context.getLogger().fine("Invalid (or unsupported) command: " + command + ".");
+            // TODO remove debug output
+            HexDump.hexDump("Invalid PVA header " + command + " + , its payload buffer", payloadBuffer.array(), payloadBuffer.position(), payloadSize);
+            return;
+        }
 
-		// delegate
-		handlerTable[command].handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
-	}
+        // delegate
+        handlerTable[command].handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    }
 
 }

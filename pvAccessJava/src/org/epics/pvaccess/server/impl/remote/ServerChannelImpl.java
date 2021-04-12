@@ -14,15 +14,15 @@
 
 package org.epics.pvaccess.server.impl.remote;
 
-import java.io.PrintStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.epics.pvaccess.client.Channel;
 import org.epics.pvaccess.impl.remote.server.ServerChannel;
 import org.epics.pvaccess.plugins.SecurityPlugin.ChannelSecuritySession;
 import org.epics.pvdata.misc.Destroyable;
+
+import java.io.PrintStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Server channel (client connection to local channel). This (default)
@@ -33,207 +33,196 @@ import org.epics.pvdata.misc.Destroyable;
  */
 public class ServerChannelImpl implements ServerChannel {
 
-	/**
-	 * Local channel.
-	 */
-	protected final Channel channel;
+    /**
+     * Local channel.
+     */
+    protected final Channel channel;
 
-	/**
-	 * Channel SID.
-	 */
-	protected final int sid;
+    /**
+     * Channel SID.
+     */
+    protected final int sid;
 
-	/**
-	 * Channel CID.
-	 */
-	protected final int cid;
+    /**
+     * Channel CID.
+     */
+    protected final int cid;
 
-	/**
-	 * Channel security session.
-	 */
-	protected final ChannelSecuritySession channelSecuritySession;
+    /**
+     * Channel security session.
+     */
+    protected final ChannelSecuritySession channelSecuritySession;
 
-	/**
-	 * Requests.
-	 */
-	protected final Map<Integer, Destroyable> requests = Collections
-			.synchronizedMap(new HashMap<Integer, Destroyable>());
+    /**
+     * Requests.
+     */
+    protected final Map<Integer, Destroyable> requests = Collections
+            .synchronizedMap(new HashMap<Integer, Destroyable>());
 
-	/**
-	 * Destroy state.
-	 */
-	protected boolean destroyed = false;
+    /**
+     * Destroy state.
+     */
+    protected boolean destroyed = false;
 
-	/**
-	 * Create server channel for given process variable.
-	 *
-	 * @param channel
-	 *            local channel.
-	 * @param cid
-	 *            channel CID.
-	 * @param sid
-	 *            channel SID.
-	 * @param css
-	 *            channel security session.
-	 */
-	public ServerChannelImpl(Channel channel, int cid, int sid, ChannelSecuritySession css) {
-		if (channel == null)
-			throw new IllegalArgumentException("non null local channel required");
+    /**
+     * Create server channel for given process variable.
+     *
+     * @param channel local channel.
+     * @param cid     channel CID.
+     * @param sid     channel SID.
+     * @param css     channel security session.
+     */
+    public ServerChannelImpl(Channel channel, int cid, int sid, ChannelSecuritySession css) {
+        if (channel == null)
+            throw new IllegalArgumentException("non null local channel required");
 
-		this.cid = cid;
-		this.sid = sid;
-		this.channel = channel;
-		this.channelSecuritySession = css;
-	}
+        this.cid = cid;
+        this.sid = sid;
+        this.channel = channel;
+        this.channelSecuritySession = css;
+    }
 
-	/**
-	 * Get local channel.
-	 *
-	 * @return local channel.
-	 */
-	public Channel getChannel() {
-		return channel;
-	}
+    /**
+     * Get local channel.
+     *
+     * @return local channel.
+     */
+    public Channel getChannel() {
+        return channel;
+    }
 
-	/**
-	 * Get channel CID.
-	 *
-	 * @return channel CID.
-	 */
-	public int getCID() {
-		return cid;
-	}
+    /**
+     * Get channel CID.
+     *
+     * @return channel CID.
+     */
+    public int getCID() {
+        return cid;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.epics.pvaccess.server.impl.remote.ServerChannel#getSID()
-	 */
-	public int getSID() {
-		return sid;
-	}
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.epics.pvaccess.server.impl.remote.ServerChannel#getSID()
+     */
+    public int getSID() {
+        return sid;
+    }
 
-	public ChannelSecuritySession getChannelSecuritySession() {
-		return channelSecuritySession;
-	}
+    public ChannelSecuritySession getChannelSecuritySession() {
+        return channelSecuritySession;
+    }
 
-	/**
-	 * Register request
-	 *
-	 * @param id
-	 *            request ID.
-	 * @param request
-	 *            request to be registered.
-	 */
-	public void registerRequest(int id, Destroyable request) {
-		if (request == null)
-			throw new IllegalArgumentException("request == null");
+    /**
+     * Register request
+     *
+     * @param id      request ID.
+     * @param request request to be registered.
+     */
+    public void registerRequest(int id, Destroyable request) {
+        if (request == null)
+            throw new IllegalArgumentException("request == null");
 
-		requests.put(id, request);
-	}
+        requests.put(id, request);
+    }
 
-	/**
-	 * Unregister request.
-	 *
-	 * @param id
-	 *            request ID.
-	 */
-	public void unregisterRequest(int id) {
+    /**
+     * Unregister request.
+     *
+     * @param id request ID.
+     */
+    public void unregisterRequest(int id) {
 
-		requests.remove(id);
+        requests.remove(id);
 
-	}
+    }
 
-	/**
-	 * Get request by its ID.
-	 *
-	 * @param id
-	 *            request ID.
-	 * @return request with given ID, <code>null</code> if there is no request with
-	 *         such ID.
-	 */
-	public Destroyable getRequest(int id) {
+    /**
+     * Get request by its ID.
+     *
+     * @param id request ID.
+     * @return request with given ID, <code>null</code> if there is no request with
+     * such ID.
+     */
+    public Destroyable getRequest(int id) {
 
-		return requests.get(id);
+        return requests.get(id);
 
-	}
+    }
 
-	public synchronized Destroyable[] getRequests() {
+    public synchronized Destroyable[] getRequests() {
 
-		Destroyable[] reqs = new Destroyable[requests.size()];
-		requests.values().toArray(reqs);
-		return reqs;
+        Destroyable[] reqs = new Destroyable[requests.size()];
+        requests.values().toArray(reqs);
+        return reqs;
 
-	}
+    }
 
-	/**
-	 * Destroy all registered requests.
-	 */
-	protected void destroyAllRequests() {
-		Integer[] keys;
+    /**
+     * Destroy all registered requests.
+     */
+    protected void destroyAllRequests() {
+        Integer[] keys;
 
-		// resource allocation optimization
-		if (requests.size() == 0)
-			return;
+        // resource allocation optimization
+        if (requests.size() == 0)
+            return;
 
-		keys = new Integer[requests.keySet().size()];
-		requests.keySet().toArray(keys);
-		for (Integer key : keys) {
-			final Destroyable cr = requests.remove(key);
-			cr.destroy();
-		}
+        keys = new Integer[requests.keySet().size()];
+        requests.keySet().toArray(keys);
+        for (Integer key : keys) {
+            final Destroyable cr = requests.remove(key);
+            cr.destroy();
+        }
 
-	}
+    }
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.epics.pvaccess.server.impl.remote.ServerChannel#destroy()
-	 */
-	public synchronized void destroy() {
-		if (destroyed)
-			return;
-		destroyed = true;
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.epics.pvaccess.server.impl.remote.ServerChannel#destroy()
+     */
+    public synchronized void destroy() {
+        if (destroyed)
+            return;
+        destroyed = true;
 
-		// destroy all requests
-		destroyAllRequests();
+        // destroy all requests
+        destroyAllRequests();
 
-		try {
-			channelSecuritySession.close();
-		} catch (Throwable th) {
-			// guard from bad plug-on
-			// TODO
-			th.printStackTrace();
-		}
+        try {
+            channelSecuritySession.close();
+        } catch (Throwable th) {
+            // guard from bad plug-on
+            // TODO
+            th.printStackTrace();
+        }
 
-		// TODO make impl that does shares channels (and does ref counting)!!!
-		// try catch?
-		channel.destroy();
-	}
+        // TODO make impl that does shares channels (and does ref counting)!!!
+        // try catch?
+        channel.destroy();
+    }
 
-	/**
-	 * Prints detailed information about the process variable to the standard output
-	 * stream.
-	 *
-	 * @throws IllegalStateException
-	 *             if the context has been destroyed.
-	 */
-	public void printInfo() throws IllegalStateException {
-		printInfo(System.out);
-	}
+    /**
+     * Prints detailed information about the process variable to the standard output
+     * stream.
+     *
+     * @throws IllegalStateException if the context has been destroyed.
+     */
+    public void printInfo() throws IllegalStateException {
+        printInfo(System.out);
+    }
 
-	/**
-	 * Prints detailed information about the process variable to the specified
-	 * output stream.
-	 *
-	 * @param out
-	 *            the output stream.
-	 * @throws IllegalStateException
-	 *             if the context has been destroyed.
-	 */
-	public void printInfo(PrintStream out) {
-		out.println("CLASS        : " + getClass().getName());
-		out.println("CHANNEL      : " + channel);
-	}
+    /**
+     * Prints detailed information about the process variable to the specified
+     * output stream.
+     *
+     * @param out the output stream.
+     * @throws IllegalStateException if the context has been destroyed.
+     */
+    public void printInfo(PrintStream out) {
+        out.println("CLASS        : " + getClass().getName());
+        out.println("CHANNEL      : " + channel);
+    }
 
 }

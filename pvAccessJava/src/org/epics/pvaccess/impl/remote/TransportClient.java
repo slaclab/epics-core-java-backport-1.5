@@ -16,31 +16,33 @@ package org.epics.pvaccess.impl.remote;
 
 /**
  * Client (user) of the transport.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface TransportClient {
-	
-	/**
-	 * Notification of unresponsive transport (e.g. no heartbeat detected) .
-	 */
-	public void transportUnresponsive();
 
-	/**
-	 * Notification of responsive transport (e.g. heartbeat detected again),
-	 * called to discard <code>transportUnresponsive</code> notification.
-	 * @param transport	responsive transport.
-	 */
-	public void transportResponsive(Transport transport);
+    /**
+     * Notification of unresponsive transport (e.g. no heartbeat detected) .
+     */
+    void transportUnresponsive();
 
-	/**
-	 * Notification of network change (server restarted).
-	 */
-	public void transportChanged();
+    /**
+     * Notification of responsive transport (e.g. heartbeat detected again),
+     * called to discard <code>transportUnresponsive</code> notification.
+     *
+     * @param transport responsive transport.
+     */
+    void transportResponsive(Transport transport);
 
-	/**
-	 * Notification of forcefully closed transport.
-	 */
-	public void transportClosed();
+    /**
+     * Notification of network change (server restarted).
+     */
+    void transportChanged();
+
+    /**
+     * Notification of forcefully closed transport.
+     */
+    void transportClosed();
 
 }

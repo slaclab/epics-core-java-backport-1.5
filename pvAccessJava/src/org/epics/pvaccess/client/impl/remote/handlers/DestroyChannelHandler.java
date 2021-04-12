@@ -14,38 +14,40 @@
 
 package org.epics.pvaccess.client.impl.remote.handlers;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.client.impl.remote.ChannelImpl;
 import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
 import org.epics.pvaccess.impl.remote.Transport;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+
 /**
  * PVA destroy channel response.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $id$
  */
 public class DestroyChannelHandler extends AbstractClientResponseHandler {
 
-	public DestroyChannelHandler(ClientContextImpl context) {
-		super(context, "Destroy channel");
-	}
+    public DestroyChannelHandler(ClientContextImpl context) {
+        super(context, "Destroy channel");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		transport.ensureData(2*Integer.SIZE/Byte.SIZE);
-		final int cid = payloadBuffer.getInt();
-		/*final int sid =*/ payloadBuffer.getInt();
-		
-		ChannelImpl channel = context.getChannel(cid);
-		if (channel != null)
-			channel.channelDestroyedOnServer();
-	}
+        transport.ensureData(2 * Integer.SIZE / Byte.SIZE);
+        final int cid = payloadBuffer.getInt();
+        /*final int sid =*/
+        payloadBuffer.getInt();
+
+        ChannelImpl channel = context.getChannel(cid);
+        if (channel != null)
+            channel.channelDestroyedOnServer();
+    }
 
 }

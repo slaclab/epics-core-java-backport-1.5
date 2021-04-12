@@ -45,16 +45,10 @@ public class BlockingUDPConnector implements Connector {
      */
     private final boolean reuseSocket;
 
-    /**
-     * Broadcast flag.
-     */
-    private final boolean broadcast;
-
-    public BlockingUDPConnector(Context context, boolean reuseSocket, InetSocketAddress[] sendAddresses, boolean broadcast) {
+    public BlockingUDPConnector(Context context, boolean reuseSocket, InetSocketAddress[] sendAddresses) {
         this.context = context;
         this.reuseSocket = reuseSocket;
         this.sendAddresses = sendAddresses;
-        this.broadcast = broadcast;
     }
 
     /**
@@ -70,16 +64,12 @@ public class BlockingUDPConnector implements Connector {
         try {
             socket = new MulticastSocket(bindAddress);
 
-            // set broadcast mode
-//            if (broadcast)
-//                socket.setBroadcast(true);
-
             if (reuseSocket)
                 socket.setReuseAddress(true);
 
             // create transport
             return new BlockingUDPTransport(context, responseHandler, socket,
-                    bindAddress, sendAddresses, transportRevision);
+                    bindAddress, sendAddresses);
         } catch (Throwable th) {
             // close socket, if open
             try {

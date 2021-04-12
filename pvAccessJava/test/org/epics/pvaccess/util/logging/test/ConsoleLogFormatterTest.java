@@ -14,13 +14,12 @@
 
 package org.epics.pvaccess.util.logging.test;
 
+import junit.framework.TestCase;
+import org.epics.pvaccess.util.logging.ConsoleLogFormatter;
+
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
-import junit.framework.TestCase;
-
-import org.epics.pvaccess.util.logging.ConsoleLogFormatter;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
@@ -31,12 +30,11 @@ public class ConsoleLogFormatterTest extends TestCase {
     public ConsoleLogFormatterTest(String methodName) {
         super(methodName);
     }
-    
+
     /*
      * Class under test for String format(LogRecord)
      */
-    public void testFormatLogRecord()
-    {
+    public void testFormatLogRecord() {
         Formatter formatter = new ConsoleLogFormatter();
         LogRecord msg = new LogRecord(Level.INFO, "This is a message.");
         System.out.println(formatter.format(msg));
@@ -52,16 +50,15 @@ public class ConsoleLogFormatterTest extends TestCase {
     /*
      * Class under test for String format(LogRecord)
      */
-    public void testFormatLogRecordVerbose()
-    {
-	    boolean exists = System.getProperties().containsKey(ConsoleLogFormatter.KEY_TRACE);
-	    if (!exists)
-	        System.setProperty(ConsoleLogFormatter.KEY_TRACE, "true");
-	    
+    public void testFormatLogRecordVerbose() {
+        boolean exists = System.getProperties().containsKey(ConsoleLogFormatter.KEY_TRACE);
+        if (!exists)
+            System.setProperty(ConsoleLogFormatter.KEY_TRACE, "true");
+
         testFormatLogRecord();
 
         if (!exists)
-	        System.getProperties().remove(ConsoleLogFormatter.KEY_TRACE);
+            System.getProperties().remove(ConsoleLogFormatter.KEY_TRACE);
     }
 
 }

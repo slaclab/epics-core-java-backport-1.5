@@ -7,25 +7,29 @@ package org.epics.pvaccess.client;
 
 
 /**
- * <code>ChanneProvider</code> factory interface.
+ * <code>ChannelProvider</code> factory interface.
+ *
  * @author mse
  */
 public interface ChannelProviderFactory {
-	/**
-	 * Get factory name (i.e. name of the provider).
-	 * @return the factory name.
-	 */
-	String getFactoryName();
+    /**
+     * Get factory name (i.e. name of the provider).
+     *
+     * @return the factory name.
+     */
+    String getFactoryName();
 
-	/**
-	 * Get a shared instance.
-	 * @return a shared instance.
-	 */
-	ChannelProvider sharedInstance();
+    /**
+     * Get a shared instance.
+     *
+     * @return a shared instance.
+     */
+    ChannelProvider sharedInstance();
 
-	/**
-	 * Create a new instance.
-	 * @return a new instance.
-	 */
-	ChannelProvider newInstance();
+    /**
+     * Create a new instance.
+     *
+     * @return a new instance.
+     */
+    ChannelProvider newInstance();
 }

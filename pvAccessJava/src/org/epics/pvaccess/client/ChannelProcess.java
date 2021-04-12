@@ -8,8 +8,8 @@ package org.epics.pvaccess.client;
 
 /**
  * ChannelProcess - request that a channel be processed..
- * @author mrk
  *
+ * @author mrk
  */
 public interface ChannelProcess extends ChannelRequest {
     /**

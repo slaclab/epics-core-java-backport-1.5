@@ -14,24 +14,26 @@
 
 package org.epics.pvaccess.impl.remote;
 
-import java.net.InetSocketAddress;
-
 import org.epics.pvdata.pv.SerializableControl;
+
+import java.net.InetSocketAddress;
 
 
 /**
  * Interface defining transport send control.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface TransportSendControl extends SerializableControl {
 
-	void startMessage(byte command, int ensureCapacity);
-	void endMessage();
-	
-	void flush(boolean lastMessageCompleted);
-	
-	
-	void setRecipient(InetSocketAddress sendTo);
-	
+    void startMessage(byte command, int ensureCapacity);
+
+    void endMessage();
+
+    void flush(boolean lastMessageCompleted);
+
+
+    void setRecipient(InetSocketAddress sendTo);
+
 }

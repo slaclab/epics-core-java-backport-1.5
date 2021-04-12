@@ -33,9 +33,8 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
     private static final StandardPVField standardPVField = StandardPVFieldFactory.getStandardPVField();
     private static final PVDataCreate pvDataCreate = PVDataFactory.getPVDataCreate();
 
-    private static enum DBRProperty {none, status, time, graphic, control}
+    private enum DBRProperty {none, status, time, graphic, control}
 
-    ;
     private static final Map<gov.aps.jca.dbr.Status, AlarmStatus> statusMap = new HashMap<Status, AlarmStatus>();
 
     private final V3Channel v3Channel;
@@ -102,7 +101,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         gov.aps.jca.Channel jcaChannel = v3Channel.getJCAChannel();
         int elementCount = jcaChannel.getElementCount();
         nativeDBRType = jcaChannel.getFieldType();
-        PVField[] pvFields = null;
+        PVField[] pvFields;
         PVField pvf = pvRequest.getSubField("field");
         if (pvf != null && pvf.getField().getType() == Type.structure) {
             PVStructure pvStruct = pvRequest.getStructureField("field");
@@ -146,7 +145,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 continue;
             }
             if (!pvField.getFieldName().equals("value")) {
-                String message = pvField.toString() + " name not suported";
+                String message = pvField + " name not supported";
                 v3Channel.message(message, MessageType.error);
                 continue;
             }
@@ -154,12 +153,10 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             if (nativeDBRType != DBRType.ENUM) continue;
             PVStructure pvValue = (PVStructure) pvField;
             PVField[] pvValueFields = pvValue.getPVFields();
-            if (pvValueFields.length == 0) {
-                continue;
-            } else {
+            if (pvValueFields.length != 0) {
                 if (pvValueFields.length != 1) {
                     valueIsChoice = true;
-                    String message = pvField.toString() + " value has unsupported subfields";
+                    String message = pvField + " value has unsupported subfields";
                     v3Channel.message(message, MessageType.error);
                 } else {
                     String fieldName = pvValueFields[0].getFieldName();
@@ -201,10 +198,10 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 }
                 if (propertyName.equals("valueAlarm") && (dbrProperty.compareTo(DBRProperty.control) < 0)) {
                     dbrProperty = DBRProperty.control;
-                    continue;
                 }
             }
         }
+
         Type type = Type.scalar;
         ScalarType scalarType = null;
         if (nativeDBRType.isBYTE()) {
@@ -391,8 +388,8 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             System.err.println(
                     v3Channel.getChannelName()
                             + " v3Ca error " + message
-                            + " severity " + alarmSeverity.toString()
-                            + " status " + alarmStatus.toString());
+                            + " severity " + alarmSeverity
+                            + " status " + alarmStatus);
         }
     }
 
@@ -424,7 +421,8 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
         bitSet.clear();
         DBRType requestDBRType = fromDBR.getType();
         if (nativeDBRType.isENUM()) {
-            int index = pvEnumerated.getIndex();
+            int index;
+            pvEnumerated.getIndex();
             if (requestDBRType == DBRType.ENUM) {
                 DBR_Enum dbr = (DBR_Enum) fromDBR;
                 index = dbr.getEnumValue()[0];
@@ -458,7 +456,9 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                         " unsupported DBRType " + requestDBRType.getName());
                 return;
             }
-            if (index != pvEnumerated.getIndex()) pvEnumerated.setIndex(index);
+            if (index != pvEnumerated.getIndex()) {
+                pvEnumerated.setIndex(index);
+            }
         } else {
             if (requestDBRType == DBRType.DOUBLE) {
                 DBR_Double dbr = (DBR_Double) fromDBR;
@@ -896,7 +896,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
                 return;
             }
         }
-        PVStructure pvStructure = null;
+        PVStructure pvStructure;
         if (timeStamp != null && pvTimeStamp != null) {
             long seconds = timeStamp.secPastEpoch();
             seconds += 7305 * 86400;
@@ -914,7 +914,7 @@ public class BaseV3ChannelStructure implements V3ChannelStructure {
             if (pvStructure != null) {
                 PVString pvUnits = pvStructure.getStringField("units");
                 if (pvUnits != null) {
-                    pvUnits.put(units.toString());
+                    pvUnits.put(units);
                 }
             }
         }

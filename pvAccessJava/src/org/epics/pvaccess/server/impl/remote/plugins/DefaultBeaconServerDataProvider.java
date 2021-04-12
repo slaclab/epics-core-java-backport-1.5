@@ -14,64 +14,59 @@
 
 package org.epics.pvaccess.server.impl.remote.plugins;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.ThreadMXBean;
-
 import org.epics.pvaccess.PVFactory;
 import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
 import org.epics.pvaccess.server.plugins.BeaconServerStatusProvider;
-import org.epics.pvdata.pv.Field;
-import org.epics.pvdata.pv.FieldCreate;
-import org.epics.pvdata.pv.PVDataCreate;
-import org.epics.pvdata.pv.PVField;
-import org.epics.pvdata.pv.PVStructure;
-import org.epics.pvdata.pv.ScalarType;
+import org.epics.pvdata.pv.*;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 
 /**
  * Default <code>BeaconServerDataProvider</code> implementation.
+ *
  * @author Matej Sekoranja (matej.sekoranja@cosylab.com)
  * @version $Id$
  */
 public class DefaultBeaconServerDataProvider implements
-		BeaconServerStatusProvider {
+        BeaconServerStatusProvider {
 
-	/**
-	 * Monitored server context.
-	 */
-	protected ServerContextImpl context;
+    /**
+     * Monitored server context.
+     */
+    protected ServerContextImpl context;
 
-	/**
-	 * Status structure.
-	 */
-	protected PVStructure status;
+    /**
+     * Status structure.
+     */
+    protected PVStructure status;
 
-	/**
-	 * Constructor.
-	 * @param context server context to be monitored.
-	 */
-	public DefaultBeaconServerDataProvider(ServerContextImpl context) {
-		this.context = context;
+    /**
+     * Constructor.
+     *
+     * @param context server context to be monitored.
+     */
+    public DefaultBeaconServerDataProvider(ServerContextImpl context) {
+        this.context = context;
 
-		initialize();
-	}
+        initialize();
+    }
 
-	/**
-	 * Initialize data stuctures.
-	 */
-	private void initialize()
-	{
+    /**
+     * Initialize data structures.
+     */
+    private void initialize() {
         FieldCreate fieldCreate = PVFactory.getFieldCreate();
         PVDataCreate pvDataCreate = PVFactory.getPVDataCreate();
         // TODO hierarchy can be used...
-        String[] fieldNames = new String[] {
-        		"connections",
-        		"allocatedMemory",
-        		"freeMemory",
-        		"threads",
-        		"deadlocks",
-        		"averageSystemLoad"
-        		};
+        String[] fieldNames = new String[]{
+                "connections",
+                "allocatedMemory",
+                "freeMemory",
+                "threads",
+                "deadlocks",
+                "averageSystemLoad"
+        };
 
         Field[] fields = new Field[6];
         fields[0] = fieldCreate.createScalar(ScalarType.pvInt);
@@ -81,34 +76,28 @@ public class DefaultBeaconServerDataProvider implements
         fields[4] = fieldCreate.createScalar(ScalarType.pvInt);
         fields[5] = fieldCreate.createScalar(ScalarType.pvDouble);
 
-        status = pvDataCreate.createPVStructure(fieldCreate.createStructure(fieldNames,fields));
-	}
+        status = pvDataCreate.createPVStructure(fieldCreate.createStructure(fieldNames, fields));
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.server.plugins.BeaconServerStatusProvider#getServerStatusData()
-	 */
-	public PVField getServerStatusData() {
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.server.plugins.BeaconServerStatusProvider#getServerStatusData()
+     */
+    public PVField getServerStatusData() {
 
-		status.getIntField("connections").put(context.getTransportRegistry().numberOfActiveTransports());
-		status.getLongField("allocatedMemory").put(Runtime.getRuntime().totalMemory());
-		status.getLongField("freeMemory").put(Runtime.getRuntime().freeMemory());
+        status.getIntField("connections").put(context.getTransportRegistry().numberOfActiveTransports());
+        status.getLongField("allocatedMemory").put(Runtime.getRuntime().totalMemory());
+        status.getLongField("freeMemory").put(Runtime.getRuntime().freeMemory());
 
-		ThreadMXBean threadMBean = ManagementFactory.getThreadMXBean();
-		status.getIntField("threads").put(threadMBean.getThreadCount());
+        ThreadMXBean threadMBean = ManagementFactory.getThreadMXBean();
+        status.getIntField("threads").put(threadMBean.getThreadCount());
 
-		// In Java 5 owner synchroniser usage is not supported so force alternative strategy
-		final long[] deadlocks = threadMBean.findMonitorDeadlockedThreads();
-//		final long[] deadlocks = threadMBean.isSynchronizerUsageSupported() ?
-//        	threadMBean.findDeadlockedThreads() :
-//        	threadMBean.findMonitorDeadlockedThreads();
-    	status.getIntField("deadlocks").put((deadlocks != null) ? deadlocks.length : 0);
+        final long[] deadlocks = threadMBean.findMonitorDeadlockedThreads();
+        status.getIntField("deadlocks").put((deadlocks != null) ? deadlocks.length : 0);
 
-        OperatingSystemMXBean osMBean = ManagementFactory.getOperatingSystemMXBean();
-        // Not available for Java 5 so return unavailable result instead
-//		status.getDoubleField("averageSystemLoad").put(osMBean.getSystemLoadAverage());
-		status.getDoubleField("averageSystemLoad").put(-1);
+        ManagementFactory.getOperatingSystemMXBean();
+        status.getDoubleField("averageSystemLoad").put(-1);
 
-		return status;
-	}
+        return status;
+    }
 
 }

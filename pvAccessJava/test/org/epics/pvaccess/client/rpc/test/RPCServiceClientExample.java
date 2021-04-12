@@ -37,7 +37,7 @@ public class RPCServiceClientExample {
                     PVStructure result = client.request(arguments, 3.0);
                     System.out.println(result);
                 } catch (RPCRequestException rre) {
-                    System.out.println(rre);
+                    System.out.println(rre.getMessage());
                 }
                 client.destroy();
             }

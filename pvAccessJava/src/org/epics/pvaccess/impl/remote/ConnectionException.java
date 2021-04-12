@@ -18,49 +18,52 @@ import java.net.InetSocketAddress;
 
 /**
  * Connection exception.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public class ConnectionException extends Exception {
 
-	static final long serialVersionUID = 2533297215333289327L;
-
-	/**
-	 * Failed connection address.
-	 */
-	private InetSocketAddress address;
-
-	/**
-	 * Protocol type (tcp, udp, ssl, etc.)
-	 */
-	private String type;
-	
-	/**
-	 * @param address remote address.
-	 * @param type protocol type (tcp, udp, ssl, etc.)
-	 * @param message exception message.
-	 * @param cause the cause.
-	 */
-	public ConnectionException(String message, InetSocketAddress address, String type, Throwable cause) {
-		super(message, cause);
-		this.address = address;
-		this.type = type;
-	}
+    static final long serialVersionUID = 2533297215333289327L;
 
     /**
-     * Get connection addresss.
+     * Failed connection address.
+     */
+    private final InetSocketAddress address;
+
+    /**
+     * Protocol type (tcp, udp, ssl, etc.)
+     */
+    private final String type;
+
+    /**
+     * @param address remote address.
+     * @param type    protocol type (tcp, udp, ssl, etc.)
+     * @param message exception message.
+     * @param cause   the cause.
+     */
+    public ConnectionException(String message, InetSocketAddress address, String type, Throwable cause) {
+        super(message, cause);
+        this.address = address;
+        this.type = type;
+    }
+
+    /**
+     * Get connection addresses.
+     *
      * @return connection address.
      */
     public InetSocketAddress getAddress() {
         return address;
     }
 
-	/**
-	 * Get protocol type (tcp, udp, ssl, etc.).
-	 * @return protocol type.
-	 */
-	public String getType() {
-		return type;
-	}
-    
+    /**
+     * Get protocol type (tcp, udp, ssl, etc.).
+     *
+     * @return protocol type.
+     */
+    public String getType() {
+        return type;
+    }
+
 }

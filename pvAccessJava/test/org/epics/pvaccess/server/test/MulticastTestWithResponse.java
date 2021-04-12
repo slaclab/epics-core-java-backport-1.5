@@ -19,8 +19,6 @@ public class MulticastTestWithResponse {
         System.setProperty("java.net.preferIPv4Stack", "true");
     }
 
-    private static int PORT = 6789;
-
     public static void main(String[] args) {
         Set<org.epics.util.compat.jdk5.net.NetworkInterface> nifs = InetAddressUtil.getMulticastNIFs();
 
@@ -32,11 +30,11 @@ public class MulticastTestWithResponse {
 
         for (org.epics.util.compat.jdk5.net.NetworkInterface networkInterface : nifs) {
             NetworkInterface multicastNIF = networkInterface.getNetworkInterface();
-            List<InetAddress> multicastInterfaceAddresss = Collections.list(multicastNIF.getInetAddresses());
+            List<InetAddress> multicastInterfaceAddresses = Collections.list(multicastNIF.getInetAddresses());
 
-            for (InetAddress multicastInterfaceAddress : multicastInterfaceAddresss) {
+            for (InetAddress multicastInterfaceAddress : multicastInterfaceAddresses) {
                 try {
-                    System.out.println("");
+                    System.out.println();
                     System.out.println("Testing Multicast doing send and receive on each sock for Network Interface: " + networkInterface.getDisplayName() + " on network: " + multicastInterfaceAddress);
                     System.out.println("=======================================================");
 
@@ -45,6 +43,7 @@ public class MulticastTestWithResponse {
                     String stringToSend = new String(message, "ASCII");
 
                     // Create two sockets - one for a port the other
+                    int PORT = 6789;
                     MulticastSocket firstSocket = new MulticastSocket(PORT);
                     MulticastSocket secondSocket = new MulticastSocket();
                     InetAddress multicastGroup = InetAddressUtil.getMulticastGroup();
@@ -89,7 +88,7 @@ public class MulticastTestWithResponse {
                     //////////////// Now response message
                     /////////////////
 
-                    System.out.println("");
+                    System.out.println();
                     System.out.println("Reversing Direction ");
                     System.out.println("=======================================================");
 

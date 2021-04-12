@@ -19,38 +19,42 @@ import org.epics.pvdata.pv.Status;
 
 /**
  * A request that expects an response.
- * Responses identified by its I/O ID. 
+ * Responses identified by its I/O ID.
  * This interface needs to be extended (to provide method called on response).
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface ResponseRequest {
-	
-	/**
-	 * Get I/O ID.
-	 * @return ioid
-	 */
-	public int getIOID();
 
-	/**
-	 * Timeout notification.
-	 */
-	public void timeout();
+    /**
+     * Get I/O ID.
+     *
+     * @return ioid
+     */
+    int getIOID();
 
-	/**
-	 * Cancel response request.
-	 */
-	public void cancel();
-	
-	/**
-	 * Report status to clients (e.g. disconnected).
-	 * @param status to report.
-	 */
-	public void reportStatus(Status status);
-	
-	/**
-	 * Get request requester.
-	 * @return request requester.
-	 */
-	public Requester getRequester();
+    /**
+     * Timeout notification.
+     */
+    void timeout();
+
+    /**
+     * Cancel response request.
+     */
+    void cancel();
+
+    /**
+     * Report status to clients (e.g. disconnected).
+     *
+     * @param status to report.
+     */
+    void reportStatus(Status status);
+
+    /**
+     * Get request requester.
+     *
+     * @return request requester.
+     */
+    Requester getRequester();
 }

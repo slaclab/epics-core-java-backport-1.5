@@ -14,69 +14,65 @@
 
 package org.epics.pvaccess;
 
-import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelProviderFactory;
+import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
 
 /**
  * Utility class that starts/stops remote pvAccess client channel provider.
+ *
  * @author msekoranja
  */
 public class ClientFactory {
 
-	/**
-	 * Name if the provider this factory registers.
-	 */
-	public static final String PROVIDER_NAME = ClientContextImpl.PROVIDER_NAME;
+    /**
+     * Name if the provider this factory registers.
+     */
+    public static final String PROVIDER_NAME = ClientContextImpl.PROVIDER_NAME;
 
-	static private ChannelProviderFactoryImpl factory = null;
+    static private ChannelProviderFactoryImpl factory = null;
     static private ClientContextImpl context = null;
 
-    private static class ChannelProviderFactoryImpl implements ChannelProviderFactory
-    {
+    private static class ChannelProviderFactoryImpl implements ChannelProviderFactory {
 
-		public String getFactoryName() {
-			return PROVIDER_NAME;
-		}
+        public String getFactoryName() {
+            return PROVIDER_NAME;
+        }
 
-		public synchronized ChannelProvider sharedInstance() {
-	        try
-	        {
-	        	if (context == null)
-	        	{
-		        	ClientContextImpl lcontext = new ClientContextImpl();
-					lcontext.initialize();
-					context = lcontext;
-	        	}
+        public synchronized ChannelProvider sharedInstance() {
+            try {
+                if (context == null) {
+                    ClientContextImpl clientContext = new ClientContextImpl();
+                    clientContext.initialize();
+                    context = clientContext;
+                }
 
-				return context.getProvider();
-	        } catch (Throwable e) {
-	            throw new RuntimeException("Failed to initialize shared pvAccess client instance.", e);
-	        }
-		}
+                return context.getProvider();
+            } catch (Throwable e) {
+                throw new RuntimeException("Failed to initialize shared pvAccess client instance.", e);
+            }
+        }
 
-		public ChannelProvider newInstance() {
-	        try
-	        {
-	        	ClientContextImpl lcontext = new ClientContextImpl();
-				lcontext.initialize();
-				return lcontext.getProvider();
-	        } catch (Throwable e) {
-	            throw new RuntimeException("Failed to initialize new pvAccess client instance.", e);
-	        }
-		}
+        public ChannelProvider newInstance() {
+            try {
+                ClientContextImpl clientContext = new ClientContextImpl();
+                clientContext.initialize();
+                return clientContext.getProvider();
+            } catch (Throwable e) {
+                throw new RuntimeException("Failed to initialize new pvAccess client instance.", e);
+            }
+        }
 
-		public synchronized boolean destroySharedInstance() {
-			boolean destroyed = true;
-			if (context != null)
-			{
-				context.dispose();
-				destroyed = context.isDestroyed();
-				context = null;
-			}
-			return destroyed;
-		}
+        public synchronized boolean destroySharedInstance() {
+            boolean destroyed = true;
+            if (context != null) {
+                context.dispose();
+                destroyed = context.isDestroyed();
+                context = null;
+            }
+            return destroyed;
+        }
     }
 
     /**
@@ -92,13 +88,11 @@ public class ClientFactory {
      * Unregisters pvAccess client channel provider factory and destroys shared channel provider instance (if necessary).
      */
     public static synchronized void stop() {
-    	if (factory != null)
-    	{
-    		ChannelProviderRegistryFactory.unregisterChannelProviderFactory(factory);
-    		if(factory.destroySharedInstance())
-    		{
-    			factory=null;
-    		}
-    	}
+        if (factory != null) {
+            ChannelProviderRegistryFactory.unregisterChannelProviderFactory(factory);
+            if (factory.destroySharedInstance()) {
+                factory = null;
+            }
+        }
     }
 }

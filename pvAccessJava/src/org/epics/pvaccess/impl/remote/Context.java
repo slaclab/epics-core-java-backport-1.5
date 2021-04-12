@@ -14,42 +14,47 @@
 
 package org.epics.pvaccess.impl.remote;
 
-import java.util.Map;
-
 import org.epics.pvaccess.plugins.SecurityPlugin;
 import org.epics.pvaccess.util.logging.LoggerProvider;
 import org.epics.pvdata.misc.Timer;
 
+import java.util.Map;
+
 
 /**
  * Interface defining <code>Context</code> (logging, reactor, thread-pool, etc.).
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface Context extends LoggerProvider {
 
-	/**
-	 * Get timer.
-	 * @return timer.
-	 */
-	public Timer getTimer();
+    /**
+     * Get timer.
+     *
+     * @return timer.
+     */
+    Timer getTimer();
 
-	/**
-	 * Get transport (virtual circuit) registry.
-	 * @return transport (virtual circuit) registry.
-	 */
-	public TransportRegistry getTransportRegistry();
-	
-	/**
-	 * Get map of available security plug-ins.
-	 * @return the map of available security plug-ins
-	 */
-	public Map<String, SecurityPlugin> getSecurityPlugins();
+    /**
+     * Get transport (virtual circuit) registry.
+     *
+     * @return transport (virtual circuit) registry.
+     */
+    TransportRegistry getTransportRegistry();
 
-	/**
-	 * Get internal debug level configuration, higher value means more, 0 means none.
-	 * @return debug level.
-	 */
-	public int getDebugLevel();
+    /**
+     * Get map of available security plug-ins.
+     *
+     * @return the map of available security plug-ins
+     */
+    Map<String, SecurityPlugin> getSecurityPlugins();
+
+    /**
+     * Get internal debug level configuration, higher value means more, 0 means none.
+     *
+     * @return debug level.
+     */
+    int getDebugLevel();
 
 }

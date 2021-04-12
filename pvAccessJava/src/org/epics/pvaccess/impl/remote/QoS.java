@@ -16,88 +16,88 @@ package org.epics.pvaccess.impl.remote;
 
 /**
  * QoS bit-mask values.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public enum QoS {
 
-	/**
-	 * Default behavior.
-	 */
-	DEFAULT(0x00),
+    /**
+     * Default behavior.
+     */
+    DEFAULT(0x00),
 
-	/**
-	 * Require reply (acknowledgment for reliable operation).
-	 */
-	REPLY_REQUIRED(0x01),
+    /**
+     * Require reply (acknowledgment for reliable operation).
+     */
+    REPLY_REQUIRED(0x01),
 
-	/**
-	 * Best-effort option (no reply).
-	 */
-	UNUSED_0(0x02),
+    /**
+     * Best-effort option (no reply).
+     */
+    UNUSED_0(0x02),
 
-	/**
-	 * Process option.
-	 */
-	PROCESS(0x04),
+    /**
+     * Process option.
+     */
+    PROCESS(0x04),
 
-	/**
-	 * Initialize option.
-	 */
-	INIT(0x08),
+    /**
+     * Initialize option.
+     */
+    INIT(0x08),
 
-	/**
-	 * Destroy option.
-	 */
-	DESTROY(0x10),
+    /**
+     * Destroy option.
+     */
+    DESTROY(0x10),
 
-	/**
-	 * Share data option.
-	 */
-	UNUSED_1(0x20),
+    /**
+     * Share data option.
+     */
+    UNUSED_1(0x20),
 
-	/**
-	 * Get.
-	 */
-	GET(0x40),
+    /**
+     * Get.
+     */
+    GET(0x40),
 
-	/**
-	 * Get-put.
-	 */
-	GET_PUT(0x80);
+    /**
+     * Get-put.
+     */
+    GET_PUT(0x80);
 
 
+    /**
+     * Bit-mask value of this option.
+     */
+    private final int maskValue;
 
-	/**
-	 * Bit-mask value of this option.
-	 */
-	private final int maskValue;
+    /**
+     * Private constructor.
+     *
+     * @param maskValue mask value
+     */
+    QoS(int maskValue) {
+        this.maskValue = maskValue;
+    }
 
-	/**
-	 * Private constructor.
-	 * @param maskValue mask value
-	 */
-	private QoS(int maskValue)
-	{
-		this.maskValue = maskValue;
-	}
+    /**
+     * Get bit-mask value of this option.
+     *
+     * @return bit-mask value.
+     */
+    public int getMaskValue() {
+        return maskValue;
+    }
 
-	/**
-	 * Get bit-mask value of this option.
-	 * @return bit-mask value.
-	 */
-	public int getMaskValue()
-	{
-		return maskValue;
-	}
-
-	/**
-	 * Check if option is set.
-	 * @param qos QoS options to check.
-	 * @return <code>true</code> if option is set.
-	 */
-	public boolean isSet(int qos)
-	{
-		return ((qos & getMaskValue()) != 0);
-	}
+    /**
+     * Check if option is set.
+     *
+     * @param qos QoS options to check.
+     * @return <code>true</code> if option is set.
+     */
+    public boolean isSet(int qos) {
+        return ((qos & getMaskValue()) != 0);
+    }
 }

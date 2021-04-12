@@ -15,11 +15,15 @@ package org.epics.pvaccess.util.configuration;
 
 /**
  * Configuration interface.
+ *
  * @author msekoranja
  */
 public interface Configuration {
-	boolean getPropertyAsBoolean(String name, boolean defaultValue);
-	int getPropertyAsInteger(String name, int defaultValue);
-	float getPropertyAsFloat(String name, float defaultValue);
-	String getPropertyAsString(String name, String defaultValue);
+    boolean getPropertyAsBoolean(String name, boolean defaultValue);
+
+    int getPropertyAsInteger(String name, int defaultValue);
+
+    float getPropertyAsFloat(String name, float defaultValue);
+
+    String getPropertyAsString(String name, String defaultValue);
 }

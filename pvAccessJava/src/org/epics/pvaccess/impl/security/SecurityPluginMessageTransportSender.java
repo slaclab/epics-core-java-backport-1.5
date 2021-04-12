@@ -13,39 +13,37 @@
  */
 package org.epics.pvaccess.impl.security;
 
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.impl.remote.SerializationHelper;
 import org.epics.pvaccess.impl.remote.TransportSendControl;
 import org.epics.pvaccess.impl.remote.TransportSender;
 import org.epics.pvdata.pv.PVField;
 
-public class SecurityPluginMessageTransportSender implements TransportSender
-{
-	private final PVField data;
+import java.nio.ByteBuffer;
 
-	public SecurityPluginMessageTransportSender(PVField data)
-	{
-		this.data = data;
-	}
+public class SecurityPluginMessageTransportSender implements TransportSender {
+    private final PVField data;
 
-	public void lock() {
-		// noop
-	}
+    public SecurityPluginMessageTransportSender(PVField data) {
+        this.data = data;
+    }
 
-	public void unlock() {
-		// noop
-	}
+    public void lock() {
+        // noop
+    }
 
-	public void send(ByteBuffer buffer, TransportSendControl control) {
+    public void unlock() {
+        // noop
+    }
 
-		control.startMessage((byte)5, 0);
+    public void send(ByteBuffer buffer, TransportSendControl control) {
 
-		SerializationHelper.serializeFull(buffer, control, data);
+        control.startMessage((byte) 5, 0);
 
-		// send immediately
-		control.flush(true);
+        SerializationHelper.serializeFull(buffer, control, data);
 
-	}
+        // send immediately
+        control.flush(true);
+
+    }
 
 }

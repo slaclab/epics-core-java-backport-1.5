@@ -55,7 +55,7 @@ public class PVAForwarder {
             // following IPv4 address
             buffer.put(address.getAddress());    // always network byte order
         } else
-            throw new RuntimeException("unsupported network addresss: " + address);
+            throw new RuntimeException("unsupported network address: " + address);
     }
 
     public static NetworkInterface getFirstLoopbackNIF() throws SocketException {
@@ -79,12 +79,6 @@ public class PVAForwarder {
         System.out.println("Binding to UDP socket at port " + MC_PORT);
 
         DatagramSocket receiveSocket = new DatagramSocket(MC_PORT);
-		/*
-		DatagramSocket receiveSocket = new DatagramSocket(null);
-		receiveSocket.setReuseAddress(true);
-		receiveSocket.bind(new InetSocketAddress(MC_PORT));
-		*/
-
         InetSocketAddress mcAddress = new InetSocketAddress(MC_ADDRESS, MC_PORT);
         System.out.println("MC Group:   " + mcAddress);
 
@@ -137,7 +131,7 @@ public class PVAForwarder {
                 receiveBuffer.order(ByteOrder.LITTLE_ENDIAN);
             }
 
-            // command ID and paylaod
+            // command ID and payload
             final byte commandId = receiveBuffer.get();
             if (commandId != 3) {
                 System.out.println("Not a search request, ignoring... (ID: " + commandId + " != 3)");

@@ -15,9 +15,11 @@ package org.epics.pvaccess.util.configuration;
 
 /**
  * Configuration provider.
+ *
  * @author msekoranja
  */
 public interface ConfigurationProvider {
-	Configuration getConfiguration(String name);
-	void registerConfiguration(String name, Configuration configuration);
+    Configuration getConfiguration(String name);
+
+    void registerConfiguration(String name, Configuration configuration);
 }

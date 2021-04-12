@@ -14,56 +14,53 @@
 
 package org.epics.pvaccess.server.impl.remote.handlers;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.impl.remote.Transport;
 import org.epics.pvaccess.impl.remote.TransportSendControl;
 import org.epics.pvaccess.impl.remote.TransportSender;
 import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+
 
 /**
  * Echo request handler.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public class EchoHandler extends AbstractServerResponseHandler {
 
-	public EchoHandler(ServerContextImpl context) {
-		super(context, "Echo request");
-	}
+    public EchoHandler(ServerContextImpl context) {
+        super(context, "Echo request");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(final InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, final ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(final InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, final ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		// send back
-		transport.enqueueSendRequest(
-				new TransportSender() {
+        // send back
+        transport.enqueueSendRequest(
+                new TransportSender() {
 
-					public void send(ByteBuffer buffer, TransportSendControl control) {
-						// all at once...
-						/*
-						control.startMessage((byte)2, payloadBuffer.remaining());		/// TODO this is wrooooooong !!!!
-						buffer.put(payloadBuffer);
-						*/
-						control.startMessage((byte)2, 0);
-						control.setRecipient(responseFrom);
-					}
+                    public void send(ByteBuffer buffer, TransportSendControl control) {
+                        // all at once...
+                        control.startMessage((byte) 2, 0);
+                        control.setRecipient(responseFrom);
+                    }
 
-					public void lock() {
-						// noop
-					}
+                    public void lock() {
+                        // noop
+                    }
 
-					public void unlock() {
-						// noop
-					}
+                    public void unlock() {
+                        // noop
+                    }
 
-			});
-	}
+                });
+    }
 
 }

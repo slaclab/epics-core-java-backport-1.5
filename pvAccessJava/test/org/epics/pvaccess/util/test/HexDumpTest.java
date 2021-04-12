@@ -15,7 +15,6 @@
 package org.epics.pvaccess.util.test;
 
 import junit.framework.TestCase;
-
 import org.epics.pvaccess.util.HexDump;
 
 /**
@@ -31,8 +30,7 @@ public class HexDumpTest extends TestCase {
     /*
      * Class under test for void hexDump(String, byte[])
      */
-    public void testHexDump()
-    {
+    public void testHexDump() {
         final byte[] TO_DUMP = "Matej Sekoranja\0\1\2\3\4\5\6\254\255\256".getBytes();
         HexDump.hexDump("test", TO_DUMP);
 

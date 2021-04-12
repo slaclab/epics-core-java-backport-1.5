@@ -14,30 +14,32 @@
 
 package org.epics.pvaccess.client.impl.remote;
 
-import java.net.InetSocketAddress;
-
 import org.epics.pvdata.pv.PVField;
+
+import java.net.InetSocketAddress;
 
 /**
  * PVA beacon handler interface.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
-public interface BeaconHandler  {
-	
-	/**
-	 * Beacon arrival notification.
-	 * @param from who is notifying.
-	 * @param remoteTransportRevision encoded (major, minor) revision.
-	 * @param timestamp time when beacon was received.
-	 * @param guid server GUID.
-	 * @param sequentalID sequential ID (unsigned short).
-	 * @param changeCount change count (unsigned short).
-	 * @param data server status data, can be <code>null</code>.
-	 */
-	public void beaconNotify(InetSocketAddress from, byte remoteTransportRevision,
-							 long timestamp, byte[] guid, int sequentalID,
-							 int changeCount,
-							 PVField data);
+public interface BeaconHandler {
+
+    /**
+     * Beacon arrival notification.
+     *
+     * @param from                    who is notifying.
+     * @param remoteTransportRevision encoded (major, minor) revision.
+     * @param timestamp               time when beacon was received.
+     * @param guid                    server GUID.
+     * @param sequentialID            sequential ID (unsigned short).
+     * @param changeCount             change count (unsigned short).
+     * @param data                    server status data, can be <code>null</code>.
+     */
+    void beaconNotify(InetSocketAddress from, byte remoteTransportRevision,
+                      long timestamp, byte[] guid, int sequentialID,
+                      int changeCount,
+                      PVField data);
 
 }

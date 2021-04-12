@@ -14,51 +14,48 @@
 
 package org.epics.pvaccess.impl.remote.utils;
 
-import java.util.Arrays;
-
 import org.epics.pvaccess.util.HexDump;
 
+import java.util.Arrays;
+
 public class GUID {
-	private final byte[] guid;
+    private final byte[] guid;
 
-	public GUID(byte[] guid) {
-		this.guid = guid;
-	}
+    public GUID(byte[] guid) {
+        this.guid = guid;
+    }
 
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(guid);
-	}
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(guid);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		GUID other = (GUID) obj;
-		if (!Arrays.equals(guid, other.guid))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        GUID other = (GUID) obj;
+        return Arrays.equals(guid, other.guid);
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer b = new StringBuffer(50);
-		b.append("Ox");
-		for (byte v : guid)
-			b.append(HexDump.toHex(v));
-		return b.toString();
-	}
-	
-	public static String toString(byte[] guid) {
-		StringBuffer b = new StringBuffer(50);
-		b.append("Ox");
-		for (byte v : guid)
-			b.append(HexDump.toHex(v));
-		return b.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuffer b = new StringBuffer(50);
+        b.append("Ox");
+        for (byte v : guid)
+            b.append(HexDump.toHex(v));
+        return b.toString();
+    }
 
+    public static String toString(byte[] guid) {
+        StringBuffer b = new StringBuffer(50);
+        b.append("Ox");
+        for (byte v : guid)
+            b.append(HexDump.toHex(v));
+        return b.toString();
+    }
 }

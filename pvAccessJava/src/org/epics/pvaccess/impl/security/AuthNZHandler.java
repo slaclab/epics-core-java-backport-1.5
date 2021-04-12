@@ -14,13 +14,13 @@
 
 package org.epics.pvaccess.impl.security;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.impl.remote.SerializationHelper;
 import org.epics.pvaccess.impl.remote.Transport;
 import org.epics.pvaccess.impl.remote.request.AbstractResponseHandler;
 import org.epics.pvdata.pv.PVField;
+
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
@@ -28,19 +28,19 @@ import org.epics.pvdata.pv.PVField;
  */
 public class AuthNZHandler extends AbstractResponseHandler {
 
-	public AuthNZHandler(boolean debug) {
-		super("authNZ message", debug);
-	}
+    public AuthNZHandler(boolean debug) {
+        super("authNZ message", debug);
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		PVField data = SerializationHelper.deserializeFull(payloadBuffer, transport);
-		transport.authNZMessage(data);
-	}
+        PVField data = SerializationHelper.deserializeFull(payloadBuffer, transport);
+        transport.authNZMessage(data);
+    }
 
 }

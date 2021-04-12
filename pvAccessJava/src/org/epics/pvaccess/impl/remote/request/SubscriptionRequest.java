@@ -19,21 +19,23 @@ import org.epics.pvaccess.impl.remote.Transport;
 
 /**
  * A request that expects an response multiple responses.
- * Responses identified by its I/O ID. 
+ * Responses identified by its I/O ID.
  * This interface needs to be extended (to provide method called on response).
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface SubscriptionRequest extends ResponseRequest {
-	
-	/**
-	 * Update (e.g. after some time of unresponsiveness) - report current value.
-	 */
-	public void updateSubscription();
-	
-	/**
-	 * Resubscribe (e.g. when server was restarted)
-	 * @param transport new transport to be used.
-	 */
-	public void resubscribeSubscription(Transport transport);
+
+    /**
+     * Update (e.g. after some time of unresponsiveness) - report current value.
+     */
+    void updateSubscription();
+
+    /**
+     * Resubscribe (e.g. when server was restarted)
+     *
+     * @param transport new transport to be used.
+     */
+    void resubscribeSubscription(Transport transport);
 }

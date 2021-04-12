@@ -23,7 +23,6 @@ import org.epics.pvaccess.client.impl.remote.tcp.BlockingClientTCPTransport;
 import org.epics.pvaccess.client.impl.remote.tcp.BlockingTCPConnector;
 import org.epics.pvaccess.client.impl.remote.tcp.BlockingTCPConnector.TransportFactory;
 import org.epics.pvaccess.impl.remote.*;
-import org.epics.pvaccess.impl.remote.io.impl.PollerImpl;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
 import org.epics.pvaccess.impl.remote.request.ResponseRequest;
 import org.epics.pvaccess.impl.remote.udp.BlockingUDPConnector;
@@ -54,7 +53,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -82,7 +80,7 @@ public class ClientContextImpl implements Context {
     /**
      * Version.
      */
-    public static final Version VERSION = new Version("pvAccess Client", "Java", PVAVersion.VERSION_MAJOR,
+    public static final Version VERSION = new Version("pvAccess Client", PVAVersion.VERSION_MAJOR,
             PVAVersion.VERSION_MINOR, PVAVersion.VERSION_MAINTENANCE, PVAVersion.VERSION_DEVELOPMENT);
 
     /**
@@ -102,7 +100,7 @@ public class ClientContextImpl implements Context {
         /**
          * State value of destroyed context.
          */
-        DESTROYED;
+        DESTROYED
     }
 
     /**
@@ -250,7 +248,7 @@ public class ClientContextImpl implements Context {
     public ClientContextImpl() {
         loadConfiguration();
         initializeLogger();
-        initializeSecutiryPlugins();
+        initializeSecurityPlugins();
 
         clientResponseHandler = new ClientResponseHandler(this);
     }
@@ -285,7 +283,7 @@ public class ClientContextImpl implements Context {
                 inspectedLogger = inspectedLogger.getParent();
             }
 
-            if (!found)
+            if (!found && logger != null)
                 logger.addHandler(new ConsoleLogHandler());
         }
     }
@@ -355,14 +353,10 @@ public class ClientContextImpl implements Context {
 
     }
 
-    // TODO remove
-    final AtomicBoolean pollerInitialized = new AtomicBoolean();
-    PollerImpl poller;
-
     /**
-     * @throws PVAException for PV Access Exceptions
+     *
      */
-    private void internalInitialize() throws PVAException {
+    private void internalInitialize() {
 
         timer = TimerFactory.create("pvAccess-client timer", ThreadPriority.lower);
         TransportFactory transportFactory = new TransportFactory() {
@@ -372,7 +366,7 @@ public class ClientContextImpl implements Context {
                                     short priority) {
                 try {
                     return new BlockingClientTCPTransport(context, channel, responseHandler, receiveBufferSize, client,
-                            transportRevision, heartbeatInterval, priority);
+                            heartbeatInterval, priority);
                 } catch (SocketException e) {
                     throw new RuntimeException("Failed to create transport.");
                 }
@@ -402,7 +396,7 @@ public class ClientContextImpl implements Context {
             // where to send address
             InetSocketAddress[] broadcastAddresses = InetAddressUtil.getBroadcastAddresses(broadcastPort);
 
-            BlockingUDPConnector broadcastConnector = new BlockingUDPConnector(this, true, broadcastAddresses, true);
+            BlockingUDPConnector broadcastConnector = new BlockingUDPConnector(this, true, broadcastAddresses);
 
             broadcastTransport = (BlockingUDPTransport) broadcastConnector.connect(
                     null,
@@ -412,7 +406,7 @@ public class ClientContextImpl implements Context {
                     PVAConstants.PVA_DEFAULT_PRIORITY
             );
 
-            BlockingUDPConnector searchConnector = new BlockingUDPConnector(this, false, broadcastAddresses, true);
+            BlockingUDPConnector searchConnector = new BlockingUDPConnector(this, false, broadcastAddresses);
 
             searchTransport = (BlockingUDPTransport) searchConnector.connect(null, new ClientResponseHandler(this),
                     new InetSocketAddress(0), PVAConstants.PVA_PROTOCOL_REVISION, PVAConstants.PVA_DEFAULT_PRIORITY);
@@ -421,11 +415,11 @@ public class ClientContextImpl implements Context {
             if (addressList != null && addressList.length() > 0) {
                 // if auto is true, add it to specified list
                 InetSocketAddress[] appendList = null;
-                if (autoAddressList == true)
+                if (autoAddressList)
                     appendList = broadcastTransport.getSendAddresses();
 
                 InetSocketAddress[] list = InetAddressUtil.getSocketAddressList(addressList, broadcastPort, appendList);
-                if (list != null && list.length > 0) {
+                if (list.length > 0) {
                     broadcastTransport.setSendAddresses(list);
                     searchTransport.setSendAddresses(list);
                 }
@@ -546,7 +540,7 @@ public class ClientContextImpl implements Context {
      * @param name name to check.
      * @throws IllegalArgumentException for illegal argument exceptions
      */
-    private final void checkChannelName(String name) throws IllegalArgumentException {
+    private void checkChannelName(String name) throws IllegalArgumentException {
         if (name == null || name.length() == 0)
             throw new IllegalArgumentException("null or empty channel name");
         else if (name.length() > PVAConstants.MAX_CHANNEL_NAME_LENGTH)
@@ -699,33 +693,6 @@ public class ClientContextImpl implements Context {
     }
 
     /**
-     * Get search address list.
-     *
-     * @return get search address list.
-     */
-    public String getAddressList() {
-        return addressList;
-    }
-
-    /**
-     * Get auto search-list flag.
-     *
-     * @return auto search-list flag.
-     */
-    public boolean isAutoAddressList() {
-        return autoAddressList;
-    }
-
-    /**
-     * Get beacon period (in seconds).
-     *
-     * @return beacon period (in seconds).
-     */
-    public float getBeaconPeriod() {
-        return beaconPeriod;
-    }
-
-    /**
      * Get connection timeout (in seconds).
      *
      * @return connection timeout (in seconds).
@@ -756,15 +723,6 @@ public class ClientContextImpl implements Context {
         return receiveBufferSize;
     }
 
-    /**
-     * Get broadcast port.
-     *
-     * @return broadcast port.
-     */
-    public int getBroadcastPort() {
-        return broadcastPort;
-    }
-
     /*
      * (non-Javadoc)
      *
@@ -776,15 +734,6 @@ public class ClientContextImpl implements Context {
         } catch (Throwable th) {
             // noop
         }
-    }
-
-    /**
-     * Broadcast transport.
-     *
-     * @return broadcast transport.
-     */
-    public BlockingUDPTransport getBroadcastTransport() {
-        return broadcastTransport;
     }
 
     /**
@@ -829,7 +778,7 @@ public class ClientContextImpl implements Context {
         return securityPlugins;
     }
 
-    private void initializeSecutiryPlugins() {
+    private void initializeSecurityPlugins() {
         String classes = System.getProperty(SecurityPlugin.SECURITY_PLUGINS_CLIENT_KEY);
         if (classes != null) {
             StringTokenizer tokens = new StringTokenizer(classes, ",");
@@ -869,15 +818,6 @@ public class ClientContextImpl implements Context {
     }
 
     /**
-     * Get LF thread pool.
-     *
-     * @return LF thread pool, can be <code>null</code> if disabled.
-     *
-     *         public LeaderFollowersThreadPool getLeaderFollowersThreadPool() {
-     *         return leaderFollowersThreadPool; }
-     */
-
-    /**
      * Called each time new server is detected.
      */
     public void newServerDetected() {
@@ -913,8 +853,7 @@ public class ClientContextImpl implements Context {
         synchronized (channelsByCID) {
             // reserve CID
             // search first free (theoretically possible loop of death)
-            while (getChannel(++lastCID) != null)
-                ;
+            while (getChannel(++lastCID) != null) ;
             // reserve CID
             channelsByCID.put(lastCID, null);
             return lastCID;
@@ -935,7 +874,7 @@ public class ClientContextImpl implements Context {
      * @return request response with given I/O ID.
      */
     public ResponseRequest getResponseRequest(int ioid) {
-        return (ResponseRequest) pendingResponseRequests.get(ioid);
+        return pendingResponseRequests.get(ioid);
     }
 
     /**
@@ -960,7 +899,7 @@ public class ClientContextImpl implements Context {
      * @return removed object, can be <code>null</code>
      */
     public ResponseRequest unregisterResponseRequest(ResponseRequest request) {
-        return (ResponseRequest) pendingResponseRequests.remove(request.getIOID());
+        return pendingResponseRequests.remove(request.getIOID());
     }
 
     /**

@@ -1,5 +1,8 @@
 package org.epics.pvaccess.impl.remote.codec.test.perf;
 
+import org.epics.pvaccess.impl.remote.codec.AbstractCodec;
+import org.epics.pvdata.pv.Field;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -7,243 +10,193 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.logging.Logger;
 
-import org.epics.pvaccess.impl.remote.codec.AbstractCodec;
-import org.epics.pvdata.pv.Field;
+class TestCodec extends AbstractCodec {
+    interface ReadPollOneCallback {
+        void readPollOne() throws IOException;
+    }
 
-class TestCodec extends AbstractCodec
-{
-	static interface ReadPollOneCallback {
-		public void readPollOne() throws IOException;
-	}
+    interface WritePollOneCallback {
+        void writePollOne() throws IOException;
+    }
 
-	static interface WritePollOneCallback {
-		public void writePollOne() throws IOException;
-	}
+    int closedCount = 0;
+    int invalidDataStreamCount = 0;
+    int scheduleSendCount = 0;
+    int sendCompletedCount = 0;
+    int sendBufferFullCount = 0;
+    int readPollOneCount = 0;
+    int writePollOneCount = 0;
+    int messagesProcessed = 0;
 
-	int closedCount = 0;
-	int invalidDataStreamCount = 0;
-	int scheduleSendCount = 0;
-	int sendCompletedCount = 0;
-	int sendBufferFullCount = 0;
-	int readPollOneCount = 0;
-	int writePollOneCount = 0;
-	int messagesProcessed = 0;
+    boolean throwExceptionOnSend = false;
 
-	boolean throwExceptionOnSend = false;
+    ByteBuffer readBuffer;
+    final ByteBuffer writeBuffer;
 
-	ByteBuffer readBuffer;
-	final ByteBuffer writeBuffer;
+    TestCodec.ReadPollOneCallback readPollOneCallback = null;
+    TestCodec.WritePollOneCallback writePollOneCallback = null;
 
-	TestCodec.ReadPollOneCallback readPollOneCallback = null;
-	TestCodec.WritePollOneCallback writePollOneCallback = null;
+    boolean readPayload = false;
+    boolean disconnected = false;
 
-	boolean readPayload = false;
-	boolean disconnected = false;
+    int forcePayloadRead = -1;
 
-	int forcePayloadRead = -1;
+    public TestCodec(int bufferSize) {
+        this(bufferSize, bufferSize);
+    }
 
-	public TestCodec(int bufferSize) throws IOException {
-		this(bufferSize, bufferSize);
-	}
+    public TestCodec(int receiveBufferSize, int sendBufferSize) {
+        this(receiveBufferSize, sendBufferSize, false);
+    }
 
-	public TestCodec(int receiveBufferSize, int sendBufferSize) throws IOException {
-		this(receiveBufferSize, sendBufferSize, false);
-	}
+    public TestCodec(int receiveBufferSize, int sendBufferSize, boolean blocking) {
+        super(false, ByteBuffer.allocate(receiveBufferSize), ByteBuffer.allocate(sendBufferSize),
+                sendBufferSize / 10, blocking, Logger.getLogger("TestCodec"));
+        readBuffer = ByteBuffer.allocate(receiveBufferSize);
+        writeBuffer = ByteBuffer.allocate(sendBufferSize);
+    }
 
-	public TestCodec(int receiveBufferSize, int sendBufferSize, boolean blocking) throws IOException {
-		super(false, ByteBuffer.allocate(receiveBufferSize), ByteBuffer.allocate(sendBufferSize),
-				sendBufferSize/10, blocking, Logger.getLogger("TestCodec"));
-		readBuffer = ByteBuffer.allocate(receiveBufferSize);
-		writeBuffer = ByteBuffer.allocate(sendBufferSize);
-	}
+    void reset() {
+        closedCount = 0;
+        invalidDataStreamCount = 0;
+        scheduleSendCount = 0;
+        sendCompletedCount = 0;
+        sendBufferFullCount = 0;
+        readPollOneCount = 0;
+        writePollOneCount = 0;
+        messagesProcessed = 0;
+        readBuffer.clear();
+        writeBuffer.clear();
+    }
 
-	public ReadMode getReadMode()
-	{
-		return readMode;
-	}
+    public int read(ByteBuffer buffer) {
+        if (disconnected)
+            return -1;
 
-	public WriteMode getWriteMode()
-	{
-		return writeMode;
-	}
+        int startPos = readBuffer.position();
 
-	public ByteBuffer getSendBuffer()
-	{
-		return sendBuffer;
-	}
+        int bufferRemaining = buffer.remaining();
+        int readBufferRemaining = readBuffer.remaining();
+        if (bufferRemaining >= readBufferRemaining)
+            buffer.put(readBuffer);
+        else {
+            // TODO this could be optimized
+            for (int i = 0; i < bufferRemaining; i++)
+                buffer.put(readBuffer.get());
+        }
+        return readBuffer.position() - startPos;
+    }
 
-	void reset()
-	{
-		closedCount = 0;
-		invalidDataStreamCount = 0;
-		scheduleSendCount = 0;
-		sendCompletedCount = 0;
-		sendBufferFullCount = 0;
-		readPollOneCount = 0;
-		writePollOneCount = 0;
-		messagesProcessed = 0;
-		readBuffer.clear();
-		writeBuffer.clear();
-	}
+    public int write(ByteBuffer buffer) throws IOException {
+        if (disconnected)
+            return -1;    // TODO: not by the JavaDoc API spec
+        if (throwExceptionOnSend)
+            throw new IOException("text IO exception");
 
-	public int read(ByteBuffer buffer) throws IOException {
-		if (disconnected)
-			return -1;
+        // we could write remaining bytes, but for test this is enough
+        if (buffer.remaining() > writeBuffer.remaining())
+            return 0;
 
-		int startPos = readBuffer.position();
-		//buffer.put(readBuffer);
-		//while (buffer.hasRemaining() && readBuffer.hasRemaining())
-		//	buffer.put(readBuffer.get());
+        int startPos = buffer.position();
+        writeBuffer.put(buffer);
+        return buffer.position() - startPos;
+    }
 
-		int bufferRemaining = buffer.remaining();
-		int readBufferRemaining = readBuffer.remaining();
-		if (bufferRemaining >= readBufferRemaining)
-			buffer.put(readBuffer);
-		else
-		{
-			// TODO this could be optimized
-			for (int i = 0; i < bufferRemaining; i++)
-				buffer.put(readBuffer.get());
-		}
-		return readBuffer.position() - startPos;
-	}
+    public void close() throws IOException {
+        closedCount++;
+    }
 
-	public int write(ByteBuffer buffer) throws IOException {
-		if (disconnected)
-			return -1;	// TODO: not by the JavaDoc API spec
-		if (throwExceptionOnSend)
-			throw new IOException("text IO exception");
+    public boolean isOpen() {
+        return closedCount == 0;
+    }
 
-		// we could write remaining bytes, but for test this is enought
-		if (buffer.remaining() > writeBuffer.remaining())
-			return 0;
+    @Override
+    public void processControlMessage() {
+        // must be here so that to prevent optimizations
+        if (flags != (byte) 0x81 || command != (byte) 0x23)
+            throw new RuntimeException("bad data");
+        messagesProcessed++;
+    }
 
-		int startPos = buffer.position();
-		writeBuffer.put(buffer);
-		return buffer.position() - startPos;
-	}
+    ByteBuffer payload = ByteBuffer.allocate(MessageProcessPerformance.MAX_PAYLOAD_SIZE);
 
-	public void transferToReadBuffer() throws IOException
-	{
-		flushSerializeBuffer();
-		writeBuffer.flip();
+    @Override
+    public void processApplicationMessage() {
+        // must be here so that to prevent optimizations
+        if (flags != (byte) 0x80 || command != (byte) 0x23)
+            throw new RuntimeException("bad data");
 
-		readBuffer.clear();
-		readBuffer.put(writeBuffer);
-		readBuffer.flip();
+        if (readPayload && payloadSize > 0) {
+            payload.clear();
+            // no fragmentation supported by this implementation
+            int toRead = forcePayloadRead >= 0 ? forcePayloadRead : payloadSize;
+            while (toRead > 0) {
+                int partialRead = Math.min(toRead, AbstractCodec.MAX_ENSURE_DATA_SIZE);
+                ensureData(partialRead);
+                int pos = payload.position();
+                payload.put(socketBuffer);
+                int read = payload.position() - pos;
+                toRead -= read;
+            }
+        }
+        messagesProcessed++;
+    }
 
-		writeBuffer.clear();
-	}
+    @Override
+    public InetSocketAddress getLastReadBufferSocketAddress() {
+        try {
+            return new InetSocketAddress(InetAddress.getLocalHost(), 1234);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
-	public void addToReadBuffer() throws IOException
-	{
-		flushSerializeBuffer();
-		writeBuffer.flip();
+    @Override
+    public void invalidDataStreamHandler() {
+        invalidDataStreamCount++;
+    }
 
-		//readBuffer.clear();
-		readBuffer.put(writeBuffer);
-		readBuffer.flip();
+    @Override
+    public void readPollOne() throws IOException {
+        readPollOneCount++;
+        if (readPollOneCallback != null)
+            readPollOneCallback.readPollOne();
+    }
 
-		writeBuffer.clear();
-	}
+    @Override
+    public void writePollOne() throws IOException {
+        writePollOneCount++;
+        if (writePollOneCallback != null)
+            writePollOneCallback.writePollOne();
+    }
 
-	public void close() throws IOException {
-		closedCount++;
-	}
+    @Override
+    protected void sendBufferFull(int tries) throws IOException {
+        sendBufferFullCount++;
+        writeOpReady = false;
+        writeMode = WriteMode.WAIT_FOR_READY_SIGNAL;
+        this.writePollOne();
+        writeMode = WriteMode.PROCESS_SEND_QUEUE;
+    }
 
-	public boolean isOpen() {
-		return closedCount == 0;
-	}
+    @Override
+    public void scheduleSend() {
+        scheduleSendCount++;
+    }
 
-	@Override
-	public void processControlMessage() {
-		// must be here so that to prevent optimizations
-		if (flags != (byte)0x81 || command != (byte)0x23)
-			throw new RuntimeException("bad data");
-		messagesProcessed++;
-	}
+    @Override
+    public void sendCompleted() {
+        sendCompletedCount++;
+    }
 
-	ByteBuffer payload = ByteBuffer.allocate(MessageProcessPerformance.MAX_PAYLOAD_SIZE);
+    @Override
+    public boolean terminated() {
+        return false;
+    }
 
-	@Override
-	public void processApplicationMessage() throws IOException {
-		// must be here so that to prevent optimizations
-		if (flags != (byte)0x80 || command != (byte)0x23)
-			throw new RuntimeException("bad data");
-
-		if (readPayload && payloadSize > 0)
-		{
-			payload.clear();
-			// no fragmentation supported by this implementation
-			int toRead = forcePayloadRead >= 0 ? forcePayloadRead : payloadSize;
-			while (toRead > 0)
-			{
-				int partitalRead = Math.min(toRead, AbstractCodec.MAX_ENSURE_DATA_SIZE);
-				ensureData(partitalRead);
-				int pos = payload.position();
-				payload.put(socketBuffer);
-				int read = payload.position() - pos;
-				toRead -= read;
-			}
-		}
-		messagesProcessed++;
-	}
-
-	@Override
-	public InetSocketAddress getLastReadBufferSocketAddress() {
-		try {
-			return new InetSocketAddress(InetAddress.getLocalHost(), 1234);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	@Override
-	public void invalidDataStreamHandler() {
-		invalidDataStreamCount++;
-	}
-
-	@Override
-	public void readPollOne() throws IOException {
-		readPollOneCount++;
-		if (readPollOneCallback != null)
-			readPollOneCallback.readPollOne();
-	}
-
-	@Override
-	public void writePollOne() throws IOException {
-		writePollOneCount++;
-		if (writePollOneCallback != null)
-			writePollOneCallback.writePollOne();
-	}
-
-	@Override
-	protected void sendBufferFull(int tries) throws IOException {
-		sendBufferFullCount++;
-		writeOpReady = false;
-		writeMode = WriteMode.WAIT_FOR_READY_SIGNAL;
-		this.writePollOne();
-		writeMode = WriteMode.PROCESS_SEND_QUEUE;
-	}
-
-	@Override
-	public void scheduleSend() {
-		scheduleSendCount++;
-	}
-
-	@Override
-	public void sendCompleted() {
-		sendCompletedCount++;
-	}
-
-	@Override
-	public boolean terminated() {
-		return false;
-	}
-
-	public void cachedSerialize(Field field, ByteBuffer buffer) {
-		// no cache
-		field.serialize(buffer, this);
-	}
+    public void cachedSerialize(Field field, ByteBuffer buffer) {
+        // no cache
+        field.serialize(buffer, this);
+    }
 }

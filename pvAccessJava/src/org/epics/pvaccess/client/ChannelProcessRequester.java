@@ -10,20 +10,23 @@ import org.epics.pvdata.pv.Status;
 
 /**
  * Requester for channelProcess.
- * @author mrk
  *
+ * @author mrk
  */
 public interface ChannelProcessRequester extends Requester {
     /**
      * The client and server have both completed the createChannelProcess request.
-     * @param status Completion status.
+     *
+     * @param status         Completion status.
      * @param channelProcess The channelProcess interface or <code>null</code> if the client could not become
-     * the record processor.
+     *                       the record processor.
      */
     void channelProcessConnect(Status status, ChannelProcess channelProcess);
+
     /**
      * The process request is done. This is always called with no locks held.
-     * @param status Completion status.
+     *
+     * @param status         Completion status.
      * @param channelProcess The channelProcess interface.
      */
     void processDone(Status status, ChannelProcess channelProcess);

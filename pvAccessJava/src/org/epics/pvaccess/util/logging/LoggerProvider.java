@@ -18,15 +18,17 @@ import java.util.logging.Logger;
 
 /**
  * Interface defining an instance providing a Java Logger API <code>Logger</code> instance.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface LoggerProvider {
 
-	/**
-	 * Get Java Logger API <code>Logger</code> instance.
-	 * @return <code>Logger</code> instance.
-	 */
-	public Logger getLogger();
-	
+    /**
+     * Get Java Logger API <code>Logger</code> instance.
+     *
+     * @return <code>Logger</code> instance.
+     */
+    Logger getLogger();
+
 }

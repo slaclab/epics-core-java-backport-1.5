@@ -10,14 +10,14 @@ import java.util.TreeMap;
 
 /**
  * @author mrk
- *
  */
 public class ChannelProviderRegistryFactory {
-    private static final Map<String,ChannelProviderFactory> channelProviderMap = new TreeMap<String,ChannelProviderFactory>();
+    private static final Map<String, ChannelProviderFactory> channelProviderMap = new TreeMap<String, ChannelProviderFactory>();
     private static final ChannelProviderRegistryImpl channelProviderRegistry = new ChannelProviderRegistryImpl();
 
     /**
      * Get the ChannelProviderRegistry interface.
+     *
      * @return The interface.
      */
     public static ChannelProviderRegistry getChannelProviderRegistry() {
@@ -25,51 +25,52 @@ public class ChannelProviderRegistryFactory {
     }
 
     public static void registerChannelProviderFactory(ChannelProviderFactory channelProviderFactory) {
-        synchronized(channelProviderMap) {
+        synchronized (channelProviderMap) {
             channelProviderMap.put(channelProviderFactory.getFactoryName(), channelProviderFactory);
         }
     }
 
     public static void unregisterChannelProviderFactory(ChannelProviderFactory channelProviderFactory) {
-        synchronized(channelProviderMap) {
-        	ChannelProviderFactory registered = channelProviderMap.get(channelProviderFactory.getFactoryName());
-        	if (registered == channelProviderFactory)
-        		channelProviderMap.remove(channelProviderFactory.getFactoryName());
+        synchronized (channelProviderMap) {
+            ChannelProviderFactory registered = channelProviderMap.get(channelProviderFactory.getFactoryName());
+            if (registered == channelProviderFactory)
+                channelProviderMap.remove(channelProviderFactory.getFactoryName());
         }
     }
 
-    private static class ChannelProviderRegistryImpl implements ChannelProviderRegistry{
+    private static class ChannelProviderRegistryImpl implements ChannelProviderRegistry {
 
         /* (non-Javadoc)
          * @see org.epics.pvaccess.client.ChannelAccess#getProvider(java.lang.String)
          */
         public ChannelProvider getProvider(String providerName) {
-            synchronized(channelProviderMap) {
-            	ChannelProviderFactory cpf = channelProviderMap.get(providerName);
-            	if (cpf != null)
-            		return cpf.sharedInstance();
-            	else
-            		return null;
+            synchronized (channelProviderMap) {
+                ChannelProviderFactory cpf = channelProviderMap.get(providerName);
+                if (cpf != null)
+                    return cpf.sharedInstance();
+                else
+                    return null;
             }
         }
-        /* (non-Javadoc)
-		 * @see org.epics.pvaccess.client.ChannelAccess#createProvider(java.lang.String)
-		 */
-		public ChannelProvider createProvider(String providerName) {
-            synchronized(channelProviderMap) {
-            	ChannelProviderFactory cpf = channelProviderMap.get(providerName);
-            	if (cpf != null)
-            		return cpf.newInstance();
-            	else
-            		return null;
-            }
-		}
 
-		/* (non-Javadoc)
+        /* (non-Javadoc)
+         * @see org.epics.pvaccess.client.ChannelAccess#createProvider(java.lang.String)
+         */
+        public ChannelProvider createProvider(String providerName) {
+            synchronized (channelProviderMap) {
+                ChannelProviderFactory cpf = channelProviderMap.get(providerName);
+                if (cpf != null)
+                    return cpf.newInstance();
+                else
+                    return null;
+            }
+        }
+
+        /* (non-Javadoc)
          * @see org.epics.pvaccess.client.ChannelAccess#getProviderNames()
          */
         public String[] getProviderNames() {
-            synchronized(channelProviderMap) {
+            synchronized (channelProviderMap) {
                 String[] names = new String[channelProviderMap.size()];
                 channelProviderMap.keySet().toArray(names);
                 return names;

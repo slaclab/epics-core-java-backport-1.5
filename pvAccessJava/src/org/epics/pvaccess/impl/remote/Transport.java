@@ -14,147 +14,157 @@
 
 package org.epics.pvaccess.impl.remote;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteOrder;
-import java.nio.channels.Channel;
-
 import org.epics.pvaccess.plugins.SecurityPlugin.SecuritySession;
 import org.epics.pvdata.pv.DeserializableControl;
 import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.Status;
 
+import java.net.InetSocketAddress;
+import java.nio.channels.Channel;
 
 
 /**
  * Interface defining transport (connection).
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface Transport extends DeserializableControl, Channel {
 
-	/** 
-	 * Acquires transport.
-	 * @param client client (channel) acquiring the transport
-	 * @return <code>true</code> if transport was granted, <code>false</code> otherwise.
-	 */
-	public boolean acquire(TransportClient client);
-	
-	/** 
-	 * Releases transport.
-	 * @param client client (channel) releasing the transport
-	 */
-	public void release(TransportClient client);
+    /**
+     * Acquires transport.
+     *
+     * @param client client (channel) acquiring the transport
+     * @return <code>true</code> if transport was granted, <code>false</code> otherwise.
+     */
+    boolean acquire(TransportClient client);
 
-	/**
-	 * Get protocol type (tcp, udp, ssl, etc.).
-	 * @return protocol type.
-	 */
-	public String getType();
-	
-	/**
-	 * Get remote address.
-	 * @return remote address.
-	 */
-	public InetSocketAddress getRemoteAddress();
+    /**
+     * Releases transport.
+     *
+     * @param client client (channel) releasing the transport
+     */
+    void release(TransportClient client);
 
-	/**
-	 * Get context transport is living in.
-	 * @return context transport is living in.
-	 */
-	public Context getContext();
+    /**
+     * Get protocol type (tcp, udp, ssl, etc.).
+     *
+     * @return protocol type.
+     */
+    String getType();
 
-	/**
-	 * Transport protocol revision.
-	 * @return protocol revision.
-	 */
-	public byte getRevision();
-	
-	/**
-	 * Get receive buffer size.
-	 * @return receive buffer size.
-	 */
-	public int getReceiveBufferSize();
-	
-	/**
-	 * Get socket receive buffer size.
-	 * @return socket receive buffer size.
-	 */
-	public int getSocketReceiveBufferSize();
+    /**
+     * Get remote address.
+     *
+     * @return remote address.
+     */
+    InetSocketAddress getRemoteAddress();
 
-	/**
-	 * Transport priority.
-	 * @return protocol priority.
-	 */
-	public short getPriority();
+    /**
+     * Get context transport is living in.
+     *
+     * @return context transport is living in.
+     */
+    Context getContext();
 
-	/**
-	 * Set remote transport protocol revision.
-	 * @param revision protocol revision.
-	 */
-	public void setRemoteRevision(byte revision);
-	
-	/**
-	 * Set remote transport receive buffer size.
-	 * @param receiveBufferSize receive buffer size.
-	 */
-	public void setRemoteTransportReceiveBufferSize(int receiveBufferSize);
+    /**
+     * Transport protocol revision.
+     *
+     * @return protocol revision.
+     */
+    byte getRevision();
 
-	/**
-	 * Set remote transport socket receive buffer size.
-	 * @param socketReceiveBufferSize remote socket receive buffer size.
-	 */
-	public void setRemoteTransportSocketReceiveBufferSize(int socketReceiveBufferSize);
+    /**
+     * Get receive buffer size.
+     *
+     * @return receive buffer size.
+     */
+    int getReceiveBufferSize();
 
-	/**
-	 * Set byte order.
-	 * @param byteOrder byte order to set.
-	 */
-	public void setByteOrder(ByteOrder byteOrder);
-	
-	/**
-	 * Notification that transport has changed (server restarted).
-	 */
-	public void changedTransport();
+    /**
+     * Get socket receive buffer size.
+     *
+     * @return socket receive buffer size.
+     */
+    int getSocketReceiveBufferSize();
 
-	/**
-	 * Enqueue send request.
-	 * @param sender sender to enqueue.
-	 */
-	void enqueueSendRequest(TransportSender sender);
+    /**
+     * Transport priority.
+     *
+     * @return protocol priority.
+     */
+    short getPriority();
 
-	/**
-	 * Waits (if needed) until transport is verified, i.e. verified() method is being called.
-	 * @param timeoutMs timeout to wait for verification, infinite if 0.
-	 * @return completion status.
-	 */
-	boolean verify(long timeoutMs);
-	
-	/**
-	 * Acknowledge that transport was verified.
-	 * @param status verification status.
-	 */
-	void verified(Status status);
-	
-	/**
-	 * Alive notification.
-	 * This method needs to be called (by newly received data or beacon)
-	 * at least once in this period, if not echo will be issued
-	 * and if there is not response to it, transport will be considered as unresponsive.
-	 */
-	void aliveNotification();
+    /**
+     * Set remote transport protocol revision.
+     *
+     * @param revision protocol revision.
+     */
+    void setRemoteRevision(byte revision);
 
-	/**
-	 * Pass data to the active security plug-in session.
-	 * @param data the data (any data), can be <code>null</code>.
-	 */
-	void authNZMessage(PVField data);
+    /**
+     * Set remote transport receive buffer size.
+     *
+     * @param receiveBufferSize receive buffer size.
+     */
+    void setRemoteTransportReceiveBufferSize(int receiveBufferSize);
 
-	/**
-	 * Used to initialize authNZ (select security plug-in).
-	 * @param data any data.
-	 */
-	void authNZInitialize(Object data);
-	
-	SecuritySession getSecuritySession();
-	
+    /**
+     * Set remote transport socket receive buffer size.
+     *
+     * @param socketReceiveBufferSize remote socket receive buffer size.
+     */
+    void setRemoteTransportSocketReceiveBufferSize(int socketReceiveBufferSize);
+
+    /**
+     * Notification that transport has changed (server restarted).
+     */
+    void changedTransport();
+
+    /**
+     * Enqueue send request.
+     *
+     * @param sender sender to enqueue.
+     */
+    void enqueueSendRequest(TransportSender sender);
+
+    /**
+     * Waits (if needed) until transport is verified, i.e. verified() method is being called.
+     *
+     * @param timeoutMs timeout to wait for verification, infinite if 0.
+     * @return completion status.
+     */
+    boolean verify(long timeoutMs);
+
+    /**
+     * Acknowledge that transport was verified.
+     *
+     * @param status verification status.
+     */
+    void verified(Status status);
+
+    /**
+     * Alive notification.
+     * This method needs to be called (by newly received data or beacon)
+     * at least once in this period, if not echo will be issued
+     * and if there is not response to it, transport will be considered as unresponsive.
+     */
+    void aliveNotification();
+
+    /**
+     * Pass data to the active security plug-in session.
+     *
+     * @param data the data (any data), can be <code>null</code>.
+     */
+    void authNZMessage(PVField data);
+
+    /**
+     * Used to initialize authNZ (select security plug-in).
+     *
+     * @param data any data.
+     */
+    void authNZInitialize(Object data);
+
+    SecuritySession getSecuritySession();
+
 }

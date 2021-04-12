@@ -10,13 +10,14 @@ import org.epics.pvdata.pv.PVStructure;
 
 /**
  * Requester for channelGet.
- * @author mrk
  *
+ * @author mrk
  */
 public interface ChannelRPC extends ChannelRequest {
     /**
      * Issue an RPC request to the channel.
      * Completion status is reported by calling ChannelRPCRequester.requestDone() callback.
+     *
      * @param pvArgument The argument structure for an RPC request.
      */
     void request(PVStructure pvArgument);

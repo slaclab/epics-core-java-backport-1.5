@@ -18,12 +18,13 @@ import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
 
 /**
  * NOOP response.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  */
 public class NoopResponse extends AbstractServerResponseHandler {
 
-	public NoopResponse(ServerContextImpl context, String description) {
-		super(context, description);
-	}
+    public NoopResponse(ServerContextImpl context, String description) {
+        super(context, description);
+    }
 
 }

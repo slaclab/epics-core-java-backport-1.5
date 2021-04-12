@@ -10,21 +10,25 @@ import org.epics.pvdata.pv.PVArray;
 /**
  * Request to put and get Array Data.
  * The data is either taken from or put in the PVArray returned by ChannelArrayRequester.channelArrayConnect.
+ *
  * @author mrk
  */
-public interface ChannelArray extends ChannelRequest{
+public interface ChannelArray extends ChannelRequest {
     /**
      * put to the remote array.
+     *
      * @param putArray array to put.
-     * @param offset The offset in the remote array, i.e. the PVArray returned by ChannelArrayRequester.channelArrayConnect.
-     * @param count The number of elements to put, 0 means "entire array".
-     * @param stride 1 means all the elements from offset to count, 2 means every other, 3 means every third, etc.
+     * @param offset   The offset in the remote array, i.e. the PVArray returned by ChannelArrayRequester.channelArrayConnect.
+     * @param count    The number of elements to put, 0 means "entire array".
+     * @param stride   1 means all the elements from offset to count, 2 means every other, 3 means every third, etc.
      */
     void putArray(PVArray putArray, int offset, int count, int stride);
+
     /**
      * get from the remote array.
+     *
      * @param offset The offset in the remote array, i.e. the PVArray returned by ChannelArrayRequester.channelArrayConnect.
-     * @param count The number of elements to get, 0 means "till the end of array".
+     * @param count  The number of elements to get, 0 means "till the end of array".
      * @param stride 1 means all the elements from offset to count, 2 means every other, 3 means every third, etc.
      */
     void getArray(int offset, int count, int stride);
@@ -36,6 +40,7 @@ public interface ChannelArray extends ChannelRequest{
 
     /**
      * Set the length and/or the capacity.
+     *
      * @param length The new length.
      */
     void setLength(int length);

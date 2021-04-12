@@ -14,29 +14,30 @@
 
 package org.epics.pvaccess.client.impl.remote.handlers;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
 import org.epics.pvaccess.impl.remote.Transport;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+
 /**
  * NOOP response.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public class EchoResponse extends AbstractClientResponseHandler {
 
-	public EchoResponse(ClientContextImpl context) {
-		super(context, "Echo");
-	}
+    public EchoResponse(ClientContextImpl context) {
+        super(context, "Echo");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
-		transport.aliveNotification();
-	}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+        transport.aliveNotification();
+    }
 }

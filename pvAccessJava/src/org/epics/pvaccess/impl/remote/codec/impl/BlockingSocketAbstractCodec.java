@@ -36,14 +36,14 @@ public abstract class BlockingSocketAbstractCodec extends BlockingAbstractCodec 
     }
 
     public int read(ByteBuffer dst) throws IOException {
-        int nread = channel.read(dst);
-        if (nread == 0) {
+        int nRead = channel.read(dst);
+        if (nRead == 0) {
             try {
                 Thread.sleep(25);
             } catch (InterruptedException ignored) {
             }
         }
-        return nread;
+        return nRead;
     }
 
     public int write(ByteBuffer src) throws IOException {

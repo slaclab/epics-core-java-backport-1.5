@@ -15,75 +15,57 @@ import org.epics.pvdata.pv.PVField;
 import org.epics.pvdata.pv.PVInt;
 import org.epics.pvdata.pv.ScalarType;
 
-public class CounterTopStructure extends PVTopStructure implements TimerCallback
-{
+public class CounterTopStructure extends PVTopStructure implements TimerCallback {
     private static final FieldCreate fieldCreate = PVFactory.getFieldCreate();
 
     private final PVInt valueField;
-	private final int timeStampFieldOffset;
-	private final PVTimeStamp timeStampField;
-	private final TimerNode timerNode;
+    private final int timeStampFieldOffset;
+    private final PVTimeStamp timeStampField;
 
-	private final TimeStamp timeStamp = TimeStampFactory.create();
+    private final TimeStamp timeStamp = TimeStampFactory.create();
 
-	private final BitSet changedBitSet;
+    private final BitSet changedBitSet;
 
-	public CounterTopStructure(double scanPeriodHz, Timer timer) {
-		super(fieldCreate.createScalar(ScalarType.pvInt));
+    public CounterTopStructure(double scanPeriodHz, Timer timer) {
+        super(fieldCreate.createScalar(ScalarType.pvInt));
 
-		changedBitSet = new BitSet(getPVStructure().getNumberFields());
+        changedBitSet = new BitSet(getPVStructure().getNumberFields());
 
-		valueField = getPVStructure().getIntField("value");
+        valueField = getPVStructure().getIntField("value");
 
-		timeStampField = PVTimeStampFactory.create();
-		PVField ts = getPVStructure().getStructureField("timeStamp");
-		timeStampField.attach(ts);
-		timeStampFieldOffset = ts.getFieldOffset();
-		if (scanPeriodHz > 0.0)
-		{
-			timerNode = TimerFactory.createNode(this);
-			timer.schedulePeriodic(timerNode, 0.0, scanPeriodHz);
-		}
-		else
-			timerNode = null;
+        timeStampField = PVTimeStampFactory.create();
+        PVField ts = getPVStructure().getStructureField("timeStamp");
+        timeStampField.attach(ts);
+        timeStampFieldOffset = ts.getFieldOffset();
+        TimerNode timerNode;
+        if (scanPeriodHz > 0.0) {
+            timerNode = TimerFactory.createNode(this);
+            timer.schedulePeriodic(timerNode, 0.0, scanPeriodHz);
+        }
 
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.server.test.TestChannelProviderImpl.PVTopStructure#process()
-	 */
-	@Override
-	public void process() {
-		changedBitSet.clear();
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.server.test.TestChannelProviderImpl.PVTopStructure#process()
+     */
+    @Override
+    public void process() {
+        changedBitSet.clear();
 
-		valueField.put((valueField.get() + 1) % 11);
-		changedBitSet.set(valueField.getFieldOffset());
+        valueField.put((valueField.get() + 1) % 11);
+        changedBitSet.set(valueField.getFieldOffset());
 
-		timeStamp.getCurrentTime();
-		timeStampField.set(timeStamp);
-		changedBitSet.set(timeStampFieldOffset);
-		notifyListeners(changedBitSet);
-	}
+        timeStamp.getCurrentTime();
+        timeStampField.set(timeStamp);
+        changedBitSet.set(timeStampFieldOffset);
+        notifyListeners(changedBitSet);
+    }
 
-	public void callback() {
-		// TODO this causes deadlock !!! with topStructure
-	//	lock();
-		try
-		{
-			process();
-		}
-		finally
-		{
-	//		unlock();
-		}
-	}
+    public void callback() {
+        process();
+    }
 
-	public void timerStopped() {
-	}
+    public void timerStopped() {
+    }
 
-	public void cancel()
-	{
-		if (timerNode != null)
-			timerNode.cancel();
-	}
 }

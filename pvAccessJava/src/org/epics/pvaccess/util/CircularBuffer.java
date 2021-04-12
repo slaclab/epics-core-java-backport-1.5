@@ -15,86 +15,95 @@
 package org.epics.pvaccess.util;
 
 /**
- * Implementaton of circular FIFO buffer.
+ * Implementation of circular FIFO buffer.
  * If buffer is full, the oldest element is replaced with the new one.
  * Instance is not a bit synchronized.
- * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
+ *
  * @param <T> buffer element type.
+ * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  */
 public final class CircularBuffer<T> {
 
-	/**
-	 * Array (circular buffer) of elements.
-	 */
-	private final T[] elements;
-	
-	/**
-	 * Take (read) pointer.
-	 */
-	private int takePointer = 0;
-	
-	/**
-	 * Put (write) pointer.
-	 */
-	private int putPointer = 0;       
+    /**
+     * Array (circular buffer) of elements.
+     */
+    private final T[] elements;
 
-	/**
-	 * Number of elements in the buffer.
-	 */
-	private int count = 0;
-	
-	/**
-	 * Create a BoundedBuffer with the given capacity.
-	 * @param capacity buffer capacity.
-	 * @exception IllegalArgumentException if capacity less or equal to zero
-	 **/
-	@SuppressWarnings("unchecked")
-	public CircularBuffer(int capacity) throws IllegalArgumentException {
-		if (capacity <= 0)
-			throw new IllegalArgumentException();
-		elements = (T[])new Object[capacity];
-	}
+    /**
+     * Take (read) pointer.
+     */
+    private int takePointer = 0;
 
-	/**
-	 * Get number of elements in the buffer.
-	 * @return number of elements in the buffer.
-	 */
-	public int size() { return count; }
+    /**
+     * Put (write) pointer.
+     */
+    private int putPointer = 0;
 
-	/**
-	 * Get buffer capacity.
-	 * @return buffer capacity.
-	 */
-	public int capacity() { return elements.length; }
+    /**
+     * Number of elements in the buffer.
+     */
+    private int count = 0;
 
-	/**
-	 * Insert a new element in to the buffer. If buffer full, oldest element will be overriden.
-	 * @param x element to insert.
-	 * @return overriden element, if any.
-	 */
-	public final T insert(T x) {
-		if (count < elements.length)
-			++count;
-		else
-			if (++takePointer >= elements.length) takePointer = 0;
-		
-		final T old = elements[putPointer];
-		elements[putPointer] = x;
-		if (++putPointer >= elements.length) putPointer = 0;
-		return old;
-	}
+    /**
+     * Create a BoundedBuffer with the given capacity.
+     *
+     * @param capacity buffer capacity.
+     * @throws IllegalArgumentException if capacity less or equal to zero
+     **/
+    @SuppressWarnings("unchecked")
+    public CircularBuffer(int capacity) throws IllegalArgumentException {
+        if (capacity <= 0)
+            throw new IllegalArgumentException();
+        elements = (T[]) new Object[capacity];
+    }
 
-	/**
-	 * Extract the oldest element from the buffer.
-	 * @return the oldest element from the buffer.
-	 */
-	public final T extract() {
-		if (count == 0)
-			return null;
-		count--;
-		final T old = elements[takePointer];
-		elements[takePointer] = null;
-		if (++takePointer >= elements.length) takePointer = 0;
-		return old;
-	}
+    /**
+     * Get number of elements in the buffer.
+     *
+     * @return number of elements in the buffer.
+     */
+    public int size() {
+        return count;
+    }
+
+    /**
+     * Get buffer capacity.
+     *
+     * @return buffer capacity.
+     */
+    public int capacity() {
+        return elements.length;
+    }
+
+    /**
+     * Insert a new element in to the buffer. If buffer full, oldest element will be overridden.
+     *
+     * @param x element to insert.
+     * @return overridden element, if any.
+     */
+    public final T insert(T x) {
+        if (count < elements.length)
+            ++count;
+        else if (++takePointer >= elements.length) takePointer = 0;
+
+        final T old = elements[putPointer];
+        elements[putPointer] = x;
+        if (++putPointer >= elements.length) putPointer = 0;
+        return old;
+    }
+
+    /**
+     * Extract the oldest element from the buffer.
+     *
+     * @return the oldest element from the buffer.
+     */
+    public final T extract() {
+        if (count == 0)
+            return null;
+        count--;
+        final T old = elements[takePointer];
+        elements[takePointer] = null;
+        if (++takePointer >= elements.length) takePointer = 0;
+        return old;
+    }
 }

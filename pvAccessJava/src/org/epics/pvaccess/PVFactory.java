@@ -25,26 +25,23 @@ import org.epics.pvdata.pv.StatusCreate;
  * Class to be used by pvAccess to get all the PVData related factory.
  * For not this implementation is pretty simple, but in the future
  * it should allow getting different implementations.
- * @author msekoranja
  *
+ * @author msekoranja
  */
 public class PVFactory {
-	private final static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
-	private final static PVDataCreate dataCreate = PVDataFactory.getPVDataCreate();
-	private final static StatusCreate statusCreate = StatusFactory.getStatusCreate();
-	
-	public static final FieldCreate getFieldCreate()
-	{
-		return fieldCreate;
-	}
-	
-	public static final PVDataCreate getPVDataCreate()
-	{
-		return dataCreate;
-	}
+    private final static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+    private final static PVDataCreate dataCreate = PVDataFactory.getPVDataCreate();
+    private final static StatusCreate statusCreate = StatusFactory.getStatusCreate();
 
-	public static final StatusCreate getStatusCreate()
-	{
-		return statusCreate;
-	}
+    public static FieldCreate getFieldCreate() {
+        return fieldCreate;
+    }
+
+    public static PVDataCreate getPVDataCreate() {
+        return dataCreate;
+    }
+
+    public static StatusCreate getStatusCreate() {
+        return statusCreate;
+    }
 }

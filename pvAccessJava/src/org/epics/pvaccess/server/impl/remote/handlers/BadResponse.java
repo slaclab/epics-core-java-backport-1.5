@@ -14,44 +14,43 @@
 
 package org.epics.pvaccess.server.impl.remote.handlers;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.PVAConstants;
 import org.epics.pvaccess.impl.remote.Transport;
 import org.epics.pvaccess.server.impl.remote.ServerContextImpl;
 import org.epics.pvaccess.util.HexDump;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 
 /**
  * Bad request handler.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public class BadResponse extends AbstractServerResponseHandler {
 
-	public BadResponse(ServerContextImpl context) {
-		super(context, "Bad request");
-	}
+    public BadResponse(ServerContextImpl context) {
+        super(context, "Bad request");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.impl.remote.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom,
-			Transport transport, byte version, byte command, int payloadSize,
-			ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.impl.remote.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom,
+                               Transport transport, byte version, byte command, int payloadSize,
+                               ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		context.getLogger().fine("Undecipherable message (bad response type " + command + ") from " + responseFrom + ".");
+        context.getLogger().fine("Undecipherable message (bad response type " + command + ") from " + responseFrom + ".");
 
-		// TODO remove debug output
-		if (payloadBuffer.hasArray())
-		{
-			int start = Math.max(0, payloadBuffer.position() - PVAConstants.PVA_MESSAGE_HEADER_SIZE);
-			HexDump.hexDump(description, payloadBuffer.array(), start, payloadBuffer.limit());
-		}
-	}
+        // TODO remove debug output
+        if (payloadBuffer.hasArray()) {
+            int start = Math.max(0, payloadBuffer.position() - PVAConstants.PVA_MESSAGE_HEADER_SIZE);
+            HexDump.hexDump(description, payloadBuffer.array(), start, payloadBuffer.limit());
+        }
+    }
 
 }

@@ -24,6 +24,7 @@ import org.epics.pvdata.misc.ThreadReady;
 
 /**
  * Utility class that starts pvAccess server.
+ *
  * @author msekoranja
  */
 public class ServerFactory {
@@ -42,26 +43,28 @@ public class ServerFactory {
             threadCreate.create("pvAccessServer", 3, this);
         }
 
-    	/**
+        /**
          * JCA server context.
          */
         private ServerContextImpl context = null;
 
         /**
          * Initialize JCA context.
-         * @throws PVAException	throws on any failure.
+         *
+         * @throws PVAException throws on any failure.
          */
         private void initialize() throws PVAException {
 
-    		// Create a context with default configuration values.
-    		context = new ServerContextImpl();
-    		context.setBeaconServerStatusProvider(new DefaultBeaconServerDataProvider(context));
+            // Create a context with default configuration values.
+            context = new ServerContextImpl();
+            context.setBeaconServerStatusProvider(new DefaultBeaconServerDataProvider(context));
 
-    		context.initialize(ChannelProviderRegistryFactory.getChannelProviderRegistry());
+            context.initialize(ChannelProviderRegistryFactory.getChannelProviderRegistry());
 
-    		// Display basic information about the context.
+            // Display basic information about the context.
             System.out.println(context.getVersion().getVersionString());
-            context.printInfo(); System.out.println();
+            context.printInfo();
+            System.out.println();
         }
 
         /**
@@ -79,31 +82,31 @@ public class ServerFactory {
                 th.printStackTrace();
             }
         }
+
         /* (non-Javadoc)
          * @see org.epics.ioc.util.RunnableReady#run(org.epics.ioc.util.ThreadReady)
          */
         public void run(final ThreadReady threadReady) {
-                Thread runThread = new Thread(new Runnable() {
-					public void run() {
-			            try {
-			                // initialize context
-			                initialize();
-			                System.out.println("Running server...");
-			                // run server
-							context.run(0);
-			                System.out.println("Done.");
-			            } catch (Throwable th) {
-			                th.printStackTrace();
-			            }
-			            finally {
-			                // always finalize
-			                destroy();
-			            }
-					}
-				}, "pvAccess-server");
-                runThread.setDaemon(false);
-                runThread.start();
-                threadReady.ready();
+            Thread runThread = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        // initialize context
+                        initialize();
+                        System.out.println("Running server...");
+                        // run server
+                        context.run(0);
+                        System.out.println("Done.");
+                    } catch (Throwable th) {
+                        th.printStackTrace();
+                    } finally {
+                        // always finalize
+                        destroy();
+                    }
+                }
+            }, "pvAccess-server");
+            runThread.setDaemon(false);
+            runThread.start();
+            threadReady.ready();
         }
     }
 }

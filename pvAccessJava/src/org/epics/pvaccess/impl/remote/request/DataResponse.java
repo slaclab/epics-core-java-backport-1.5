@@ -14,9 +14,9 @@
 
 package org.epics.pvaccess.impl.remote.request;
 
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.impl.remote.Transport;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
@@ -24,12 +24,13 @@ import org.epics.pvaccess.impl.remote.Transport;
  */
 public interface DataResponse extends ResponseRequest {
 
-	/**
-	 * Notification response.
-	 * @param transport transport to use.
-	 * @param version protocol version.
-	 * @param payloadBuffer the data.
-	 */
-	public void response(Transport transport, byte version, ByteBuffer payloadBuffer);
+    /**
+     * Notification response.
+     *
+     * @param transport     transport to use.
+     * @param version       protocol version.
+     * @param payloadBuffer the data.
+     */
+    void response(Transport transport, byte version, ByteBuffer payloadBuffer);
 
 }

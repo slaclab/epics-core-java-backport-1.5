@@ -16,6 +16,7 @@ package org.epics.pvaccess;
 
 /**
  * pvAccessJava module version (to be keep in sync with pom.xml).
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
@@ -24,21 +25,21 @@ public interface PVAVersion {
     /**
      * Major version.
      */
-    public static final int VERSION_MAJOR = 5;
-    
+    int VERSION_MAJOR = 5;
+
     /**
      * Minor version.
      */
-    public static final int VERSION_MINOR = 1;
+    int VERSION_MINOR = 1;
 
     /**
      * Maintenance version.
      */
-    public static final int VERSION_MAINTENANCE = 0;
+    int VERSION_MAINTENANCE = 0;
 
     /**
      * Development version.
      */
-    public static final boolean VERSION_DEVELOPMENT = true;
+    boolean VERSION_DEVELOPMENT = true;
 
 }

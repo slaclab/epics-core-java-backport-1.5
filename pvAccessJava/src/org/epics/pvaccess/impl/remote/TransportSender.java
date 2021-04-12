@@ -14,26 +14,28 @@
 
 package org.epics.pvaccess.impl.remote;
 
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.client.Lockable;
+
+import java.nio.ByteBuffer;
 
 /**
  * Interface defining transport sender (instance sending data over transport).
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface TransportSender extends Lockable {
 
-	/**
-	 * Called by transport.
-	 * By this call transport gives callee ownership over the buffer.
-	 * Calls on <code>TransportSendControl</code> instance must be made from
-	 * calling thread. Moreover, ownership is valid only for the time of call
-	 * of this method.
-	 * NOTE: these limitations allow efficient implementation.
-	 * @param buffer buffer to send.
-	 * @param control transport send control instance.
-	 */
-	void send(ByteBuffer buffer, TransportSendControl control);
+    /**
+     * Called by transport.
+     * By this call transport gives callee ownership over the buffer.
+     * Calls on <code>TransportSendControl</code> instance must be made from
+     * calling thread. Moreover, ownership is valid only for the time of call
+     * of this method.
+     * NOTE: these limitations allow efficient implementation.
+     *
+     * @param buffer  buffer to send.
+     * @param control transport send control instance.
+     */
+    void send(ByteBuffer buffer, TransportSendControl control);
 }

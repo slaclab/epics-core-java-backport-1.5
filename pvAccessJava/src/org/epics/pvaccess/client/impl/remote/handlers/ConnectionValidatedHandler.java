@@ -14,18 +14,19 @@
 
 package org.epics.pvaccess.client.impl.remote.handlers;
 
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.PVFactory;
 import org.epics.pvaccess.client.impl.remote.ClientContextImpl;
 import org.epics.pvaccess.impl.remote.Transport;
 import org.epics.pvdata.pv.Status;
 import org.epics.pvdata.pv.StatusCreate;
 
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+
 
 /**
  * Connection validation message handler.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
@@ -33,19 +34,19 @@ public class ConnectionValidatedHandler extends AbstractClientResponseHandler {
 
     protected static final StatusCreate statusCreate = PVFactory.getStatusCreate();
 
- 	public ConnectionValidatedHandler(ClientContextImpl context) {
-		super(context, "Connection validated");
-	}
+    public ConnectionValidatedHandler(ClientContextImpl context) {
+        super(context, "Connection validated");
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
-	 */
-	@Override
-	public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
-		super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.AbstractResponseHandler#handleResponse(java.net.InetSocketAddress, org.epics.pvaccess.core.Transport, byte, byte, int, java.nio.ByteBuffer)
+     */
+    @Override
+    public void handleResponse(InetSocketAddress responseFrom, Transport transport, byte version, byte command, int payloadSize, ByteBuffer payloadBuffer) {
+        super.handleResponse(responseFrom, transport, version, command, payloadSize, payloadBuffer);
 
-		final Status status = statusCreate.deserializeStatus(payloadBuffer, transport);
-		transport.verified(status);
-	}
+        final Status status = statusCreate.deserializeStatus(payloadBuffer, transport);
+        transport.verified(status);
+    }
 
 }

@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
 public abstract class AbstractResponseHandler implements ResponseHandler {
 
     /**
-     * Response hanlder description.
+     * Response handler description.
      */
     protected final String description;
 

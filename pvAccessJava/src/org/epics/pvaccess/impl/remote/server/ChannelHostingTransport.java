@@ -15,55 +15,55 @@
 package org.epics.pvaccess.impl.remote.server;
 
 
-
 /**
  * Interface defining a transport that hosts channels.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface ChannelHostingTransport {
 
-	/**
-	 * Preallocate new channel SID.
-	 * @return new channel server id (SID).
-	 */
-	public int preallocateChannelSID();
+    /**
+     * Preallocate new channel SID.
+     *
+     * @return new channel server id (SID).
+     */
+    int preallocateChannelSID();
 
-	/**
-	 * De-preallocate new channel SID.
-	 * @param sid preallocated channel SID.
-	 */
-	public void dePreAllocateChannelSID(int sid);
+    /**
+     * De-preallocate new channel SID.
+     *
+     * @param sid pre-allocated channel SID.
+     */
+    void dePreAllocateChannelSID(int sid);
 
-	/**
-	 * Register a new channel.
-	 * @param sid preallocated channel SID.
-	 * @param channel channel to register.
-	 */
-	public void registerChannel(int sid, ServerChannel channel);
+    /**
+     * Register a new channel.
+     *
+     * @param sid     pre-allocated channel SID.
+     * @param channel channel to register.
+     */
+    void registerChannel(int sid, ServerChannel channel);
 
-	/**
-	 * Unregister a new channel (and deallocates its handle).
-	 * @param sid SID
-	 */
-	public void unregisterChannel(int sid);
+    /**
+     * Unregister a new channel (and deallocates its handle).
+     *
+     * @param sid SID
+     */
+    void unregisterChannel(int sid);
 
-	/**
-	 * Get channel by its SID.
-	 * @param sid channel SID
-	 * @return channel with given SID, <code>null</code> otherwise
-	 */
-	public ServerChannel getChannel(int sid);
+    /**
+     * Get channel by its SID.
+     *
+     * @param sid channel SID
+     * @return channel with given SID, <code>null</code> otherwise
+     */
+    ServerChannel getChannel(int sid);
 
-	/**
-	 * Get channel count.
-	 * @return channel count.
-	 */
-	public int getChannelCount();
-
-	/**
-	 * Get an array of all hosted channels.
-	 * @return an array of all hosted channels.
-	 */
-	public ServerChannel[] getChannels();
+    /**
+     * Get an array of all hosted channels.
+     *
+     * @return an array of all hosted channels.
+     */
+    ServerChannel[] getChannels();
 }

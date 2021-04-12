@@ -14,36 +14,36 @@
 
 package org.epics.pvaccess.util.logging;
 
-import java.util.logging.Level;
-
 import org.epics.pvdata.pv.MessageType;
+
+import java.util.logging.Level;
 
 
 /**
  * Implementation of Java Logging API logging utilities.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public final class LoggingUtils {
 
-	/**
-	 * Maps MessageType to standard Java Logging API Level.
-	 * @param messageType message type.
-	 * @return logging <code>Level</code>, <code>Level.INFO</code> if unknown.
-	 */
-	public static Level toLevel(MessageType messageType) {
-		switch (messageType)
-		{
-			case info:
-				return Level.INFO;
-			case warning:
-				return Level.WARNING;
-			case error:
-			case fatalError:
-				return Level.SEVERE;
-			default:
-				return Level.INFO;
-		}
-	}
+    /**
+     * Maps MessageType to standard Java Logging API Level.
+     *
+     * @param messageType message type.
+     * @return logging <code>Level</code>, <code>Level.INFO</code> if unknown.
+     */
+    public static Level toLevel(MessageType messageType) {
+        switch (messageType) {
+            case warning:
+                return Level.WARNING;
+            case error:
+            case fatalError:
+                return Level.SEVERE;
+            case info:
+            default:
+                return Level.INFO;
+        }
+    }
 
 }

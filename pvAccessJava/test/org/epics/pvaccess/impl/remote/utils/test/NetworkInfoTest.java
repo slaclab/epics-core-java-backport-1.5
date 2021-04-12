@@ -15,7 +15,6 @@
 package org.epics.pvaccess.impl.remote.utils.test;
 
 import junit.framework.TestCase;
-
 import org.epics.pvaccess.impl.remote.utils.NetworkInfo;
 
 /**
@@ -23,16 +22,16 @@ import org.epics.pvaccess.impl.remote.utils.NetworkInfo;
  */
 public class NetworkInfoTest extends TestCase {
 
-	public NetworkInfoTest(String methodName) {
-		super(methodName);
-	}
+    public NetworkInfoTest(String methodName) {
+        super(methodName);
+    }
 
-	/**
-	 * Conversion test.
-	 * @throws Throwable rethrown exception. 
-	 */
-	public void testNetworkInfo() throws Throwable
-	{
-		NetworkInfo.main(new String[0]);
-	}
+    /**
+     * Conversion test.
+     *
+     * @throws Throwable rethrown exception.
+     */
+    public void testNetworkInfo() throws Throwable {
+        NetworkInfo.main(new String[0]);
+    }
 }

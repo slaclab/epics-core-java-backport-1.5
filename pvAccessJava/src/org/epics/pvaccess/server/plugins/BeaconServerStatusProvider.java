@@ -19,14 +19,16 @@ import org.epics.pvdata.pv.PVField;
 /**
  * Interface providing a method that returns server status. This server status
  * is sent with server beacons and system monitoring.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public interface BeaconServerStatusProvider {
 
-	/**
-	 * Get server status data.
-	 * @return server status data.
-	 */
-	public PVField getServerStatusData();
+    /**
+     * Get server status data.
+     *
+     * @return server status data.
+     */
+    public PVField getServerStatusData();
 }

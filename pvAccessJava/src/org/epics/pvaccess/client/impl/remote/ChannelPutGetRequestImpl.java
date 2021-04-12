@@ -14,11 +14,6 @@
 
 package org.epics.pvaccess.client.impl.remote;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.nio.ByteBuffer;
-
 import org.epics.pvaccess.client.ChannelPutGet;
 import org.epics.pvaccess.client.ChannelPutGetRequester;
 import org.epics.pvaccess.impl.remote.QoS;
@@ -30,293 +25,282 @@ import org.epics.pvdata.pv.MessageType;
 import org.epics.pvdata.pv.PVStructure;
 import org.epics.pvdata.pv.Status;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.ByteBuffer;
+
 /**
  * PVA putGet request.
+ *
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  * @version $Id$
  */
 public class ChannelPutGetRequestImpl extends BaseRequestImpl implements ChannelPutGet {
 
     /**
-	 * Response callback listener.
-	 */
-	protected final ChannelPutGetRequester callback;
+     * Response callback listener.
+     */
+    protected final ChannelPutGetRequester callback;
 
-	// TODO !!! give access to it, or lazy initialize
-	// put data container
-	protected PVStructure putData = null;
-	protected BitSet putDataBitSet = null;
+    // TODO !!! give access to it, or lazy initialize
+    // put data container
+    protected PVStructure putData = null;
+    protected BitSet putDataBitSet = null;
 
-	// get data container
-	protected PVStructure getData = null;
-	protected BitSet getDataBitSet = null;
+    // get data container
+    protected PVStructure getData = null;
+    protected BitSet getDataBitSet = null;
 
-	// putGet reference store
-	protected PVStructure putPutData = null;
-	protected BitSet putPutDataBitSet = null;
+    // putGet reference store
+    protected PVStructure putPutData = null;
+    protected BitSet putPutDataBitSet = null;
 
-	public static ChannelPutGetRequestImpl create(ChannelImpl channel,
-			ChannelPutGetRequester callback,
-	        PVStructure pvRequest)
-	{
-		ChannelPutGetRequestImpl thisInstance =
-			new ChannelPutGetRequestImpl(channel, callback, pvRequest);
-		thisInstance.activate();
-		return thisInstance;
-	}
+    public static ChannelPutGetRequestImpl create(ChannelImpl channel,
+                                                  ChannelPutGetRequester callback,
+                                                  PVStructure pvRequest) {
+        ChannelPutGetRequestImpl thisInstance =
+                new ChannelPutGetRequestImpl(channel, callback, pvRequest);
+        thisInstance.activate();
+        return thisInstance;
+    }
 
-	protected ChannelPutGetRequestImpl(ChannelImpl channel,
-			ChannelPutGetRequester callback,
-	        PVStructure pvRequest)
-	{
-		super(channel, callback, pvRequest, false);
+    protected ChannelPutGetRequestImpl(ChannelImpl channel,
+                                       ChannelPutGetRequester callback,
+                                       PVStructure pvRequest) {
+        super(channel, callback, pvRequest, false);
 
-		this.callback = callback;
-	}
+        this.callback = callback;
+    }
 
-	protected void activate()
-	{
-		super.activate();
+    protected void activate() {
+        super.activate();
 
-		// subscribe
-		try {
-			resubscribeSubscription(channel.checkDestroyedAndGetTransport());
-		} catch (IllegalStateException ise) {
-			callback.channelPutGetConnect(channelDestroyed, this, null, null);
-			destroy(true);
-		}
-	}
+        // subscribe
+        try {
+            resubscribeSubscription(channel.checkDestroyedAndGetTransport());
+        } catch (IllegalStateException ise) {
+            callback.channelPutGetConnect(channelDestroyed, this, null, null);
+            destroy(true);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.impl.remote.TransportSender#send(java.nio.ByteBuffer, org.epics.pvaccess.impl.remote.TransportSendControl)
-	 */
-	@Override
-	public void send(ByteBuffer buffer, TransportSendControl control) {
-		final int pendingRequest = getPendingRequest();
-		if (pendingRequest < 0)
-		{
-			super.send(buffer, control);
-			return;
-		}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.impl.remote.TransportSender#send(java.nio.ByteBuffer, org.epics.pvaccess.impl.remote.TransportSendControl)
+     */
+    @Override
+    public void send(ByteBuffer buffer, TransportSendControl control) {
+        final int pendingRequest = getPendingRequest();
+        if (pendingRequest < 0) {
+            super.send(buffer, control);
+            return;
+        }
 
-		control.startMessage((byte)12, 2*Integer.SIZE/Byte.SIZE+1);
-		buffer.putInt(channel.getServerChannelID());
-		buffer.putInt(ioid);
-		if (pendingRequest != QoS.INIT.getMaskValue())
-			buffer.put((byte)pendingRequest);
+        control.startMessage((byte) 12, 2 * Integer.SIZE / Byte.SIZE + 1);
+        buffer.putInt(channel.getServerChannelID());
+        buffer.putInt(ioid);
+        if (pendingRequest != QoS.INIT.getMaskValue())
+            buffer.put((byte) pendingRequest);
 
-		if (QoS.INIT.isSet(pendingRequest))
-		{
-			// qos
-			buffer.put((byte)QoS.INIT.getMaskValue());
+        if (QoS.INIT.isSet(pendingRequest)) {
+            // qos
+            buffer.put((byte) QoS.INIT.getMaskValue());
 
-			// pvRequest
-			SerializationHelper.serializePVRequest(buffer, control, pvRequest);
-		}
-		else if (QoS.GET.isSet(pendingRequest) || QoS.GET_PUT.isSet(pendingRequest)) {
-			// noop
-		}
-		else
-		{
-			lock();
-			try {
-				putPutDataBitSet.serialize(buffer, control);
-				putPutData.serialize(buffer, control, putPutDataBitSet);
-			} finally {
-				// release references
-				putPutData = null;
-				putPutDataBitSet = null;
+            // pvRequest
+            SerializationHelper.serializePVRequest(buffer, control, pvRequest);
+        } else if (!QoS.GET.isSet(pendingRequest) && !QoS.GET_PUT.isSet(pendingRequest)) {
+            lock();
+            try {
+                putPutDataBitSet.serialize(buffer, control);
+                putPutData.serialize(buffer, control, putPutDataBitSet);
+            } finally {
+                // release references
+                putPutData = null;
+                putPutDataBitSet = null;
 
-				unlock();
-			}
-		}
+                unlock();
+            }
+        }
 
-		stopRequest();
-	}
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.client.impl.remote.channelAccess.BaseRequestImpl#initResponse(org.epics.pvaccess.core.Transport, byte, java.nio.ByteBuffer, byte, org.epics.pvdata.pv.Status)
-	 */
-	@Override
-	void initResponse(Transport transport, byte version, ByteBuffer payloadBuffer, byte qos, Status status) {
-		try
-		{
-			if (!status.isSuccess())
-			{
-				callback.channelPutGetConnect(status, this, null, null);
-				return;
-			}
+        stopRequest();
+    }
 
-			lock();
-			try {
-				putData = SerializationHelper.deserializeStructureAndCreatePVStructure(payloadBuffer, transport, putData);
-				putDataBitSet = createBitSetFor(putData, putDataBitSet);
-				getData = SerializationHelper.deserializeStructureAndCreatePVStructure(payloadBuffer, transport, getData);
-				getDataBitSet = createBitSetFor(putData, getDataBitSet);
-			} finally {
-				unlock();
-			}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.client.impl.remote.channelAccess.BaseRequestImpl#initResponse(org.epics.pvaccess.core.Transport, byte, java.nio.ByteBuffer, byte, org.epics.pvdata.pv.Status)
+     */
+    @Override
+    void initResponse(Transport transport, byte version, ByteBuffer payloadBuffer, byte qos, Status status) {
+        try {
+            if (!status.isSuccess()) {
+                callback.channelPutGetConnect(status, this, null, null);
+                return;
+            }
 
-			// notify
-			callback.channelPutGetConnect(status, this, putData.getStructure(), getData.getStructure());
-		} catch (Throwable th) {
-			// guard PVA code from exceptions
-			Writer writer = new StringWriter();
-			PrintWriter printWriter = new PrintWriter(writer);
-			th.printStackTrace(printWriter);
-			requester.message("Unexpected exception caught: " + writer, MessageType.fatalError);
-		}
-	}
+            lock();
+            try {
+                putData = SerializationHelper.deserializeStructureAndCreatePVStructure(payloadBuffer, transport, putData);
+                if (putData != null) {
+                    putDataBitSet = createBitSetFor(putData, putDataBitSet);
+                }
+                getData = SerializationHelper.deserializeStructureAndCreatePVStructure(payloadBuffer, transport, getData);
+                if (getData != null) {
+                    getDataBitSet = createBitSetFor(getData, getDataBitSet);
+                }
+            } finally {
+                unlock();
+            }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.client.impl.remote.channelAccess.BaseRequestImpl#normalResponse(org.epics.pvaccess.core.Transport, byte, java.nio.ByteBuffer, byte, org.epics.pvdata.pv.Status)
-	 */
-	@Override
-	void normalResponse(Transport transport, byte version, ByteBuffer payloadBuffer, byte qos, Status status) {
-		try
-		{
+            // notify
+            callback.channelPutGetConnect(status, this, putData.getStructure(), getData.getStructure());
+        } catch (Throwable th) {
+            // guard PVA code from exceptions
+            Writer writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(writer);
+            th.printStackTrace(printWriter);
+            requester.message("Unexpected exception caught: " + writer, MessageType.fatalError);
+        }
+    }
 
-			if (QoS.GET.isSet(qos))
-			{
-				if (!status.isSuccess())
-				{
-					callback.getGetDone(status, this, null, null);
-					return;
-				}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.client.impl.remote.channelAccess.BaseRequestImpl#normalResponse(org.epics.pvaccess.core.Transport, byte, java.nio.ByteBuffer, byte, org.epics.pvdata.pv.Status)
+     */
+    @Override
+    void normalResponse(Transport transport, byte version, ByteBuffer payloadBuffer, byte qos, Status status) {
+        try {
 
-				lock();
-				try {
-					// deserialize get data
-					getDataBitSet.deserialize(payloadBuffer, transport);
-					getData.deserialize(payloadBuffer, transport, getDataBitSet);
-				} finally {
-					unlock();
-				}
+            if (QoS.GET.isSet(qos)) {
+                if (!status.isSuccess()) {
+                    callback.getGetDone(status, this, null, null);
+                    return;
+                }
 
-				callback.getGetDone(status, this, getData, getDataBitSet);
-			}
-			else if (QoS.GET_PUT.isSet(qos))
-			{
-				if (!status.isSuccess())
-				{
-					callback.getPutDone(status, this, null, null);
-					return;
-				}
+                lock();
+                try {
+                    // deserialize get data
+                    getDataBitSet.deserialize(payloadBuffer, transport);
+                    getData.deserialize(payloadBuffer, transport, getDataBitSet);
+                } finally {
+                    unlock();
+                }
 
-				lock();
-				try {
-					// deserialize put data
-					putDataBitSet.deserialize(payloadBuffer, transport);
-					putData.deserialize(payloadBuffer, transport, putDataBitSet);
-				} finally {
-					unlock();
-				}
+                callback.getGetDone(status, this, getData, getDataBitSet);
+            } else if (QoS.GET_PUT.isSet(qos)) {
+                if (!status.isSuccess()) {
+                    callback.getPutDone(status, this, null, null);
+                    return;
+                }
 
-				callback.getPutDone(status, this, putData, putDataBitSet);
-			}
-			else
-			{
-				if (!status.isSuccess())
-				{
-					callback.putGetDone(status, this, null, null);
-					return;
-				}
+                lock();
+                try {
+                    // deserialize put data
+                    putDataBitSet.deserialize(payloadBuffer, transport);
+                    putData.deserialize(payloadBuffer, transport, putDataBitSet);
+                } finally {
+                    unlock();
+                }
 
-				lock();
-				try {
-					// deserialize data
-					getDataBitSet.deserialize(payloadBuffer, transport);
-					getData.deserialize(payloadBuffer, transport, getDataBitSet);
-				} finally {
-					unlock();
-				}
+                callback.getPutDone(status, this, putData, putDataBitSet);
+            } else {
+                if (!status.isSuccess()) {
+                    callback.putGetDone(status, this, null, null);
+                    return;
+                }
 
-				callback.putGetDone(status, this, getData, getDataBitSet);
-			}
-		} catch (Throwable th) {
-			// guard PVA code from exceptions
-			Writer writer = new StringWriter();
-			PrintWriter printWriter = new PrintWriter(writer);
-			th.printStackTrace(printWriter);
-			requester.message("Unexpected exception caught: " + writer, MessageType.fatalError);
-		}
-	}
+                lock();
+                try {
+                    // deserialize data
+                    getDataBitSet.deserialize(payloadBuffer, transport);
+                    getData.deserialize(payloadBuffer, transport, getDataBitSet);
+                } finally {
+                    unlock();
+                }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.client.ChannelPutGet#putGet(PVStructure, BitSet)
-	 */
+                callback.putGetDone(status, this, getData, getDataBitSet);
+            }
+        } catch (Throwable th) {
+            // guard PVA code from exceptions
+            Writer writer = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(writer);
+            th.printStackTrace(printWriter);
+            requester.message("Unexpected exception caught: " + writer, MessageType.fatalError);
+        }
+    }
 
-	public void putGet(PVStructure pvPutStructure, BitSet bitSet) {
-		if (destroyed) {
-			callback.putGetDone(destroyedStatus, this, null, null);
-			return;
-		}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.client.ChannelPutGet#putGet(PVStructure, BitSet)
+     */
 
-		if (!putData.getStructure().equals(pvPutStructure.getStructure()))
-		{
-			callback.putGetDone(invalidPutStructureStatus, this, null, null);
-			return;
-		}
+    public void putGet(PVStructure pvPutStructure, BitSet bitSet) {
+        if (destroyed) {
+            callback.putGetDone(destroyedStatus, this, null, null);
+            return;
+        }
 
-		if (!startRequest(lastRequest ? QoS.DESTROY.getMaskValue() : QoS.DEFAULT.getMaskValue())) {
-			callback.putGetDone(otherRequestPendingStatus, this, null, null);
-			return;
-		}
+        if (!putData.getStructure().equals(pvPutStructure.getStructure())) {
+            callback.putGetDone(invalidPutStructureStatus, this, null, null);
+            return;
+        }
 
-		try {
-			lock();
-			putPutData = pvPutStructure;
-			putPutDataBitSet = bitSet;
-			unlock();
-			channel.checkAndGetTransport().enqueueSendRequest(this);
-		} catch (IllegalStateException ise) {
-			stopRequest();
-			callback.putGetDone(channelNotConnected, this, null, null);
-		}
-	}
+        if (!startRequest(lastRequest ? QoS.DESTROY.getMaskValue() : QoS.DEFAULT.getMaskValue())) {
+            callback.putGetDone(otherRequestPendingStatus, this, null, null);
+            return;
+        }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.client.ChannelPutGet#getGet()
-	 */
-	public void getGet() {
-		if (destroyed) {
-			callback.getGetDone(destroyedStatus, this, null, null);
-			return;
-		}
+        try {
+            lock();
+            putPutData = pvPutStructure;
+            putPutDataBitSet = bitSet;
+            unlock();
+            channel.checkAndGetTransport().enqueueSendRequest(this);
+        } catch (IllegalStateException ise) {
+            stopRequest();
+            callback.putGetDone(channelNotConnected, this, null, null);
+        }
+    }
 
-		if (!startRequest(lastRequest ? QoS.DESTROY.getMaskValue() | QoS.GET.getMaskValue() : QoS.GET.getMaskValue())) {
-			callback.getGetDone(otherRequestPendingStatus, this, null, null);
-			return;
-		}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.client.ChannelPutGet#getGet()
+     */
+    public void getGet() {
+        if (destroyed) {
+            callback.getGetDone(destroyedStatus, this, null, null);
+            return;
+        }
 
-		try {
-			channel.checkAndGetTransport().enqueueSendRequest(this);
-		} catch (IllegalStateException ise) {
-			stopRequest();
-			callback.getGetDone(channelNotConnected, this, null, null);
-		}
-	}
+        if (!startRequest(lastRequest ? QoS.DESTROY.getMaskValue() | QoS.GET.getMaskValue() : QoS.GET.getMaskValue())) {
+            callback.getGetDone(otherRequestPendingStatus, this, null, null);
+            return;
+        }
 
-	/* (non-Javadoc)
-	 * @see org.epics.pvaccess.client.ChannelPutGet#getPut()
-	 */
-	public void getPut() {
-		if (destroyed) {
-			callback.getPutDone(destroyedStatus, this, null, null);
-			return;
-		}
+        try {
+            channel.checkAndGetTransport().enqueueSendRequest(this);
+        } catch (IllegalStateException ise) {
+            stopRequest();
+            callback.getGetDone(channelNotConnected, this, null, null);
+        }
+    }
 
-		if (!startRequest(lastRequest ? QoS.DESTROY.getMaskValue() | QoS.GET_PUT.getMaskValue() : QoS.GET_PUT.getMaskValue())) {
-			callback.getPutDone(otherRequestPendingStatus, this, null, null);
-			return;
-		}
+    /* (non-Javadoc)
+     * @see org.epics.pvaccess.client.ChannelPutGet#getPut()
+     */
+    public void getPut() {
+        if (destroyed) {
+            callback.getPutDone(destroyedStatus, this, null, null);
+            return;
+        }
 
-		try {
-			channel.checkAndGetTransport().enqueueSendRequest(this);
-		} catch (IllegalStateException ise) {
-			stopRequest();
-			callback.getPutDone(channelNotConnected, this, null, null);
-		}
-	}
+        if (!startRequest(lastRequest ? QoS.DESTROY.getMaskValue() | QoS.GET_PUT.getMaskValue() : QoS.GET_PUT.getMaskValue())) {
+            callback.getPutDone(otherRequestPendingStatus, this, null, null);
+            return;
+        }
+
+        try {
+            channel.checkAndGetTransport().enqueueSendRequest(this);
+        } catch (IllegalStateException ise) {
+            stopRequest();
+            callback.getPutDone(channelNotConnected, this, null, null);
+        }
+    }
 
 }

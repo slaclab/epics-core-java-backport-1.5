@@ -79,11 +79,6 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
     protected final InetSocketAddress[] addresses;
 
     /**
-     * Last reported connection status.
-     */
-    //protected boolean lastReportedConnectionState = false;
-
-    /**
      * Connection status.
      */
     protected ConnectionState connectionState = ConnectionState.NEVER_CONNECTED;
@@ -266,11 +261,10 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
      * Actual destroy method, to be called <code>CAJContext</code>.
      *
      * @param force force destruction regardless of reference count
-     * @throws PVAException          thrown on unexpected exception.
      * @throws IllegalStateException thrown when channel is destroyed.
      * @throws IOException           thrown if IO exception occurs.
      */
-    public synchronized void destroyChannel(boolean force) throws PVAException, IllegalStateException, IOException {
+    public synchronized void destroyChannel(boolean force) throws IllegalStateException, IOException {
 
         if (connectionState == ConnectionState.DESTROYED)
             throw new IllegalStateException("Channel already destroyed.");
@@ -297,21 +291,6 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
 
         // unregister
         context.unregisterChannel(this);
-
-		/*
-		synchronized (accessRightsListeners)
-		{
-			accessRightsListeners.clear();
-		}
-		*/
-
-		/*
-		// this makes problem to the queued dispatchers...
-		synchronized (connectionListeners)
-		{
-			connectionListeners.clear();
-		}
-		*/
     }
 
     /**
@@ -436,22 +415,13 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
     /**
      * @see org.epics.pvaccess.impl.remote.TransportClient#transportChanged()
      */
-    public /*synchronized*/ void transportChanged() {
-//System.err.println("CHANNEL transportChanged");
-// this will be called immediately after reconnect... bad...
-		/*
-		if (connectionState == ConnectionState.CONNECTED)
-		{
-			disconnect(true, false);
-		}
-		*/
+    public void transportChanged() {
     }
 
     /**
      * @see org.epics.pvaccess.impl.remote.TransportClient#transportResponsive(org.epics.pvaccess.impl.remote.Transport)
      */
     public synchronized void transportResponsive(Transport transport) {
-//System.err.println("CHANNEL transportResponsive");
         if (connectionState == ConnectionState.DISCONNECTED) {
             updateSubscriptions();
 
@@ -464,13 +434,6 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
      * @see org.epics.pvaccess.impl.remote.TransportClient#transportUnresponsive()
      */
     public synchronized void transportUnresponsive() {
-//		System.err.println("CHANNEL transportUnresponsive");
-        //if (connectionState == ConnectionState.CONNECTED)
-        {
-            // TODO 2 types of disconnected state - distinguish them otherwise disconnect will handle connection loss right
-            // setConnectionState(ConnectionState.DISCONNECTED);
-            // should we notify client at all?
-        }
     }
 
     /**
@@ -532,16 +495,6 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
     }
 
     /**
-     * Checks if channel is in connected state,
-     * if not throws <code>IllegalStateException</code> if not.
-     *
-     private final void connectionRequiredCheck()
-     {
-     if (connectionState != ConnectionState.CONNECTED)
-     throw new IllegalStateException("Channel not connected.");
-     }*/
-
-    /**
      * Checks if channel is in connected state and returns transport.
      *
      * @return used transport.
@@ -569,27 +522,6 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
         else
             return null;
     }
-
-    /**
-     * Checks if channel is in connected or disconnected state,
-     * if not throws <code>IllegalStateException</code> if not.
-     *
-     private final void checkState()
-     {
-     // connectionState is always non-null
-     if (connectionState != ConnectionState.CONNECTED && connectionState != ConnectionState.DISCONNECTED)
-     throw new IllegalStateException("Channel not in connected or disconnected state, state = '" + connectionState.name() + "'.");
-     }*/
-
-    /**
-     * Checks if channel is not it closed state.
-     * if not throws <code>IllegalStateException</code> if not.
-     *
-     private final synchronized void checkNotDestroyed()
-     {
-     if (connectionState == ConnectionState.DESTROYED)
-     throw new IllegalStateException("Channel destroyed.");
-     }*/
 
     /**
      * Get transport used by this channel.
@@ -654,9 +586,9 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
 
             ResponseRequest[] rrs = new ResponseRequest[responseRequests.size()];
             responseRequests.values().toArray(rrs);
-            for (int i = 0; i < rrs.length; i++) {
+            for (ResponseRequest rr : rrs) {
                 try {
-                    rrs[i].reportStatus(status);
+                    rr.reportStatus(status);
                 } catch (Throwable th) {
                     // TODO remove
                     th.printStackTrace();
@@ -676,10 +608,10 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
 
             ResponseRequest[] rrs = new ResponseRequest[responseRequests.size()];
             responseRequests.values().toArray(rrs);
-            for (int i = 0; i < rrs.length; i++) {
+            for (ResponseRequest rr : rrs) {
                 try {
-                    if (rrs[i] instanceof SubscriptionRequest)
-                        ((SubscriptionRequest) rrs[i]).resubscribeSubscription(transport);
+                    if (rr instanceof SubscriptionRequest)
+                        ((SubscriptionRequest) rr).resubscribeSubscription(transport);
                 } catch (Throwable th) {
                     // TODO remove
                     th.printStackTrace();
@@ -701,10 +633,10 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
 
             ResponseRequest[] rrs = new ResponseRequest[responseRequests.size()];
             responseRequests.values().toArray(rrs);
-            for (int i = 0; i < rrs.length; i++) {
+            for (ResponseRequest rr : rrs) {
                 try {
-                    if (rrs[i] instanceof SubscriptionRequest)
-                        ((SubscriptionRequest) rrs[i]).updateSubscription();
+                    if (rr instanceof SubscriptionRequest)
+                        ((SubscriptionRequest) rr).updateSubscription();
                 } catch (Throwable th) {
                     // TODO remove
                     th.printStackTrace();
@@ -888,19 +820,14 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
             // array of CIDs and names
             buffer.putInt(channelID);
             SerializeHelper.serializeString(name, buffer, control);
-            // send immediately
-            // TODO really?
-            control.flush(true);
         } else {
             control.startMessage((byte) 8, 2 * Integer.SIZE / Byte.SIZE);
             // SID
             buffer.putInt(getServerChannelID());
             // CID
             buffer.putInt(channelID);
-            // send immediately
-            // TODO really?
-            control.flush(true);
         }
+        control.flush(true);
     }
 
     /* (non-Javadoc)
@@ -909,6 +836,4 @@ public class ChannelImpl implements Channel, SearchInstance, TransportClient, Tr
     public void unlock() {
         // noop
     }
-
-
 }

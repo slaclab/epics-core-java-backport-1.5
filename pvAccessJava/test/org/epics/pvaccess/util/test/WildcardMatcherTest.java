@@ -15,37 +15,35 @@
 package org.epics.pvaccess.util.test;
 
 import junit.framework.TestCase;
-
-import org.epics.pvaccess.util.WildcharMatcher;
+import org.epics.pvaccess.util.WildcardMatcher;
 
 /**
  * @author <a href="mailto:matej.sekoranjaATcosylab.com">Matej Sekoranja</a>
  */
 public class WildcardMatcherTest extends TestCase {
 
-	public WildcardMatcherTest(String methodName) {
-		super(methodName);
-	}
+    public WildcardMatcherTest(String methodName) {
+        super(methodName);
+    }
 
-	/**
-	 * Conversion test.
-	 */
-	public void testWildcard()
-	{
-		assertTrue(WildcharMatcher.match("[-aa-]*", "01 abAZ"));
-		assertTrue(WildcharMatcher.match("[\\!a\\-bc]*", "!!!b-bb-"));
-		assertTrue(WildcharMatcher.match("*zz", "zz"));
-		assertTrue(WildcharMatcher.match("[abc]*zz", "zz"));
+    /**
+     * Conversion test.
+     */
+    public void testWildcard() {
+        assertTrue(WildcardMatcher.match("[-aa-]*", "01 abAZ"));
+        assertTrue(WildcardMatcher.match("[\\!a\\-bc]*", "!!!b-bb-"));
+        assertTrue(WildcardMatcher.match("*zz", "zz"));
+        assertTrue(WildcardMatcher.match("[abc]*zz", "zz"));
 
-		assertTrue(!WildcharMatcher.match("[!abc]*a[def]", "xyzbd"));
-		assertTrue(WildcharMatcher.match("[!abc]*a[def]", "xyzad"));
-		assertTrue(WildcharMatcher.match("[a-g]l*i?", "gloria"));
-		assertTrue(WildcharMatcher.match("[!abc]*e", "smile"));
-		assertTrue(WildcharMatcher.match("[-z]", "a"));
-		assertTrue(!WildcharMatcher.match("[]", ""));
-		assertTrue(WildcharMatcher.match("[a-z]*", "java"));
-		assertTrue(WildcharMatcher.match("*.*", "command.com"));
-		assertTrue(!WildcharMatcher.match("*.*", "/var/etc"));
-		assertTrue(WildcharMatcher.match("**?*x*[abh-]*Q", "XYZxabbauuZQ"));
-	}
+        assertFalse(WildcardMatcher.match("[!abc]*a[def]", "xyzbd"));
+        assertTrue(WildcardMatcher.match("[!abc]*a[def]", "xyzad"));
+        assertTrue(WildcardMatcher.match("[a-g]l*i?", "gloria"));
+        assertTrue(WildcardMatcher.match("[!abc]*e", "smile"));
+        assertTrue(WildcardMatcher.match("[-z]", "a"));
+        assertFalse(WildcardMatcher.match("[]", ""));
+        assertTrue(WildcardMatcher.match("[a-z]*", "java"));
+        assertTrue(WildcardMatcher.match("*.*", "command.com"));
+        assertFalse(WildcardMatcher.match("*.*", "/var/etc"));
+        assertTrue(WildcardMatcher.match("**?*x*[abh-]*Q", "XYZxabbauuZQ"));
+    }
 }

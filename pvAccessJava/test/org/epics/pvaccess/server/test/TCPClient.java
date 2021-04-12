@@ -23,8 +23,8 @@ public class TCPClient {
             System.out.println("Connected, waiting for message...");
 
             ByteBuffer msg = ByteBuffer.allocate(1000);
-            int nread = socket.read(msg);
-            if (nread > 0) {
+            int nRead = socket.read(msg);
+            if (nRead > 0) {
                 System.out.println(new String(msg.array()));
             } else {
                 System.out.println("no data");
@@ -32,8 +32,8 @@ public class TCPClient {
 
             // Reply
             msg = ByteBuffer.wrap("from Client".getBytes());
-            int nwritten = socket.write(msg);
-            System.out.println("Reply back to server, bytes written: " + nwritten);
+            int nWritten = socket.write(msg);
+            System.out.println("Reply back to server, bytes written: " + nWritten);
 
             Thread.sleep(4000);
             socket.close();

@@ -22,10 +22,11 @@ import org.epics.pvdata.monitor.Monitor;
  */
 public interface PipelineMonitor extends Monitor {
 
-	/**
-	 * Report remote queue status.
-	 * @param freeElements number of free elements.
-	 */
-	void reportRemoteQueueStatus(int freeElements);
+    /**
+     * Report remote queue status.
+     *
+     * @param freeElements number of free elements.
+     */
+    void reportRemoteQueueStatus(int freeElements);
 
 }

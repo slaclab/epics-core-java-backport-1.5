@@ -9,60 +9,54 @@ import org.epics.pvdata.factory.PVDataFactory;
 import org.epics.pvdata.pv.*;
 import org.epics.pvdata.pv.Status.StatusType;
 
-import java.util.logging.Logger;
-
 public class RPCServiceExample {
 
-	private final static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
+    private final static FieldCreate fieldCreate = FieldFactory.getFieldCreate();
 
-	private final static Structure resultStructure =
-			fieldCreate.createFieldBuilder().
-				add("c", ScalarType.pvDouble).
-				createStructure();
+    private final static Structure resultStructure =
+            fieldCreate.createFieldBuilder().
+                    add("c", ScalarType.pvDouble).
+                    createStructure();
 
-	static class SumServiceImpl implements RPCService
-	{
-		private static final Logger logger = Logger.getLogger(RPCServiceExample.SumServiceImpl.class.getName());
+    static class SumServiceImpl implements RPCService {
+        public PVStructure request(PVStructure args) throws RPCRequestException {
 
-		public PVStructure request(PVStructure args) throws RPCRequestException {
+            // NTURI support
+            if (args.getStructure().getID().startsWith("epics:nt/NTURI:1."))
+                args = args.getStructureField("query");
 
-	        // NTURI support
-			if (args.getStructure().getID().startsWith("epics:nt/NTURI:1."))
-				args = args.getStructureField("query");
+            // get fields and check their existence
+            PVString af = args.getStringField("a");
+            PVString bf = args.getStringField("b");
+            if (af == null || bf == null)
+                throw new RPCRequestException(StatusType.ERROR, "scalar 'a' and 'b' fields are required");
 
-	        // get fields and check their existence
-	        PVString af = args.getStringField("a");
-	        PVString bf = args.getStringField("b");
-	        if (af == null || bf == null)
-	            throw new RPCRequestException(StatusType.ERROR, "scalar 'a' and 'b' fields are required");
+            // convert
+            double a, b;
+            try {
+                a = Double.parseDouble(af.get());
+                b = Double.parseDouble(bf.get());
+            } catch (Throwable th) {
+                throw new RPCRequestException(StatusType.ERROR, "failed to convert arguments to double", th);
 
-	        // convert
-	        double a, b;
-	        try {
-	        	a = Double.valueOf(af.get());
-	        	b = Double.valueOf(bf.get());
-	        } catch (Throwable th) {
-	            throw new RPCRequestException(StatusType.ERROR, "failed to convert arguments to double", th);
+            }
 
-	        }
+            PVStructure result = PVDataFactory.getPVDataCreate().createPVStructure(resultStructure);
+            result.getDoubleField("c").put(a + b);
 
-			PVStructure result = PVDataFactory.getPVDataCreate().createPVStructure(resultStructure);
-			result.getDoubleField("c").put(a+b);
+            return result;
+        }
+    }
 
-			return result;
-		}
-	}
+    public static void main(String[] args) throws PVAException {
 
-	public static void main(String[] args) throws PVAException
-	{
+        RPCServer server = new RPCServer();
 
-		RPCServer server = new RPCServer();
+        server.registerService("sum", new SumServiceImpl());
+        // you can register as many services as you want here ...
 
-		server.registerService("sum", new SumServiceImpl());
-		// you can register as many services as you want here ...
-
-		server.printInfo();
-		server.run(0);
-	}
+        server.printInfo();
+        server.run(0);
+    }
 
 }

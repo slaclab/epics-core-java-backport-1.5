@@ -20,7 +20,6 @@ import org.epics.pvaccess.PVAVersion;
 import org.epics.pvaccess.Version;
 import org.epics.pvaccess.client.ChannelProvider;
 import org.epics.pvaccess.client.ChannelProviderRegistry;
-import org.epics.pvaccess.client.ChannelProviderRegistryFactory;
 import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
 import org.epics.pvaccess.impl.remote.udp.BlockingUDPConnector;
@@ -70,7 +69,7 @@ public class ServerContextImpl implements ServerContext, Context {
      * Version.
      */
     public static final Version VERSION = new Version(
-            "pvAccess Server", "Java",
+            "pvAccess Server",
             PVAVersion.VERSION_MAJOR, PVAVersion.VERSION_MINOR,
             PVAVersion.VERSION_MAINTENANCE, PVAVersion.VERSION_DEVELOPMENT);
 
@@ -348,17 +347,6 @@ public class ServerContextImpl implements ServerContext, Context {
         channelProviderNames = providerNames;
     }
 
-    /**
-     * Check context state and tries to establish necessary state.
-     *
-     * @throws PVAException          any PVA exception.
-     * @throws IllegalStateException thrown if context was already destroyed.
-     */
-    protected final void checkState() throws PVAException, IllegalStateException {
-        if (state == State.DESTROYED)
-            throw new IllegalStateException("Context destroyed.");
-    }
-
     public synchronized void initialize(ChannelProviderRegistry providerRegistry) throws PVAException, IllegalStateException {
         if (providerRegistry == null)
             throw new IllegalArgumentException("non-null providerRegistry expected");
@@ -369,7 +357,7 @@ public class ServerContextImpl implements ServerContext, Context {
             throw new IllegalStateException("Context already initialized.");
 
         if (channelProviderNames.equals(PVAConstants.PVA_ALL_PROVIDERS)) {
-            StringBuffer names = new StringBuffer(64);
+            StringBuilder names = new StringBuilder(64);
             for (String name : providerRegistry.getProviderNames()) {
                 channelProviders.add(providerRegistry.getProvider(name));
                 if (names.length() > 0) names.append(' ');
@@ -486,7 +474,7 @@ public class ServerContextImpl implements ServerContext, Context {
             InetSocketAddress[] broadcastAddresses = InetAddressUtil.getBroadcastAddresses(broadcastPort);
 
 //			UDPConnector broadcastConnector = new UDPConnector(this, true, broadcastAddresses, true);
-            BlockingUDPConnector broadcastConnector = new BlockingUDPConnector(this, true, broadcastAddresses, true);
+            BlockingUDPConnector broadcastConnector = new BlockingUDPConnector(this, true, broadcastAddresses);
 
             broadcastTransport = (BlockingUDPTransport) broadcastConnector.connect(
 //			broadcastTransport = (UDPTransport)broadcastConnector.connect(
@@ -500,7 +488,7 @@ public class ServerContextImpl implements ServerContext, Context {
             if (ignoreAddressList != null && ignoreAddressList.length() > 0) {
                 // we do not care about the port
                 InetSocketAddress[] list = InetAddressUtil.getSocketAddressList(ignoreAddressList, 0);
-                if (list != null && list.length > 0)
+                if (list.length > 0)
                     broadcastTransport.setIgnoredAddresses(list);
             }
             // set broadcast address list
@@ -511,7 +499,7 @@ public class ServerContextImpl implements ServerContext, Context {
                     appendList = broadcastTransport.getSendAddresses();
 
                 InetSocketAddress[] list = InetAddressUtil.getSocketAddressList(beaconAddressList, broadcastPort, appendList);
-                if (list != null && list.length > 0)
+                if (list.length > 0)
                     broadcastTransport.setSendAddresses(list);
             }
 
@@ -641,7 +629,7 @@ public class ServerContextImpl implements ServerContext, Context {
 
     }
 
-    private void internalDestroy() throws PVAException {
+    private void internalDestroy() {
         // stop responding to search requests
         if (broadcastTransport != null) {
             try {
@@ -674,21 +662,9 @@ public class ServerContextImpl implements ServerContext, Context {
         if (timer != null)
             timer.stop();
 
-        //
         // cleanup
-        //
-
         // this will also destroy all channels
         destroyAllTransports();
-		/*
-		// shutdown reactor
-		if (reactor != null)
-			reactor.shutdown();
-
-		// shutdown LF thread pool
-		if (leaderFollowersThreadPool != null)
-		    leaderFollowersThreadPool.shutdown();
-		*/
     }
 
     /**
@@ -775,24 +751,6 @@ public class ServerContextImpl implements ServerContext, Context {
     }
 
     /**
-     * Get beacon address list.
-     *
-     * @return beacon address list.
-     */
-    public String getBeaconAddressList() {
-        return beaconAddressList;
-    }
-
-    /**
-     * Get beacon address list auto flag.
-     *
-     * @return beacon address list auto flag.
-     */
-    public boolean isAutoBeaconAddressList() {
-        return autoBeaconAddressList;
-    }
-
-    /**
      * Get beacon period (in seconds).
      *
      * @return beacon period (in seconds).
@@ -833,35 +791,6 @@ public class ServerContextImpl implements ServerContext, Context {
     }
 
     /**
-     * Set server port number.
-     *
-     * @param port new server port number.
-     */
-    public void setServerPort(int port) {
-        serverPort = port;
-    }
-
-    /**
-     * Get broadcast port.
-     *
-     * @return broadcast port.
-     */
-    public int getBroadcastPort() {
-        return broadcastPort;
-    }
-
-    /**
-     * Get ignore search address list.
-     *
-     * @return ignore search address list.
-     */
-    public String getIgnoreAddressList() {
-        return ignoreAddressList;
-    }
-
-    // ************************************************************************** //
-
-    /**
      * Beacon server status provider interface (optional).
      */
     private BeaconServerStatusProvider beaconServerStatusProvider = null;
@@ -884,8 +813,6 @@ public class ServerContextImpl implements ServerContext, Context {
         this.beaconServerStatusProvider = beaconServerStatusProvider;
     }
 
-    // ************************************************************************** //
-
     /**
      * Get server network (IP) address.
      *
@@ -904,16 +831,6 @@ public class ServerContextImpl implements ServerContext, Context {
     public BlockingUDPTransport getBroadcastTransport() {
 //	public UDPTransport getBroadcastTransport() {
         return broadcastTransport;
-    }
-
-    /**
-     * Local multicast transport.
-     *
-     * @return multicast transport.
-     */
-    public BlockingUDPTransport getLocalMulticastTransport() {
-//	public UDPTransport getLocalMulticastTransport() {
-        return localMulticastTransport;
     }
 
     /**
@@ -965,14 +882,6 @@ public class ServerContextImpl implements ServerContext, Context {
     }
 
 
-    /*
-     * Get LF thread pool.
-     * @return LF thread pool, can be <code>null</code> if disabled.
-     *
-    public LeaderFollowersThreadPool getLeaderFollowersThreadPool() {
-    return leaderFollowersThreadPool;
-    }*/
-
     /**
      * Get channel provider name.
      *
@@ -1007,48 +916,6 @@ public class ServerContextImpl implements ServerContext, Context {
      */
     public ResponseHandler getServerResponseHandler() {
         return serverResponseHandler;
-    }
-
-    /**
-     * Create <code>ServerContextImpl</code> instance and start server.
-     *
-     * @param providerNames       providers to use, <code>null</code> to use defaults or
-     *                            <code>PVAConstants.PVA_ALL_PROVIDERS</code> to use all providers.
-     * @param timeToRun           time (in seconds) to run, <code>0</code> until {@link #destroy()} is called.
-     * @param runInSeparateThread run in separate thread flag.
-     * @param printInfoStream     stream instance where to print context info, can be <code>null</code>
-     * @return the server context instance.
-     * @throws PVAException thrown on exception.
-     */
-    public static ServerContextImpl startPVAServer(String providerNames, final int timeToRun,
-                                                   boolean runInSeparateThread, PrintStream printInfoStream)
-            throws PVAException {
-        final ServerContextImpl context = new ServerContextImpl();
-        if (providerNames != null)
-            context.setChannelProviderNames(providerNames);
-
-        context.initialize(ChannelProviderRegistryFactory.getChannelProviderRegistry());
-
-        if (printInfoStream != null) {
-            printInfoStream.println(context.getVersion().getVersionString());
-            context.printInfo(printInfoStream);
-        }
-
-        if (runInSeparateThread) {
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        context.run(timeToRun);
-                    } catch (Throwable th) {
-                        Logger logger = Logger.getLogger(this.getClass().getName());
-                        logger.log(Level.SEVERE, "Unhandled exception caught.", th);
-                    }
-                }
-            }, "startPVAServer").start();
-        } else
-            context.run(timeToRun);
-
-        return context;
     }
 
 }
