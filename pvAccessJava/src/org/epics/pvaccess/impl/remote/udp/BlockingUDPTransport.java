@@ -392,7 +392,6 @@ public class BlockingUDPTransport implements Transport, TransportSendControl {
                     byteBuffer.array(),
                     byteBuffer.limit(),
                     address.getAddress(), address.getPort());
-            System.out.println("** [" + this + "] =>  send(" + byteBuffer.limit() + ", " + address + ")");
             socket.send(packet);
             socket.close();
 //            this.channel.send(byteBuffer, address);

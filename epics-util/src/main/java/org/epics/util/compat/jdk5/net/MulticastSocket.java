@@ -17,27 +17,22 @@ public class MulticastSocket extends java.net.MulticastSocket {
 
     public MulticastSocket() throws IOException {
         super();
-        System.out.println("** [" + this + "] =>  MulticastSocket()");
     }
 
     public MulticastSocket(int port) throws IOException {
         super(port);
-        System.out.println("** [" + this + "] =>  MulticastSocket(" + port + ")");
     }
 
     public MulticastSocket(SocketAddress bindaddr) throws IOException {
         super(bindaddr);
-        System.out.println("** [" + this + "] =>  MulticastSocket(" + bindaddr + ")");
     }
 
     public InetSocketAddress getInetSocketAddress() {
-        System.out.println("** [" + this + "] =>  getInetSocketAddress()");
         return inetSocketAddress;
     }
 
     @Override
     public void connect(InetAddress address, int port) {
-        System.out.println("** [" + this + "] =>  connect(" + address + ", " + port + ")");
         super.connect(address, port);
         inetSocketAddress = new InetSocketAddress(address, port);
     }
@@ -50,7 +45,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
      */
     @Override
     public void joinGroup(InetAddress mcastaddr) throws IOException {
-        System.out.println("** [" + this + "] =>  joinGroup(" + mcastaddr + ")");
         synchronized (this.groups) {
             if (!this.groups.contains(mcastaddr)) {
                 super.joinGroup(mcastaddr);
@@ -76,7 +70,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
      */
     @Override
     public void close() {
-        System.out.println("** [" + this + "] =>  close()");
         for (InetAddress group : this.groups) {
             try {
                 super.leaveGroup(group);
@@ -88,7 +81,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
 
     @Override
     public void leaveGroup(InetAddress mcastaddr) throws IOException {
-        System.out.println("** [" + this + "] =>  leaveGroup(" + mcastaddr + ")");
         synchronized (this.groups) {
             if (this.groups.contains(mcastaddr)) {
                 super.leaveGroup(mcastaddr);
@@ -120,7 +112,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
     @Override
     public synchronized void receive(DatagramPacket packet) throws IOException {
         super.receive(packet);
-        System.out.println("** [" + this + "] =>  receive(" + packet.getLength() + ", " + packet.getSocketAddress() + ")");
     }
 
     public synchronized void send(ByteBuffer byteBuffer) throws IOException {
@@ -143,7 +134,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @throws IOException if there is a problem sending
      */
     public void send(ByteBuffer byteBuffer, InetSocketAddress socketAddress) throws IOException {
-        System.out.println("** [" + this + "] =>  send(" + byteBuffer.limit() + ", " + socketAddress + ")");
         DatagramPacket datagramPacket = new DatagramPacket(byteBuffer.array(), byteBuffer.arrayOffset(), byteBuffer.limit(), socketAddress.getAddress(), socketAddress.getPort());
         send(datagramPacket);
 
@@ -158,7 +148,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
      * @throws SocketException if does not support multicast
      */
     public void setNetworkInterface(NetworkInterface netIf) throws SocketException {
-        System.out.println("** [" + this + "] =>  setNetworkInterface(" + netIf.getDisplayName() + ")");
         if (this.networkInterface == null || this.networkInterface.equals(netIf)) {
             super.setNetworkInterface(netIf.getNetworkInterface());
             this.networkInterface = netIf;
@@ -170,7 +159,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
 
     @Override
     public void setInterface(InetAddress inf) throws SocketException {
-        System.out.println("** [" + this + "] =>  setInterface(" + inf + ")");
         super.setInterface(inf);
     }
 }
