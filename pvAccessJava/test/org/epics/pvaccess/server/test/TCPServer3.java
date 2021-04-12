@@ -1,5 +1,4 @@
 package org.epics.pvaccess.server.test;
-
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -30,19 +29,23 @@ public class TCPServer3 {
 
                 socket.socket().setTcpNoDelay(true);
                 socket.socket().setKeepAlive(true);
+                socket.configureBlocking(false);
 
-                // crazy idea, but can blocking read block writing on VMS?!
                 new Thread(new Runnable() {
 
                     public void run() {
                         try {
+                            ByteBuffer msg = ByteBuffer.allocate(1000);
                             while (true) {
-                                ByteBuffer msg = ByteBuffer.allocate(1000);
-                                socket.configureBlocking(false);
+                                msg.clear();
                                 int nread = socket.read(msg);
-                                socket.configureBlocking(true);
                                 System.out.println("Bytes read: " + nread);
-                                Thread.sleep(1000);
+                                if (nread == 0) {
+                                    Thread.sleep(25);
+                                } else if (nread < 0) {
+                                    System.out.println("Detected closed socket.  Exiting!");
+                                    break;
+                                }
                             }
                         } catch (AsynchronousCloseException ace) {
                             // noop, expected
