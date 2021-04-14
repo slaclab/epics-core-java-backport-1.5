@@ -111,21 +111,6 @@ public class NetworkInterface {
         return true;
     }
 
-    /**
-     * Has any IP addresses that are auto-assigned
-     *
-     * @return true if has auto-assigned addresses
-     */
-    private boolean hasAutoIpAssignments() {
-        List<InterfaceAddress> interfaceAddresses = getInterfaceAddresses();
-        for (InterfaceAddress interfaceAddress : interfaceAddresses) {
-            if (interfaceAddress.getAddress().getHostAddress().startsWith("169")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public boolean isVirtual() {
         // TODO Find a good way to determine whether isVirtual
 

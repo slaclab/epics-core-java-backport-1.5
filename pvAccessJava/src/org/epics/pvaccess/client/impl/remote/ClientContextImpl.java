@@ -131,6 +131,11 @@ public class ClientContextImpl implements Context {
     protected boolean autoAddressList = true;
 
     /**
+     * Define manually override the network interface for multicast
+     */
+    protected String networkBindInterface = "auto";
+
+    /**
      * If the context doesn't see a beacon from a server that it is connected to for
      * connectionTimeout seconds then a state-of-health message is sent to the
      * server over TCP/IP. If this state-of-health message isn't promptly replied to
@@ -311,6 +316,7 @@ public class ClientContextImpl implements Context {
 
         addressList = config.getPropertyAsString("EPICS_PVA_ADDR_LIST", addressList);
         autoAddressList = config.getPropertyAsBoolean("EPICS_PVA_AUTO_ADDR_LIST", autoAddressList);
+        networkBindInterface = config.getPropertyAsString("EPICS_PVA_BIND_INTERFACE", "auto");
         connectionTimeout = config.getPropertyAsFloat("EPICS_PVA_CONN_TMO", connectionTimeout);
         beaconPeriod = config.getPropertyAsFloat("EPICS_PVA_BEACON_PERIOD", beaconPeriod);
         broadcastPort = config.getPropertyAsInteger("EPICS_PVA_BROADCAST_PORT", broadcastPort);
@@ -433,7 +439,7 @@ public class ClientContextImpl implements Context {
             // TODO do not use searchBroadcast in future
             // TODO configurable local NIF, address
             // setup local broadcasting
-            NetworkInterface localNIF = InetAddressUtil.getFirstMulticastNIF();
+            NetworkInterface localNIF = InetAddressUtil.getFirstMulticastNIF(networkBindInterface);
             if (localNIF != null) {
                 try {
                     InetAddress group = InetAddressUtil.getMulticastGroup();

@@ -99,12 +99,9 @@ public class PVAForwarder {
                 continue;
             }
 
-            System.out.println("Received packet from: " + responseFrom);
-
             ByteBuffer receiveBuffer = ByteBuffer.wrap(packet.getData(), packet.getOffset(), packet.getLength());
 
             if (receiveBuffer.remaining() < PVA_MESSAGE_HEADER_SIZE) {
-                System.out.println("Received packet too small, ignoring...");
                 continue;
             }
 
@@ -115,7 +112,6 @@ public class PVAForwarder {
             // first byte is PVA_MAGIC
             final byte magic = receiveBuffer.get();
             if (magic != PVA_MAGIC) {
-                System.out.println("Invalid magic signature, ignoring...");
                 continue;
             }
 
@@ -134,14 +130,12 @@ public class PVAForwarder {
             // command ID and payload
             final byte commandId = receiveBuffer.get();
             if (commandId != 3) {
-                System.out.println("Not a search request, ignoring... (ID: " + commandId + " != 3)");
                 continue;
             }
             final int payloadSize = receiveBuffer.getInt();
 
             // control message check (skip message)
             if ((flags & 0x01) != 0) {
-                System.out.println("Control message received, ignoring...");
                 continue;
             }
 
@@ -149,10 +143,8 @@ public class PVAForwarder {
             //
             // payload
             //
-
             if (receiveBuffer.remaining() < payloadSize ||
                     receiveBuffer.remaining() < (4 + 1 + 3 + 16 + 2)) {
-                System.out.println("Payload too short, ignoring...");
                 continue;
             }
 
@@ -175,7 +167,7 @@ public class PVAForwarder {
             try {
                 addr = InetAddress.getByAddress(byteAddress);
             } catch (UnknownHostException e) {
-                System.out.println("Invalid address '" + new String(byteAddress) + "' in search response.");
+                System.err.println("Invalid address '" + new String(byteAddress) + "' in search response.");
                 return;
             }
 
@@ -204,7 +196,6 @@ public class PVAForwarder {
                         packet.getLength(),
                         mcAddress.getAddress(), MC_PORT);
 
-                System.out.println("Forwarding packet to: " + packet.getSocketAddress());
                 sendSocket.send(packet);
             }
         }

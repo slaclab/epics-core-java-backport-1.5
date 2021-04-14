@@ -656,22 +656,15 @@ public abstract class AbstractCodec
         final int limit = buffer.limit();
         int bytesToSend = limit - buffer.position();
 
-//context.getLogger().finest("Total bytes to send: " + bytesToSend);
-//System.out.println("Total bytes to send: " + bytesToSend);
-
         // limit sending
         if (bytesToSend > maxBytesToSend) {
             bytesToSend = maxBytesToSend;
             buffer.limit(buffer.position() + bytesToSend);
         }
 
-//context.getLogger().finest("Sending " + bytesToSend + " of total " + limit + " bytes in the packet to " + socketAddress + ".");
-
         int tries = 0;
         while (buffer.hasRemaining()) {
 
-//int p = buffer.position();
-            System.out.println("** [" + this + "] =>  write(" + bytesToSend + ")");
             logger.finest("Buffer position " + buffer.position() + " of total " + limit + " bytes.");
             final int bytesSent = this.write(buffer);
 

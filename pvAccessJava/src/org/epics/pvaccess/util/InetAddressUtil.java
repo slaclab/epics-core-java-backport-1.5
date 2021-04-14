@@ -162,12 +162,27 @@ public class InetAddressUtil {
      *
      * @return a multicast capable NIF, <code>null</code> if not found.
      */
-    public static NetworkInterface getFirstMulticastNIF() {
+    public static NetworkInterface getFirstMulticastNIF(String networkBindInterface) {
         Set<NetworkInterface> multicastNifs = getMulticastNIFs();
         if (multicastNifs.isEmpty()) {
             return null;
         } else {
-            return multicastNifs.iterator().next();
+            Iterator<NetworkInterface> iterator = multicastNifs.iterator();
+            NetworkInterface firstNif = iterator.next();
+
+            if (networkBindInterface != null &&
+                    !networkBindInterface.equals("auto") &&
+                    !firstNif.getName().equalsIgnoreCase(networkBindInterface)) {
+                while (iterator.hasNext()) {
+                    NetworkInterface nif = iterator.next();
+                    if (nif.getName().equalsIgnoreCase(networkBindInterface)) {
+                        System.out.println("Multicast Network Interface: " + nif);
+                        return nif;
+                    }
+                }
+            }
+            System.out.println("NetworkInterface: " + firstNif);
+            return firstNif;
         }
     }
 

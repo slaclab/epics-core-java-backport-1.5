@@ -137,6 +137,12 @@ public class ServerContextImpl implements ServerContext, Context {
     protected boolean autoBeaconAddressList = true;
 
     /**
+     * Define the network interface card to bind to for multicast.  Auto will take the first
+     * network interface found that supports loopback
+     */
+    protected String networkBindInterface = "auto";
+
+    /**
      * Period in second between two beacon signals.
      */
     protected float beaconPeriod = 15.0f;
@@ -326,6 +332,8 @@ public class ServerContextImpl implements ServerContext, Context {
         autoBeaconAddressList = config.getPropertyAsBoolean("EPICS_PVA_AUTO_ADDR_LIST", autoBeaconAddressList);
         autoBeaconAddressList = config.getPropertyAsBoolean("EPICS_PVAS_AUTO_BEACON_ADDR_LIST", autoBeaconAddressList);
 
+        networkBindInterface = config.getPropertyAsString("EPICS_PVA_BIND_INTERFACE", "auto");
+
         beaconPeriod = config.getPropertyAsFloat("EPICS_PVA_BEACON_PERIOD", beaconPeriod);
         beaconPeriod = config.getPropertyAsFloat("EPICS_PVAS_BEACON_PERIOD", beaconPeriod);
 
@@ -505,7 +513,7 @@ public class ServerContextImpl implements ServerContext, Context {
 
             // TODO configurable local NIF, address
             // setup local broadcasting
-            NetworkInterface localNIF = InetAddressUtil.getFirstMulticastNIF();
+            NetworkInterface localNIF = InetAddressUtil.getFirstMulticastNIF(networkBindInterface);
             if (localNIF != null) {
                 try {
                     InetAddress group = InetAddressUtil.getMulticastGroup();
