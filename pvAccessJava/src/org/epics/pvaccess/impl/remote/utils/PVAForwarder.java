@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Enumeration;
 
+import static org.epics.pvaccess.util.InetAddressUtil.getMulticastGroup;
+
 public class PVAForwarder {
     static {
         System.setProperty("java.net.preferIPv4Stack", "true");
@@ -32,7 +34,6 @@ public class PVAForwarder {
     public static final int PVA_BROADCAST_PORT = 5076;
 
 
-    public static final String MC_ADDRESS = "239.219.1.200";
     public static final short MC_PORT = PVA_BROADCAST_PORT;
 
     /**
@@ -79,7 +80,7 @@ public class PVAForwarder {
         System.out.println("Binding to UDP socket at port " + MC_PORT);
 
         DatagramSocket receiveSocket = new DatagramSocket(MC_PORT);
-        InetSocketAddress mcAddress = new InetSocketAddress(MC_ADDRESS, MC_PORT);
+        InetSocketAddress mcAddress = new InetSocketAddress(getMulticastGroup(), MC_PORT);
         System.out.println("MC Group:   " + mcAddress);
 
         NetworkInterface loNif = PVAForwarder.getFirstLoopbackNIF();

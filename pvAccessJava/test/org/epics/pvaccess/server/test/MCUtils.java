@@ -9,7 +9,7 @@ import java.util.Enumeration;
  * @author Matej Sekoranja
  */
 public class MCUtils {
-    public static final String MC_ADDRESS = "239.219.1.200";
+    public static final String MC_ADDRESS = "224.0.0.128";
     public static final short MC_PORT = 6789;
     public static final InetSocketAddress MC_GROUP = new InetSocketAddress(MC_ADDRESS, MC_PORT);
 

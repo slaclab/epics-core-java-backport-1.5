@@ -17,7 +17,7 @@ public class NetworkInterface {
     }
 
     private static final Map<NetworkInterface, Boolean> SUPPORTS_MULTICAST_CACHE = new HashMap<NetworkInterface, Boolean>();
-    private static final String MULTICAST_PROBE_GROUP = "239.219.1.200";
+    private static final String MULTICAST_PROBE_GROUP = "224.0.0.128";
     private static final int MULTICAST_PROBE_PORT = 2000;
 
     private final java.net.NetworkInterface networkInterface;

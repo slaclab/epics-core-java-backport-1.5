@@ -35,7 +35,7 @@ public class InetAddressUtil {
     private static final String STRIP_HOSTNAME_KEY = "STRIP_HOSTNAME";
 
     private static final String MULTICAST_GROUP_KEY = "EPICS_PVA_MULTICAST_GROUP";
-    private static final String MULTICAST_GROUP_DEFAULT = "239.219.1.200";
+    private static final String MULTICAST_GROUP_DEFAULT = "224.0.0.128";
     public static final InetSocketAddress MULTICAST_GROUP = new InetSocketAddress(MULTICAST_GROUP_DEFAULT, PVA_BROADCAST_PORT);
 
     private static final Set<NetworkInterface> MULTICAST_NIFS = new HashSet<NetworkInterface>();
@@ -163,8 +163,14 @@ public class InetAddressUtil {
      * @return a multicast capable NIF, <code>null</code> if not found.
      */
     public static NetworkInterface getFirstMulticastNIF(String networkBindInterface) {
-        Set<NetworkInterface> multicastNifs = getMulticastNIFs();
-        if (multicastNifs.isEmpty()) {
+        Set<NetworkInterface> multicastNifs = null;
+        try {
+            multicastNifs = networkBindInterface.equals("auto") ? getMulticastNIFs() : new HashSet<NetworkInterface>(Collections.list(NetworkInterface.getNetworkInterfaces()));
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
+        if (multicastNifs == null || multicastNifs.isEmpty()) {
             return null;
         } else {
             Iterator<NetworkInterface> iterator = multicastNifs.iterator();
