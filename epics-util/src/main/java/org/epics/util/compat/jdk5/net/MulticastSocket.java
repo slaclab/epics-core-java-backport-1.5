@@ -3,8 +3,6 @@ package org.epics.util.compat.jdk5.net;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MulticastSocket extends java.net.MulticastSocket {
     static {
@@ -12,7 +10,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
     }
 
     private NetworkInterface networkInterface;
-    private final Set<InetAddress> groups = new HashSet<InetAddress>();
     private InetSocketAddress inetSocketAddress;
 
     public MulticastSocket() throws IOException {
@@ -35,58 +32,6 @@ public class MulticastSocket extends java.net.MulticastSocket {
     public void connect(InetAddress address, int port) {
         super.connect(address, port);
         inetSocketAddress = new InetSocketAddress(address, port);
-    }
-
-    /**
-     * Join multicast group.
-     *
-     * @param mcastaddr the group to join.  No port is specified
-     * @throws IOException if the group cannot be joined
-     */
-    @Override
-    public void joinGroup(InetAddress mcastaddr) throws IOException {
-        synchronized (this.groups) {
-            if (!this.groups.contains(mcastaddr)) {
-                super.joinGroup(mcastaddr);
-                this.groups.add(mcastaddr);
-            }
-        }
-    }
-
-    /**
-     * Join multicast group and set interface to first address on specified nif
-     *
-     * @param mcastaddr group
-     * @param nif       network interface
-     * @throws IOException if there is a problem
-     */
-    public void joinGroup(InetAddress mcastaddr, NetworkInterface nif) throws IOException {
-        setInterface(nif.getFirstIPV4Address());
-        joinGroup(mcastaddr);
-    }
-
-    /**
-     * Close the socket and leave any groups that may have been joined
-     */
-    @Override
-    public void close() {
-        for (InetAddress group : this.groups) {
-            try {
-                super.leaveGroup(group);
-            } catch (IOException ignored) {
-            }
-        }
-        super.close();
-    }
-
-    @Override
-    public void leaveGroup(InetAddress mcastaddr) throws IOException {
-        synchronized (this.groups) {
-            if (this.groups.contains(mcastaddr)) {
-                super.leaveGroup(mcastaddr);
-                this.groups.add(mcastaddr);
-            }
-        }
     }
 
     /**

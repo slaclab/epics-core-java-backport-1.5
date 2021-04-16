@@ -1,8 +1,6 @@
 package org.epics.util.compat.jdk5.net;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.*;
 
@@ -97,17 +95,7 @@ public class NetworkInterface {
             return supportsMulticastCachedValue;
         }
 
-        try {
-            InetAddress multicastGroup = InetAddress.getByName(MULTICAST_PROBE_GROUP);
-            MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PROBE_PORT);
-            multicastSocket.setInterface(getFirstIPV4Address());
-            multicastSocket.joinGroup(multicastGroup);
-            multicastSocket.leaveGroup(multicastGroup);
-            multicastSocket.close();
-            SUPPORTS_MULTICAST_CACHE.put(this, true);
-        } catch (IOException ignored) {
-            return false;
-        }
+        SUPPORTS_MULTICAST_CACHE.put(this, true);
         return true;
     }
 
