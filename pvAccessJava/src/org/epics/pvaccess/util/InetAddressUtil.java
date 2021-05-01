@@ -220,6 +220,17 @@ public class InetAddressUtil {
         }
     }
 
+    public static NetworkInterface getFirstLoopbackNIF() throws RuntimeException {
+        Set<NetworkInterface> loopbackNIFs = getLoopbackNIFs();
+
+        if (loopbackNIFs.isEmpty()) {
+            throw new RuntimeException("no loopback interface found");
+        }
+
+        // Return first one
+        return loopbackNIFs.iterator().next();
+    }
+
     /**
      * Get a loopback NIF.
      *
