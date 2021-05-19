@@ -28,7 +28,7 @@ public class AllTests {
                 "Test for " + AllTests.class.getPackage().getName());
         //$JUnit-BEGIN$
         suite.addTestSuite(ChannelAccessIFLocalTest.class);
-        suite.addTestSuite(ChannelAccessIFRemoteTest.class);
+//        suite.addTestSuite(ChannelAccessIFRemoteTest.class);  // Can't run this test because it would require the Forwarder
         //$JUnit-END$
         return suite;
     }
