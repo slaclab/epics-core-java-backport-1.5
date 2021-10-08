@@ -45,7 +45,7 @@ import java.nio.LongBuffer;
 /**
  * This class implements a vector of bits that grows as needed. Each
  * component of the bit set has a {@code boolean} value. The
- * bits of a {@code BitSet} are indexed by nonnegative integers.
+ * bits of a {@code BitSet} are indexed by non-negative integers.
  * Individual indexed bits can be examined, set, or cleared. One
  * {@code BitSet} may be used to modify the contents of another
  * {@code BitSet} through logical AND, logical inclusive OR, and
@@ -110,7 +110,7 @@ public final class BitSet implements Cloneable, java.io.Serializable, org.epics.
      * Whether the size of "words" is user-specified.  If so, we assume
      * the user knows what he's doing and try harder to preserve it.
      */
-    // COMMETED FROM ORIGINAL private transient boolean sizeIsSticky = false;
+    // COMMENTED FROM ORIGINAL private transient boolean sizeIsSticky = false;
     //private final transient boolean sizeIsSticky = true;
 
     /* use serialVersionUID from JDK 1.0.2 for interoperability */
@@ -1081,14 +1081,14 @@ public final class BitSet implements Cloneable, java.io.Serializable, org.epics.
      * The result is {@code true} if and only if the argument is
      * not {@code null} and is a {@code Bitset} object that has
      * exactly the same set of bits set to {@code true} as this bit
-     * set. That is, for every nonnegative {@code int} index {@code k},
+     * set. That is, for every non-negative {@code int} index {@code k},
      * <pre>((BitSet)obj).get(k) == this.get(k)</pre>
      * must be true. The current sizes of the two bit sets are not compared.
      *
-     * @param  obj the object to compare with
+     * @param obj the object to compare with
      * @return {@code true} if the objects are the same;
-     *         {@code false} otherwise
-     * @see    #size()
+     * {@code false} otherwise
+     * @see #size()
      */
     public boolean equals(Object obj) {
         if (!(obj instanceof BitSet))
@@ -1172,7 +1172,7 @@ public final class BitSet implements Cloneable, java.io.Serializable, org.epics.
         // or reduction in logical size
         wordsInUse = words.length;
         recalculateWordsInUse();
-        // COMMETED FROM ORIGINAL sizeIsSticky = (words.length > 0 && words[words.length-1] == 0L); // heuristic
+        // COMMENTED FROM ORIGINAL sizeIsSticky = (words.length > 0 && words[words.length-1] == 0L); // heuristic
     }
 
     /**
@@ -1221,7 +1221,7 @@ public final class BitSet implements Cloneable, java.io.Serializable, org.epics.
 
     /**
      * Get long[] that represents this BitSet.
-     * @return long[] that represts this BitSet.
+     * @return long[] that represents this BitSet.
      */
     public long[] getBitArray()
     {

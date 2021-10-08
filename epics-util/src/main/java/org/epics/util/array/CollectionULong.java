@@ -5,8 +5,7 @@
 package org.epics.util.array;
 
 /**
- * A collection of unisgned {@code long}s.
- *
+ * A collection of unsigned {@code long}s.
  */
 public interface CollectionULong extends CollectionNumber {
 

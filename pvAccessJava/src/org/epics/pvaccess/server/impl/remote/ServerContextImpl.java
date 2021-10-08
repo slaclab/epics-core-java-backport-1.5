@@ -415,53 +415,7 @@ public class ServerContextImpl implements ServerContext, Context {
 
         timer = TimerFactory.create("pvAccess-server timer", ThreadPriority.lower);
         transportRegistry = new TransportRegistry();
-/*
-		try
-		{
-			reactor = new Reactor();
 
-			if (System.getProperties().containsKey(CAJ_SINGLE_THREADED_MODEL))
-			{
-			    logger.config("Using single threaded model.");
-
-				// single thread processing
-				new Thread(
-				        new Runnable() {
-				            /**
-				        	 * @see java.lang.Runnable#run()
-				        	 *
-				        	public void run() {
-				        		// do the work
-				        		while (reactor.process());
-				        	}
-
-				        }, "CAS reactor").start();
-			}
-			else
-			{
-			    // leader/followers processing
-			    leaderFollowersThreadPool = new LeaderFollowersThreadPool();
-				// spawn initial leader
-				leaderFollowersThreadPool.promoteLeader(
-				        new Runnable() {
-				            /**
-				        	 * @see java.lang.Runnable#run()
-				        	 *
-				        	public void run() {
-				        		reactor.process();
-				        	}
-						}
-				);
-			}
-
-		}
-		catch (IOException ioex)
-		{
-			throw new PVAException("Failed to initialize reactor.", ioex);
-		}
-		*/
-
-//		acceptor = new TCPAcceptor(this, serverPort, receiveBufferSize);
         acceptor = new BlockingTCPAcceptor(this, serverPort, receiveBufferSize);
         serverPort = acceptor.getBindAddress().getPort();
 
@@ -481,11 +435,9 @@ public class ServerContextImpl implements ServerContext, Context {
             // where to send address
             InetSocketAddress[] broadcastAddresses = InetAddressUtil.getBroadcastAddresses(broadcastPort);
 
-//			UDPConnector broadcastConnector = new UDPConnector(this, true, broadcastAddresses, true);
             BlockingUDPConnector broadcastConnector = new BlockingUDPConnector(this, true, broadcastAddresses);
 
             broadcastTransport = (BlockingUDPTransport) broadcastConnector.connect(
-//			broadcastTransport = (UDPTransport)broadcastConnector.connect(
                     null,
                     serverResponseHandler,
                     MULTICAST_GROUP,
@@ -522,7 +474,6 @@ public class ServerContextImpl implements ServerContext, Context {
                     InetSocketAddress anyAddress = new InetSocketAddress(0);
                     // NOTE: localMulticastTransport is not started (no read is called on a socket)
                     localMulticastTransport = (BlockingUDPTransport) broadcastConnector.connect(
-//					localMulticastTransport = (UDPTransport)broadcastConnector.connect(
                             null, serverResponseHandler,
                             anyAddress, PVAConstants.PVA_PROTOCOL_REVISION,
                             PVAConstants.PVA_DEFAULT_PRIORITY);

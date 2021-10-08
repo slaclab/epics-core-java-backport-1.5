@@ -404,6 +404,11 @@ public class ClientContextImpl implements Context {
 
             BlockingUDPConnector broadcastConnector = new BlockingUDPConnector(this, true, broadcastAddresses);
 
+            BlockingUDPConnector searchConnector = new BlockingUDPConnector(this, false, broadcastAddresses);
+
+            searchTransport = (BlockingUDPTransport) searchConnector.connect(null, new ClientResponseHandler(this),
+                    new InetSocketAddress(0), PVAConstants.PVA_PROTOCOL_REVISION, PVAConstants.PVA_DEFAULT_PRIORITY);
+
             broadcastTransport = (BlockingUDPTransport) broadcastConnector.connect(
                     null,
                     new ClientResponseHandler(this),
@@ -411,11 +416,6 @@ public class ClientContextImpl implements Context {
                     PVAConstants.PVA_PROTOCOL_REVISION,
                     PVAConstants.PVA_DEFAULT_PRIORITY
             );
-
-            BlockingUDPConnector searchConnector = new BlockingUDPConnector(this, false, broadcastAddresses);
-
-            searchTransport = (BlockingUDPTransport) searchConnector.connect(null, new ClientResponseHandler(this),
-                    new InetSocketAddress(0), PVAConstants.PVA_PROTOCOL_REVISION, PVAConstants.PVA_DEFAULT_PRIORITY);
 
             // set broadcast address list
             if (addressList != null && addressList.length() > 0) {
@@ -461,8 +461,8 @@ public class ClientContextImpl implements Context {
             broadcastTransport.start();
             searchTransport.start();
 
-        } catch (ConnectionException ce) {
-            logger.log(Level.SEVERE, "Failed to initialize UDP transport.", ce);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Failed to initialize UDP transport" + e.getMessage());
         }
     }
 

@@ -7,10 +7,10 @@ package org.epics.pvdata.pv;
 /**
  * get/put a boolean array.
  * The caller must be prepared to get/put the array in chunks.
- * The return argument is always the number of elements that were transfered.
+ * The return argument is always the number of elements that were transferred.
  * It may be less than the number requested.
- * @author mrk
  *
+ * @author mrk
  */
 public interface PVBooleanArray extends PVScalarArray{
     /**
@@ -19,9 +19,9 @@ public interface PVBooleanArray extends PVScalarArray{
      *
      * @param offset the offset to the first element to get
      * @param length the maximum number of elements to transfer
-     * @param data the class containing the data and an offset into the data.
-     * Get sets these values. The caller must do the actual data transfer
-     * @return The number of elements that can be transfered
+     * @param data   the class containing the data and an offset into the data.
+     *               Get sets these values. The caller must do the actual data transfer
+     * @return The number of elements that can be transferred
      * This is always less than or equal to length
      * If the value is less then length then get should be called again
      * If the return value is greater than 0 then data.data is
@@ -38,7 +38,7 @@ public interface PVBooleanArray extends PVScalarArray{
      * @param length the maximum number of elements to transfer.
      * @param from the array from which to get the data.
      * @param fromOffset The offset into from.
-     * @return the number of elements transfered.
+     * @return the number of elements transferred.
      * This is always less than or equal to length.
      * If the value is less than the length then put should be called again.
      */
@@ -51,5 +51,5 @@ public interface PVBooleanArray extends PVScalarArray{
      * @param from The data to share.
      */
     void shareData(boolean[] from);
-    
+
 }

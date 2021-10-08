@@ -1,10 +1,13 @@
 package org.epics.pvaccess.impl.remote.utils;
 
 import org.epics.pvaccess.util.InetAddressUtil;
+import org.joda.time.DateTime;
 
+import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.logging.Logger;
 
 import static org.epics.pvaccess.PVAConstants.*;
 import static org.epics.pvaccess.util.InetAddressUtil.getFirstLoopbackNIF;
@@ -15,15 +18,19 @@ public class PVAForwarder {
         System.setProperty("java.net.preferIPv4Stack", "true");
     }
 
+    private static final Logger logger = Logger.getLogger(PVAForwarder.class.getName());
+
     public static void main(String[] args) throws Throwable {
-        System.out.println("Binding to UDP socket at port " + PVA_BROADCAST_PORT);
+        DateTime startTime = DateTime.now();
+        logger.fine("EPICS Request Forwarder starting ...");
+        logger.fine("  Binding to UDP socket at port " + PVA_BROADCAST_PORT);
 
         DatagramSocket receiveSocket = new DatagramSocket(PVA_BROADCAST_PORT);
         InetSocketAddress mcAddress = new InetSocketAddress(getMulticastGroup(), PVA_BROADCAST_PORT);
-        System.out.println("MC Group:   " + mcAddress);
+        logger.fine("  Multicast Group:   " + mcAddress);
 
         NetworkInterface loNif = getFirstLoopbackNIF().getNetworkInterface();
-        System.out.println("MC Loopback Network IF: " + loNif);
+        logger.fine("  MC Loopback Network IF: " + loNif);
 
         MulticastSocket sendSocket = new MulticastSocket();
         sendSocket.setNetworkInterface(loNif);
@@ -31,9 +38,16 @@ public class PVAForwarder {
         byte[] buffer = new byte[MAX_UDP_PACKET];
         InetAddress addr = null;
 
+        DateTime lastCheckpoint = DateTime.now();
+        logger.info("EPICS Request Forwarder started: " + lastCheckpoint.minus(startTime.getMillis()).getMillis() + " milliseconds");
+        System.out.print(startTime.getHourOfDay() + ":" + startTime.getMinuteOfHour() + " > ");
         do {
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            receiveSocket.receive(packet);
+            try {
+                receiveSocket.receive(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             InetSocketAddress responseFrom = (InetSocketAddress) packet.getSocketAddress();
 
             if (responseFrom.getAddress().isLoopbackAddress()) {
@@ -47,15 +61,22 @@ public class PVAForwarder {
                 continue;
 
             final Byte qosCode = readQosCode(receiveBuffer, payloadSize);
-            if (qosCode == null)
+            if (qosCode == null) {
                 continue;
+            }
+
+            lastCheckpoint = DateTime.now();
+            long periods = lastCheckpoint.minus(startTime.getMillis()).getMillis() / (1000 * 60 * 60);
+            for (int period = 0; period < periods; period++) {
+                System.out.println();
+                startTime = startTime.plus(1000 * 60 * 60);
+                System.out.print(startTime.getHourOfDay() + ":" + startTime.getMinuteOfHour() + " > ");
+            }
+            System.out.print('.');
 
             addr = readAddress(receiveBuffer);
-            if (addr == null)
-                break;
-
             final Integer port = readPort(receiveBuffer);
-            if (port == null)
+            if (addr == null || port == null)
                 continue;
 
             // accept given address if explicitly specified by sender
@@ -77,8 +98,12 @@ public class PVAForwarder {
                     packet.getLength(),
                     mcAddress.getAddress(), PVA_BROADCAST_PORT);
 
-            sendSocket.send(packet);
-        } while (addr != null);
+            try {
+                sendSocket.send(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } while (true);
     }
 
     /**
@@ -165,7 +190,7 @@ public class PVAForwarder {
         try {
             addr = InetAddress.getByAddress(byteAddress);
         } catch (UnknownHostException e) {
-            System.err.println("Invalid address '" + new String(byteAddress) + "' in search response.");
+            logger.warning("Invalid address '" + new String(byteAddress) + "' in search response.");
             return null;
         }
 

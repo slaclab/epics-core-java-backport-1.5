@@ -79,7 +79,7 @@ public class ArrayPerformanceMeasurement {
 
         System.out.println("");
         System.out.println("Benchmark array wrappers through common abstract class");
-        // Note: rearrenging the order will change which type executes faster
+        // Note: rearranging the order will change which type executes faster
         // The first couple of iterations will be faster: if only a couple of
         // implementation of an interface are used, the JIT will inline with a
         // simple switch.

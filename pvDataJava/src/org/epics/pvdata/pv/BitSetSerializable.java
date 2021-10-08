@@ -4,19 +4,18 @@
  */
 package org.epics.pvdata.pv;
 
-import java.nio.ByteBuffer;
-
 import org.epics.pvdata.misc.BitSet;
 
+import java.nio.ByteBuffer;
 
 
 /**
- * Base interface for partital serializaion.
- * @author mse
+ * Base interface for partial serialization.
  *
+ * @author mse
  */
 public interface BitSetSerializable {
-    
+
     /**
      * Serialize field into the given buffer.
      *

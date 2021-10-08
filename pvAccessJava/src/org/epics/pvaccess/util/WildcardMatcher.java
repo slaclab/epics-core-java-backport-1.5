@@ -1,18 +1,32 @@
 package org.epics.pvaccess.util;
 
 /**
- * A Unix-like wildcard matcher. Supported wild-characters: '*', '?'; sets:
- * [a-z], '!' negation Examples: '[a-g]li?n' matches 'florian' '[!abc]e'
- * matches 'smile' '[-z] matches 'a' Rules for sets: RegEx definition of the
- * valid set is: [!]?(-.)?((.-.)|(.))(.-)? a-z : match any letter between 'a'
- * and 'z' inclusively [-a : match everything up to and including 'a' (only
- * valid at beginning) a-] : match everything from 'a' (only valid at the end)
- * a   : match exactly 'a' !a  : not operator, match everything except 'a'
- * (only allowed at beginning) \a  : treat a literally (useful for specifying
- * '!]-' in sets. Note that     \t\b\n... are not processed.  Wildcard rules:
- * : match any number (0..inf) number of occurrences of any character ?     :
- * match exactly and only one occurrence of any character ab    : match exactly
- * 'ab' [..]: same as , but character must match the set.
+ * A Unix-like wildcard matcher.
+ * Supported
+ * wild-characters: '*', '?';
+ * sets: [a-z],
+ * '!' negation
+ * <p>
+ * Examples:
+ * '[a-g]l*i?n' matches 'florian'
+ * '[!abc]*e' matches 'smile'
+ * '[-z] matches 'a'
+ * <p>
+ * Rules for sets:
+ * RegEx definition of the valid set is: [!]?(-.)?((.-.)|(.))(.-)?
+ * a-z : match any letter between 'a' and 'z' inclusively
+ * [-a : match everything up to and including 'a' (only valid at beginning)
+ * a-] : match everything from 'a' (only valid at the end)
+ * a   : match exactly 'a'
+ * !a  : not operator, match everything except 'a' (only allowed at beginning)
+ * \a  : treat a literally (useful for specifying '!]-' in sets.
+ * Note that     \t\b\n... are not processed.
+ * <p>
+ * Wildcard rules:
+ * : match any number (0..inf) number of occurrences of any character
+ * ?   : match exactly and only one occurrence of any character
+ * ab  : match exactly 'ab'
+ * [..]: same as , but character must match the set.
  */
 public class WildcardMatcher {
     /**

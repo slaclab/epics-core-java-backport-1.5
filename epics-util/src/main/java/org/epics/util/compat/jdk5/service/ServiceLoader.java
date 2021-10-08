@@ -27,7 +27,6 @@ package org.epics.util.compat.jdk5.service;
  */
 
 import org.epics.util.compat.jdk5.lang.Objects;
-import sun.misc.ServiceConfigurationError;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -170,7 +169,7 @@ import java.util.*;
  * requested resource does not exist.  Sometimes, however, web servers are
  * erroneously configured to return an HTTP 200 (OK) response along with a
  * helpful HTML error page in such cases.  This will cause a {@code
- * ServiceConfigurationError} to be thrown when this class attempts to parse
+ * Error} to be thrown when this class attempts to parse
  * the HTML page as a provider-configuration file.  The best solution to this
  * problem is to fix the misconfigured web server to return the correct
  * response code (HTTP 404) along with the HTML error page.
@@ -194,7 +193,7 @@ public final class ServiceLoader<S> implements Iterable<S> {
     private final AccessControlContext acc;
 
     // Cached providers, in instantiation order
-    private LinkedHashMap<String, S> providers = new LinkedHashMap<String, S>();
+    private final LinkedHashMap<String, S> providers = new LinkedHashMap<String, S>();
 
     // The current lazy-lookup iterator
     private LazyIterator lookupIterator;
@@ -223,17 +222,17 @@ public final class ServiceLoader<S> implements Iterable<S> {
     }
 
     private static void fail(Class<?> service, String msg, Throwable cause)
-            throws ServiceConfigurationError {
-        throw new ServiceConfigurationError(service.getName() + ": " + msg);
+            throws Error {
+        throw new Error(service.getName() + ": " + msg);
     }
 
     private static void fail(Class<?> service, String msg)
-            throws ServiceConfigurationError {
-        throw new ServiceConfigurationError(service.getName() + ": " + msg);
+            throws Error {
+        throw new Error(service.getName() + ": " + msg);
     }
 
     private static void fail(Class<?> service, URL u, int line, String msg)
-            throws ServiceConfigurationError {
+            throws Error {
         fail(service, u + ":" + line + ": " + msg);
     }
 
@@ -242,7 +241,7 @@ public final class ServiceLoader<S> implements Iterable<S> {
     //
     private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
                           List<String> names)
-            throws IOException, ServiceConfigurationError {
+            throws IOException, Error {
         String ln = r.readLine();
         if (ln == null) {
             return -1;
@@ -281,12 +280,12 @@ public final class ServiceLoader<S> implements Iterable<S> {
     //         names in the given configuration file that are not yet members
     //         of the returned set
     //
-    // @throws ServiceConfigurationError
+    // @throws Error
     //         If an I/O error occurs while reading from the given URL, or
     //         if a configuration-file format error is detected
     //
     private Iterator<String> parse(Class<?> service, URL u)
-            throws ServiceConfigurationError {
+            throws Error {
         InputStream in = null;
         BufferedReader r = null;
         ArrayList<String> names = new ArrayList<String>();
@@ -421,13 +420,13 @@ public final class ServiceLoader<S> implements Iterable<S> {
      * provider-configuration files and instantiating providers must be done by
      * the iterator itself.  Its {@link java.util.Iterator#hasNext hasNext} and
      * {@link java.util.Iterator#next next} methods can therefore throw a
-     * {@link ServiceConfigurationError} if a provider-configuration file
+     * {@link Error} if a provider-configuration file
      * violates the specified format, or if it names a provider class that
      * cannot be found and instantiated, or if the result of instantiating the
      * class is not assignable to the service type, or if any other kind of
      * exception or error is thrown as the next provider is located and
      * instantiated.  To write robust code it is only necessary to catch {@link
-     * ServiceConfigurationError} when using a service iterator.
+     * Error} when using a service iterator.
      *
      * <p> If such an error is thrown then subsequent invocations of the
      * iterator will make a best effort to locate and instantiate the next
@@ -448,7 +447,7 @@ public final class ServiceLoader<S> implements Iterable<S> {
      *
      * @return An iterator that lazily loads providers for this loader's
      * service
-     * When adding providers to the cache, the {@link #iterator
+     * When adding providers to the cache, the {@code #iterator
      * Iterator} processes resources in the order that the {@link
      * java.lang.ClassLoader#getResources(java.lang.String)
      * ClassLoader.getResources(String)} method finds the service configuration

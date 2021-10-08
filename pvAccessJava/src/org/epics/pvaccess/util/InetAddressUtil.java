@@ -182,12 +182,12 @@ public class InetAddressUtil {
                 while (iterator.hasNext()) {
                     NetworkInterface nif = iterator.next();
                     if (nif.getName().equalsIgnoreCase(networkBindInterface)) {
-                        System.out.println("Multicast Network Interface: " + nif);
+                        // System.out.println("Multicast Network Interface: " + nif);
                         return nif;
                     }
                 }
             }
-            System.out.println("NetworkInterface: " + firstNif);
+            //System.out.println("NetworkInterface: " + firstNif);
             return firstNif;
         }
     }

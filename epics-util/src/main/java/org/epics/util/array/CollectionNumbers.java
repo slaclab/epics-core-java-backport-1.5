@@ -50,7 +50,7 @@ public class CollectionNumbers {
     // would expect. First, the generic method must have signature toList(Object).
     // This means that any vararg calls with one argument (i.e. toList(1) ) goes
     // to the generic method which expects an actual array. One would have to
-    // implement the methods with a signle primitive (i.e. toList(int) ) to have
+    // implement the methods with a single primitive (i.e. toList(int) ) to have
     // the correct behavior. Moreover, the vararg method is chosen depending
     // on the wider primitive in the list, which may make it confusing to use.
     // Last, byte and short can't really use varargs as one would have to cast

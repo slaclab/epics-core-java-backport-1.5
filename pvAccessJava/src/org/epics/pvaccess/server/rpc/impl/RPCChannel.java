@@ -130,7 +130,7 @@ public class RPCChannel implements Channel {
                 // handle user unexpected errors
                 status =
                         statusCreate.createStatus(StatusType.FATAL,
-                                "Unexpected exception caught while calling RPCService.request(PVStructure).",
+                                "Unexpected exception caught while calling RPCService.request(PVStructure) " + th.getMessage(),
                                 th);
                 ok = false;
             }
@@ -164,7 +164,7 @@ public class RPCChannel implements Channel {
                 // handle user unexpected errors
                 Status status =
                         statusCreate.createStatus(StatusType.FATAL,
-                                "Unexpected exception caught while calling RPCService.request(PVStructure).",
+                                "Unexpected exception caught while calling RPCService.request(PVStructure). " + th.getMessage(),
                                 th);
 
                 channelRPCRequester.requestDone(status, this, null);

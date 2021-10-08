@@ -4,18 +4,9 @@
  */
 package org.epics.pvdata.util.pvDataHelper;
 
-import java.util.Vector;
+import org.epics.pvdata.pv.*;
 
-import org.epics.pvdata.pv.BooleanArrayData;
-import org.epics.pvdata.pv.ByteArrayData;
-import org.epics.pvdata.pv.DoubleArrayData;
-import org.epics.pvdata.pv.LongArrayData;
-import org.epics.pvdata.pv.PVBooleanArray;
-import org.epics.pvdata.pv.PVByteArray;
-import org.epics.pvdata.pv.PVDoubleArray;
-import org.epics.pvdata.pv.PVLongArray;
-import org.epics.pvdata.pv.PVStringArray;
-import org.epics.pvdata.pv.StringArrayData;
+import java.util.Vector;
 
 /**
  * GetHelper is a utility class with methods to help application level code
@@ -50,7 +41,7 @@ public class GetHelper
      * Copy out the entire array of doubles into a Vector of Double.
      *
      * @param pv the PVDoubleArray to copy to
-     * @return the Vector containg the values from the specified array
+     * @return the Vector containing the values from the specified array
      */
     public static Vector<Double> getDoubleVector( PVDoubleArray pv )
     {
@@ -70,7 +61,7 @@ public class GetHelper
      * Copy out the entire array of longs into a Vector of Long.
      *
      * @param pv the PVLongArray to copy to
-     * @return the Vector containg the values from the specified array
+     * @return the Vector containing the values from the specified array
      */
     public static Vector<Long> getLongVector( PVLongArray pv )
     {
@@ -90,7 +81,7 @@ public class GetHelper
      * Copy out the entire array of bytes into a Vector of Byte.
      *
      * @param pv the PVByteArray to copy to
-     * @return the Vector containg the values from the specified array
+     * @return the Vector containing the values from the specified array
      */
     public static Vector<Byte> getByteVector( PVByteArray pv )
     {
@@ -110,7 +101,7 @@ public class GetHelper
      * Copy out the entire array of strings into a Vector of String.
      *
      * @param pv the PVStringArray to copy to
-     * @return the Vector containg the values from the specified array
+     * @return the Vector containing the values from the specified array
      */
     public static Vector<String> getStringVector( PVStringArray pv )
     {
@@ -138,7 +129,7 @@ public class GetHelper
      * Copy out the entire array of booleans into a Vector of Boolean.
      *
      * @param pv the PVBooleanArray to copy to
-     * @return the Vector containg the values from the specified array
+     * @return the Vector containing the values from the specified array
      */
     public static Vector<Boolean> getBooleanVector( PVBooleanArray pv )
     {
