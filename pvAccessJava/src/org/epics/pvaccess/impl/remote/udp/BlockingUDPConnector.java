@@ -18,6 +18,7 @@ import org.epics.pvaccess.impl.remote.*;
 import org.epics.pvaccess.impl.remote.request.ResponseHandler;
 import org.epics.util.compat.jdk5.net.MulticastSocket;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 
@@ -62,7 +63,13 @@ public class BlockingUDPConnector implements Connector {
 
         MulticastSocket socket = null;
         try {
-            socket = new MulticastSocket(bindAddress);
+            try {
+                socket = new MulticastSocket(bindAddress);
+            } catch (IOException e) {
+                // If fail to bind to specified address then bind to any address.
+                socket = new MulticastSocket();
+                context.getLogger().warning("Failed to bind to '" + bindAddress);
+            }
 
             if (reuseSocket)
                 socket.setReuseAddress(true);

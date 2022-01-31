@@ -462,7 +462,7 @@ public class ClientContextImpl implements Context {
             searchTransport.start();
 
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Failed to initialize UDP transport" + e.getMessage());
+            logger.log(Level.SEVERE, "Failed to initialize UDP transport: " + e.getMessage());
         }
     }
 
